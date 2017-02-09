@@ -1,0 +1,8 @@
+{
+  "name": "Doughnut",
+  "description": "Example of simple podcast player in Electron.",
+  "version": "1.0.0",
+  "author": "Chris Dyer",
+  "license": "MIT",
+  "main": "main.js"
+}
