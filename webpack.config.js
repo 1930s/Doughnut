@@ -40,5 +40,6 @@ module.exports = {
       { from: './src/assets' },
     ])
   ],
-  devServer: { inline: true }
+  devServer: { inline: true },
+  target: 'electron-renderer'
 }

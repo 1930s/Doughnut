@@ -60,6 +60,7 @@
     "browserify": "^14.0.0",
     "events": "^1.1.1",
     "follow-redirects": "^1.2.1",
+    "fs": "0.0.1-security",
     "home": "^1.0.1",
     "lame": "^1.2.4",
     "path": "^0.12.7",

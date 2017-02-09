@@ -8,6 +8,7 @@ import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Json
 
 init : Config -> (Model, Cmd Msg)
 init config =
@@ -29,7 +30,7 @@ update msg model =
 
     MenuItemClick ->
       let
-        a = debug "Right Click"
+        a = debug "Right Click!!!"
       in
         model ! []
 
@@ -47,9 +48,9 @@ buttonMenu =
       MenuItem Action "Test Item" MenuItemClick
     ]
   in
-    Menu "Button" items
+    Menu "Button" items ContextMenu
 
-view : Model -> Html (ContextMenu.Msg Msg)
+view : Model -> Html Msg
 view model =
   div []
   [ div [class "title-bar"]
