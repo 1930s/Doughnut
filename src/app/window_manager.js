@@ -5,7 +5,8 @@ import path from 'path'
 export default class WindowManager {
   constructor() {
     this._windows = {
-      MainWindow: false
+      MainWindow: false,
+      WelcomeWindow: false
     }
   }
 
@@ -28,6 +29,26 @@ export default class WindowManager {
     //w.webContents.openDevTools()
 
     this._windows.MainWindow = w
+    return w
+  }
+
+  welcomeWindow() {
+    if (this._windows.WelcomeWindow) { return this._windows.WelcomeWindow }
+
+    const w = new Electron.BrowserWindow({
+      width: 500,
+      height: 300,
+      resizable: false,
+      titleBarStyle: 'hidden-inset'
+    })
+
+    w.loadURL(url.format({
+      pathname: path.join(__dirname, 'welcome.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+
+    this._windows.WelcomeWindow = w
     return w
   }
 }

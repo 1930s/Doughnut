@@ -1,0 +1,17 @@
+.welcome-window {
+  padding: 30px 20px 20px 20px;
+  text-align: center;
+
+  -webkit-app-region: drag;
+  button {
+    -webkit-app-region: no-drag;
+  }
+
+  img {
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+}

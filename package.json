@@ -43,5 +43,9 @@
     "sass-loader": "^5.0.1",
     "style-loader": "^0.13.1",
     "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "jsonfile": "^2.4.0",
+    "nedb": "^1.8.0"
   }
 }
