@@ -46,7 +46,7 @@ buttonMenu : Menu Msg
 buttonMenu =
   let
     items = [
-      MenuItem Action "Test Item" MenuItemClick
+      MenuItem Action "Test Item"
     ]
   in
     Menu "Button" items ContextMenu

@@ -15,15 +15,15 @@ type MenuItemType
   = Action
   | Separator
 
-type alias MenuItem msg =
+type alias MenuItem =
   { itemType : MenuItemType
   , label : String
-  , action : msg
   }
 
 type alias Menu msg =
   { name : String
-  , items : List (MenuItem msg)
+  , items : List MenuItem
+  , toMsg : Msg -> msg
   }
 
 type alias MenuItemHandler =
@@ -32,18 +32,17 @@ type alias MenuItemHandler =
 
 type Msg
   = ShowMenu (List MenuItemHandler)
-  | MenuResultFail String
   | MenuResult String
 
-type alias MenuState msg =
-  { activeMenu : Maybe (Menu msg)
+type alias MenuState =
+  { activeMenu : String
   }
 
-init : MenuState msg
+init : MenuState
 init =
-  MenuState Nothing
+  MenuState ""
 
-update : Msg -> MenuState msg -> (MenuState msg, Cmd Msg)
+update : Msg -> MenuState -> (MenuState, Cmd Msg)
 update msg state = 
   case msg of
     ShowMenu menu ->
@@ -51,10 +50,7 @@ update msg state =
         cmd = Task.perform MenuResult (showMenu menu)
       in
         state ! [cmd]
-    
-    MenuResultFail str ->
-      state ! [Cmd.none]
-
+        
     MenuResult str ->
       let
         b = debug str
@@ -74,12 +70,6 @@ open menu =
       { preventDefault = True, stopPropagation = True }
       ( Decode.succeed (menu.toMsg (ShowMenu handlers))
       )
-
-position : Decode.Decoder Position
-position =
-  Decode.map2 Position
-    (Decode.field "clientX" Decode.int)
-    (Decode.field "clientY" Decode.int)
 
 showMenu : List MenuItemHandler -> Platform.Task Never String
 showMenu items =

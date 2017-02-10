@@ -5,10 +5,10 @@ import ContextMenu
 
 type alias Model =
   { test : String
-  , menuState : Maybe (ContextMenu.MenuState Msg)
+  , menuState : ContextMenu.MenuState
   }
 
 type Msg
-  = ContextMenu (ContextMenu.Msg Msg)
+  = ContextMenu ContextMenu.Msg
   | MenuItemClick
   | NoOp
