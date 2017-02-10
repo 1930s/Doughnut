@@ -1,14 +1,17 @@
-module Model exposing (Model, Msg(..))
+module Model exposing (Model, Msg(..), ButtonMenuItem(..))
 
 import Mouse exposing (Position)
-import ContextMenu
+import ContextMenu exposing (Menu)
 
 type alias Model =
   { test : String
-  , menuState : ContextMenu.MenuState
   }
 
+type ButtonMenuItem
+  = Item1 String
+  | Item2
+
 type Msg
-  = ContextMenu ContextMenu.Msg
-  | MenuItemClick
+  = OpenContextMenu (Menu ButtonMenuItem)
+  | MenuAction String
   | NoOp

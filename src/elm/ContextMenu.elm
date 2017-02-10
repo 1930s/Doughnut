@@ -1,4 +1,4 @@
-module ContextMenu exposing (init, open, update, MenuItemType(..), MenuState, MenuItem, Menu, Msg)
+module ContextMenu exposing (open, MenuItemType(..), MenuItem, Menu, showMenu, callback, actionItem, separatorItem)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,67 +15,44 @@ type MenuItemType
   = Action
   | Separator
 
-type alias MenuItem =
+type alias MenuItem types =
   { itemType : MenuItemType
+  , identifier : Maybe types
   , label : String
   }
 
-type alias Menu msg =
+type alias Menu types =
   { name : String
-  , items : List MenuItem
-  , toMsg : Msg -> msg
+  , items : List (MenuItem types)
   }
 
-type alias MenuItemHandler =
-  { label : String
-  }
+actionItem : types -> String -> MenuItem types
+actionItem t label =
+  MenuItem Action (Just t) label
 
-type Msg
-  = ShowMenu (List MenuItemHandler)
-  | MenuResult String
+separatorItem : MenuItem types
+separatorItem =
+  MenuItem Separator Nothing ""
 
-type alias MenuState =
-  { activeMenu : String
-  }
+open : msg -> Attribute msg
+open m =
+  onWithOptions
+    "contextmenu"
+    { preventDefault = True, stopPropagation = True }
+    ( Decode.succeed m
+    )
 
-init : MenuState
-init =
-  MenuState ""
-
-update : Msg -> MenuState -> (MenuState, Cmd Msg)
-update msg state = 
-  case msg of
-    ShowMenu menu ->
-      let
-        cmd = Task.perform MenuResult (showMenu menu)
-      in
-        state ! [cmd]
-        
-    MenuResult str ->
-      let
-        b = debug str
-      in
-        state ! [Cmd.none]
-
-open : (Menu msg) -> Attribute msg
-open menu =
-  let
-    itemToHandler i =
-      MenuItemHandler i.label
-
-    handlers = List.map itemToHandler menu.items
-  in
-    onWithOptions
-      "contextmenu"
-      { preventDefault = True, stopPropagation = True }
-      ( Decode.succeed (menu.toMsg (ShowMenu handlers))
-      )
-
-showMenu : List MenuItemHandler -> Platform.Task Never String
-showMenu items =
+showNativeMenu : List (MenuItem types) -> Platform.Task Never String
+showNativeMenu items =
   Native.ContextMenu.showMenu items
 
-send : msg -> Cmd msg
-send msg =
-  Task.succeed msg
-  |> Task.perform identity
+showMenu : (String -> msg) -> Menu types -> Cmd msg
+showMenu callback menu =
+  Task.perform callback (showNativeMenu menu.items)
+
+callback : (Menu types) -> String -> Maybe types
+callback menu label =
+  case List.filter (\item -> item.label == label) menu.items
+  |> List.head of
+    Just item -> item.identifier
+    Nothing -> Nothing

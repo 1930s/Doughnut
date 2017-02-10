@@ -1,7 +1,7 @@
 module Update exposing (init, update, view, subscriptions)
 
 import Config exposing (Config)
-import Model exposing (Model, Msg(..))
+import Model exposing (Model, Msg(..), ButtonMenuItem(..))
 import Logger exposing (debug)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 
@@ -13,27 +13,21 @@ import Json.Decode as Json
 init : Config -> (Model, Cmd Msg)
 init config =
   let
-    model =
-      { test = ""
-      , menuState = ContextMenu.init
-      }
+    model = Model ""
   in
     (model, Cmd.none)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    ContextMenu subMsg ->
-      let
-        (state, cmds) = ContextMenu.update subMsg model.menuState
-      in
-        { model | menuState = state } ! [cmds |> Cmd.map ContextMenu]
+    OpenContextMenu menu ->
+      model ! [(ContextMenu.showMenu MenuAction menu)]
 
-    MenuItemClick ->
-      let
-        a = debug "Right Click!!!"
-      in
-        model ! []
+    MenuAction r ->
+      case ContextMenu.callback buttonMenu r of
+        Just (Item1 s) -> { model | test = s } ! []
+        Just Item2 -> { model | test = "Item2" } ! []
+        Nothing -> { model | test = "" } ! []
 
     NoOp ->
       model ! []
@@ -42,23 +36,26 @@ subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.none
 
-buttonMenu : Menu Msg
+buttonMenu : Menu ButtonMenuItem
 buttonMenu =
   let
-    items = [
-      MenuItem Action "Test Item"
+    items =
+    [ ContextMenu.actionItem (Item1 "Test!!_") "Test Item 1"
+    , ContextMenu.actionItem (Item1 "_!Test!_") "Different Text for Item 1"
+    , ContextMenu.separatorItem
+    , ContextMenu.actionItem Item2 "Test Item 2"
     ]
   in
-    Menu "Button" items ContextMenu
+    Menu "Button" items
 
 view : Model -> Html Msg
 view model =
   div []
   [ div [class "title-bar"]
     [ div [class "player"]
-      [ button [class "play", open (buttonMenu)] [ span [class "play-icon"] [] ]
+      [ button [class "play", open (OpenContextMenu buttonMenu)] [ span [class "play-icon"] [] ]
       ]
     , div [class "search"]
-      [ text "Hi" ]
+      [ text model.test ]
     ]
   ]

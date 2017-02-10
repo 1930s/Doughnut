@@ -15,14 +15,22 @@ var _user$project$Native_ContextMenu = function() {
       const {remote} = require('electron')
       const {Menu, MenuItem} = remote
 
+      const items = _elm_lang$core$Native_List.toArray(m)
+
       const menu = new Menu()
-      menu.append(new MenuItem({label: 'MenuItem1', click() {
-        callback(_elm_lang$core$Native_Scheduler.succeed("1"));
-      }}))
-      menu.append(new MenuItem({type: 'separator'}))
-      menu.append(new MenuItem({label: 'MenuItem2', click() {
-        callback(_elm_lang$core$Native_Scheduler.succeed("2"));
-      }}))
+
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i]
+
+        if (item.itemType.ctor === 'Separator') {
+          menu.append(new MenuItem({type: 'separator'}))
+        } else if (item.itemType.ctor === 'Action') {
+          menu.append(new MenuItem({label: items[i].label, click(menuItem) {
+            callback(_elm_lang$core$Native_Scheduler.succeed(menuItem.label));
+          }}))
+        }
+      }
+
       menu.popup(remote.getCurrentWindow());
 
       setTimeout(function() {
