@@ -1,4 +1,4 @@
-module ContextMenu exposing (open, update, MenuItemType(..), MenuItem, Menu, Msg)
+module ContextMenu exposing (init, open, update, MenuItemType(..), MenuState, MenuItem, Menu, Msg)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -7,6 +7,7 @@ import Mouse exposing (Position)
 import Json.Decode as Decode
 import Logger exposing (debug)
 import Task exposing (Task)
+import Platform
 
 import Native.ContextMenu
 
@@ -23,42 +24,48 @@ type alias MenuItem msg =
 type alias Menu msg =
   { name : String
   , items : List (MenuItem msg)
-  , toMsg : Msg msg -> msg
   }
 
-type alias MenuItemHandler msg =
+type alias MenuItemHandler =
   { label : String
-  , action : Decode.Decoder msg
   }
 
-type Msg msg
-  = ShowMenu (List (MenuItemHandler msg))
+type Msg
+  = ShowMenu (List MenuItemHandler)
   | MenuResultFail String
   | MenuResult String
 
-update : Msg context -> Cmd Msg
-update msg = 
+type alias MenuState msg =
+  { activeMenu : Maybe (Menu msg)
+  }
+
+init : MenuState msg
+init =
+  MenuState Nothing
+
+update : Msg -> MenuState msg -> (MenuState msg, Cmd Msg)
+update msg state = 
   case msg of
     ShowMenu menu ->
       let
-        cmd = Task.perform MenuResultFail MenuResultFail (showMenu menu)
+        cmd = Task.perform MenuResult (showMenu menu)
       in
-        cmd
+        state ! [cmd]
     
     MenuResultFail str ->
-      Cmd.none
+      state ! [Cmd.none]
 
     MenuResult str ->
       let
         b = debug str
       in
-        Cmd.none
+        state ! [Cmd.none]
 
 open : (Menu msg) -> Attribute msg
 open menu =
   let
     itemToHandler i =
-      MenuItemHandler i.label (Decode.succeed i.action)
+      MenuItemHandler i.label
 
     handlers = List.map itemToHandler menu.items
   in
@@ -74,5 +81,11 @@ position =
     (Decode.field "clientX" Decode.int)
     (Decode.field "clientY" Decode.int)
 
-showMenu : List (MenuItemHandler msg) -> Task String String
-showMenu = Native.ContextMenu.showMenu
+showMenu : List MenuItemHandler -> Platform.Task Never String
+showMenu items =
+  Native.ContextMenu.showMenu items
+
+send : msg -> Cmd msg
+send msg =
+  Task.succeed msg
+  |> Task.perform identity

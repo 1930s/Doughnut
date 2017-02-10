@@ -15,6 +15,7 @@ init config =
   let
     model =
       { test = ""
+      , menuState = ContextMenu.init
       }
   in
     (model, Cmd.none)
@@ -22,11 +23,11 @@ init config =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    ContextMenu msg ->
+    ContextMenu subMsg ->
       let
-        cmds = ContextMenu.update msg
+        (state, cmds) = ContextMenu.update subMsg model.menuState
       in
-        model ! []
+        { model | menuState = state } ! [cmds |> Cmd.map ContextMenu]
 
     MenuItemClick ->
       let

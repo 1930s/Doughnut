@@ -5,6 +5,7 @@ import ContextMenu
 
 type alias Model =
   { test : String
+  , menuState : Maybe (ContextMenu.MenuState Msg)
   }
 
 type Msg
