@@ -1,61 +1,41 @@
-module Update exposing (init, update, view, subscriptions)
+module Update exposing (init, update, subscriptions)
 
 import Config exposing (Config)
-import Model exposing (Model, Msg(..), ButtonMenuItem(..))
-import Logger exposing (debug)
+import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
-
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Json.Decode as Json
+import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
+import SplitPane.Bound exposing (createBound)
 
 init : Config -> (Model, Cmd Msg)
 init config =
   let
-    model = Model ""
+    model =
+    { test = ""
+    , splitPane = SplitPane.init Horizontal
+      |> withResizeLimits (createBound (percentage 0.25) (percentage 0.75))
+      |> withSplitterAt (percentage 0.32)
+    }
   in
     (model, Cmd.none)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    OpenContextMenu menu ->
-      model ! [(ContextMenu.showMenu MenuAction menu)]
+    ShowPodcastContextMenu menu ->
+      model ! [(ContextMenu.showMenu HandlePodcastContextMenu menu)]
 
-    MenuAction r ->
-      case ContextMenu.callback buttonMenu r of
-        Just (Item1 s) -> { model | test = s } ! []
-        Just Item2 -> { model | test = "Item2" } ! []
-        Nothing -> { model | test = "" } ! []
-
-    NoOp ->
+    HandlePodcastContextMenu r ->
       model ! []
+    --  case ContextMenu.callback buttonMenu r of
+    --    Just (Item1 s) -> { model | test = s } ! []
+    --    Just Item2 -> { model | test = "Item2" } ! []
+    --    Nothing -> { model | test = "" } ! []
+
+    SplitterMsg paneMsg ->
+      { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
-  Sub.none
-
-buttonMenu : Menu ButtonMenuItem
-buttonMenu =
-  let
-    items =
-    [ ContextMenu.actionItem (Item1 "Test!!_") "Test Item 1"
-    , ContextMenu.actionItem (Item1 "_!Test!_") "Different Text for Item 1"
-    , ContextMenu.separatorItem
-    , ContextMenu.actionItem Item2 "Test Item 2"
-    ]
-  in
-    Menu "Button" items
-
-view : Model -> Html Msg
-view model =
-  div []
-  [ div [class "title-bar"]
-    [ div [class "player"]
-      [ button [class "play", open (OpenContextMenu buttonMenu)] [ span [class "play-icon"] [] ]
-      ]
-    , div [class "search"]
-      [ text model.test ]
-    ]
+  Sub.batch
+  [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
   ]

@@ -2,37 +2,37 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/view/renderer.js',
+  entry: {
+    view: './src/view/renderer.js',
+    main: './src/app/main.js'
+  },
   output: {
     path: './build',
-    filename: 'view.js'
+    filename: '[name].js'
   },
   module: {
-    loaders: [{
+    rules: [{
       test: /\.jsx?$/, // in case we want to use React elsewhere later
       exclude: /node_modules/,
-      loader: 'babel'
+      use: 'babel-loader'
     }, {
       test:    /\.elm$/,
       exclude: [/elm-stuff/, /node_modules/],
-      loader:  'elm-webpack?verbose=true&warn=true',
-    }, {
-      test: /\.css$/,
-      loader: ExtractTextPlugin.extract('style', 'css')
+      use:  'elm-webpack-loader?verbose=true&warn=true',
     }, {
       test: /\.scss$/,
-      loader: ExtractTextPlugin.extract(
-        'style',
-        'css!sass?includePaths[]=' + __dirname + '/node_modules'
-      )
+      use: ExtractTextPlugin.extract({
+        fallback: 'style-loader',
+        use: ['css-loader', 'sass-loader', 'import-glob-loader']
+      })
     }]
   },
   resolve: {
-    moduleDirectories: [
+    modules: [
       __dirname + '/src/view',
       __dirname + '/src/elm'
     ],
-    extensions: ['', '.js', '.elm']
+    extensions: ['.js', '.elm']
   },
   plugins: [
     new ExtractTextPlugin('main.css'),
@@ -41,5 +41,9 @@ module.exports = {
     ])
   ],
   devServer: { inline: true },
-  target: 'electron-renderer'
+  target: 'electron-renderer',
+  node: {
+    __dirname: false,
+    __filename: false
+  }
 }

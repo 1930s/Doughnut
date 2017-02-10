@@ -1,4 +1,4 @@
-module ContextMenu exposing (open, MenuItemType(..), MenuItem, Menu, showMenu, callback, actionItem, separatorItem)
+module ContextMenu exposing (open, MenuCallback, MenuItemType(..), MenuItem, Menu, showMenu, callback, actionItem, separatorItem)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -10,6 +10,8 @@ import Task exposing (Task)
 import Platform
 
 import Native.ContextMenu
+
+type alias MenuCallback = String
 
 type MenuItemType
   = Action
@@ -50,7 +52,7 @@ showMenu : (String -> msg) -> Menu types -> Cmd msg
 showMenu callback menu =
   Task.perform callback (showNativeMenu menu.items)
 
-callback : (Menu types) -> String -> Maybe types
+callback : (Menu types) -> MenuCallback -> Maybe types
 callback menu label =
   case List.filter (\item -> item.label == label) menu.items
   |> List.head of

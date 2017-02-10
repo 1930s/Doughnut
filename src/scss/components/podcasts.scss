@@ -1,0 +1,20 @@
+.podcasts {
+  height: 100%;
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  background: #FAFAFA;
+
+  ul {
+    list-style: none;
+  }
+
+  li {
+    height: 60px;
+
+    &:active {
+      background: #EEE;
+    }
+  }
+}

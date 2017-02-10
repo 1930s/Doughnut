@@ -25,7 +25,7 @@ export default class WindowManager {
       slashes: true
     }))
 
-    w.webContents.openDevTools()
+    //w.webContents.openDevTools()
 
     this._windows.MainWindow = w
     return w
