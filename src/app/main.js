@@ -31,9 +31,13 @@ class Main {
           title: "An error occured whilst loading your Doughnut library database"
         })
       }
+/*
+      Library().subscribe("test", function(t) {
+        console.log(t)
+      })*/
 
-      Library().podcasts((l) => {
-        console.log(l)
+      Library().podcasts((p) => {
+        console.log(p)
       })
 
       this.launchMainWindow()

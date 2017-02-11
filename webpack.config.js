@@ -3,8 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
-    view: './src/view/renderer.js',
-    main: './src/app/main.js'
+    view: './src/view/renderer.js'
   },
   output: {
     path: './build',
@@ -27,6 +26,9 @@ module.exports = {
       })
     }]
   },
+   externals: [
+    "sequelize"
+   ],
   resolve: {
     modules: [
       __dirname + '/node_modules',

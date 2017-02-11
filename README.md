@@ -38,3 +38,13 @@ For more example apps, see the
 created by the awesome electron community.
 
 #### License [CC0 1.0 (Public Domain)](LICENSE.md)
+
+
+## Development
+
+```
+npm install
+npm run rebuild
+npm run watch
+npm run app
+```

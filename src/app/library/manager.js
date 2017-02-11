@@ -1,47 +1,55 @@
-var Datastore = require('nedb')
+var Umzug = require('umzug')
 var path = require('path')
 var fs = require('fs')
 
 import Settings from '../settings'
-import Podcast from './podcast'
+import Migrations from './migrations'
+import Sequelize from './sequelize'
+import { Podcast } from './models'
 
 class LibraryManager {
   constructor() {
   }
 
   load(loaded) {
-    // Ensure library path exists
-    const libraryPath = Settings.get('libraryPath')
-    const subscriptionsFileName = "Subscriptions.dnl"
-
-    if (!fs.existsSync(libraryPath)) {
-      fs.mkdirSync(libraryPath)
-    }
-
-    this.subsDB = new Datastore({
-      filename: path.join(libraryPath, subscriptionsFileName)
+    // Run migrations
+    Migrations.migrate(Sequelize, () => {
+      loaded()
+    })
+    
+    
+/*
+    this.sequelize = new Sequelize('database', 'username', 'password', {
+      dialect: 'sqlite',
+      storage: path.join(libraryPath, subscriptionsFileName)
     })
 
-    this.subsDB.loadDatabase((err) => {
-      loaded(err)
-    })
+    this.sequelize
+      .authenticate()
+      .then((err) => {
+        // Run pending migrations
+        const umzug = new Umzug({
+          storage: 'sequelize'
+        })
+
+        console.log("Migrating")
+        umzug.up().then((migrations) => {
+          console.log("Migrated: ", migrations)
+          loaded(err)
+        })
+      })*/
+    
   }
 
   subscribe(url, callback = () => {}) {
     Podcast.subscribe(url, (podcast) => {
-      this.subsDB.insert(podcast.store(), (err, inserted) => {
-        callback(podcast)
-      })
+      callback(podcast)
     })
   }
 
   podcasts(callback = () => {}) {
-    this.subsDB.find({}, (err, podcasts) => {
-      var loaded = podcasts.map((p) => {
-        return new Podcast(p)
-      })
-
-      callback(loaded)
+    Podcast.findAll().then((podcasts) => {
+      callback(podcasts)
     })
   }
 }

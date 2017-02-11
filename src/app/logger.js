@@ -54,7 +54,7 @@ export default class Logger {
   }
 
   static debug( ...args ) {
-    if (global.DEBUG) {
+    if (global.DEBUG || true) {
       Logger.log(...args);
     }
   }
