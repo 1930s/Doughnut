@@ -1,49 +1,61 @@
+var electron = require('electron')
+var path = require('path')
 var jsonfile = require('jsonfile')
 var fs = require('fs')
+import Logger from './logger'
 
-const defaults = {
-  firstLaunch: true,
-  libraryPath: ''
-}
+class Settings {
+  constructor() {
+    this.defaults = {
+      firstLaunch: true,
+      libraryPath: path.join(electron.app.getPath('music'), "Doughnut")
+    }
 
-var loaded = false
+    Logger.log(`Settings file: ${this.settingsFile()}`)
 
-export default class Settings {
-  static settingsPath() {
-    return process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : '/var/local');
+    this.loaded = false
   }
 
-  static isProduction() {
+  settingsPath() {
+    return electron.app.getPath('userData')
+  }
+
+  isProduction() {
     return process.env.NODE_ENV === 'production';
   }
 
-  static settingsFile() {
-    if (Settings.isProduction()) {
-      return Settings.settingsPath() + '/Doughnut.json'
+  settingsFile() {
+    if (this.isProduction()) {
+      return path.join(this.settingsPath(), '/Doughnut.json')
     } else {
-      return Settings.settingsPath() + '/Doughnut_dev.json'
+      return path.join(this.settingsPath(), `/Doughnut_${process.env.NODE_ENV}.json`)
     }
   }
 
-  static save() {
-    jsonfile.writeFileSync(Settings.settingsFile(), loaded)
+  save() {
+    jsonfile.writeFileSync(this.settingsFile(), this.loaded)
   }
 
-  static load() {
-    loaded = defaults
+  load() {
+    this.loaded = this.defaults
 
-    if (!fs.existsSync(Settings.settingsFile())) {
-      Settings.save()
+    if (!fs.existsSync(this.settingsFile())) {
+      this.save()
     }
 
-    loaded = jsonfile.readFileSync(Settings.settingsFile())
+    this.loaded = jsonfile.readFileSync(this.settingsFile())
   }
 
-  static get(key) {
-    if (!loaded) {
-      Settings.load()
+  loadIfNeeded() {
+    if (!this.loaded) {
+      this.load()
     }
+  }
 
-    return loaded[key]
+  get(key) {
+    this.loadIfNeeded()
+    return this.loaded[key]
   }
 }
+
+export default new Settings()

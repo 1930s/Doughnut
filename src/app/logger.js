@@ -52,4 +52,10 @@ export default class Logger {
   static error( ...args ) {
     console.error( '[' + Logger.formatDate() + ']', ...args );
   }
+
+  static debug( ...args ) {
+    if (global.DEBUG) {
+      Logger.log(...args);
+    }
+  }
 }

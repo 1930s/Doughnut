@@ -3,8 +3,10 @@ import Electron from 'electron'
 import Logger from './logger'
 import WindowManager from './window_manager'
 import Menu from './menu'
-import globlalLibrary from './library/manager'
 import Settings from './settings'
+import Library from './library/manager'
+
+const {dialog} = require('electron')
 
 class Main {
   constructor() {
@@ -13,7 +15,7 @@ class Main {
 
     this.ipc = require( 'electron' ).ipcMain;
 
-    this._windowManager = new WindowManager( this );
+    this._windowManager = new WindowManager(this);
   }
 
   windowManager() {
@@ -23,20 +25,24 @@ class Main {
   onReady() {
     Menu.createMenu()
 
-    // Attempt to locate library or prompt to setup a new one
-    if (Settings.get('firstLaunch')) {
-      if (DEBUG) { Logger.log( 'First Launch!' ); }
+    Library().load((err) => {
+      if (err) {
+        dialog.showMessageBox({
+          title: "An error occured whilst loading your Doughnut library database"
+        })
+      }
 
-      //this.launchWelcomeWindow()
-    } else {
-      //this.launchMainWindow()
-    }
+      Library().podcasts((l) => {
+        console.log(l)
+      })
 
-    this.launchMainWindow()
+      this.launchMainWindow()
+    })
   }
 
   launchMainWindow() {
-    this._windowManager.mainWindow()
+    const mainWindow = this._windowManager.mainWindow()
+    mainWindow.show()
   }
 
   launchWelcomeWindow() {
