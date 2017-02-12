@@ -1,26 +1,26 @@
-var assert = require('assert')
+var expect = require('expect.js')
 
 import Library from '../../src/app/library/manager.js'
 import { Podcast } from '../../src/app/library/models'
 
-describe('Library', function() {
-  describe('Podcast', function() {
-    it('should subscribe to a podcast', function(done) {
-      Library().subscribe("test", function(t) {
-        Podcast.find({
-          where: { feed: 'test' }
-        }).then((p) => {
-          assert.equal(p.feed, 'test')
-          done()
-        })
-      })
-    })
+describe('Podcast', function() {
+  beforeEach((done) => {
+    Library().load(done)
+  })
 
-    it('should find podcast', (done) => {
-      Podcast.findAll({}).then((all) => {
-        assert.equal(all.length, 1)
+  it('should subscribe to a podcast', function(done) {
+    Library().subscribe("test", function(t) {
+      Podcast.find({
+        where: { feed: 'test' }
+      }).then((p) => {
+        expect(p.feed).to.eql('test')
         done()
       })
     })
+  })
+
+  it('test', function(done) {
+    const {ipcRenderer} = require('electron')
+    ipcRenderer.send('asynchronous-message', 'ping')
   })
 })

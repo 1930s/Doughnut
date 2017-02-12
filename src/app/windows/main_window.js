@@ -1,6 +1,7 @@
 import Electron from 'electron'
 import url from 'url'
 import path from 'path'
+import {Podcast} from '../library/models'
 
 export default class MainWindow {
   constructor() {
@@ -8,7 +9,12 @@ export default class MainWindow {
   }
 
   sendState() {
-    this.window.webContents.send('podcast:state', {id: 1, name: "Test Podcast"})
+    var self = this
+    Podcast.create({
+      name: "Test Podcast"
+    }).then(function(p) {
+      self.window.webContents.send('podcast:state', p)
+    })
   }
 
   show() {

@@ -5,6 +5,7 @@ import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import SplitPane.Bound exposing (createBound)
+import Ports exposing (podcastState)
 
 init : Config -> (Model, Cmd Msg)
 init config =
@@ -33,9 +34,13 @@ update msg model =
 
     SplitterMsg paneMsg ->
       { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
+    
+    PodcastState json ->
+      model ! []
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.batch
   [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
+  , podcastState PodcastState
   ]

@@ -4,11 +4,12 @@ var CSS = require('../scss/main.scss');
 const {ipcRenderer} = require('electron')
 
 window.onload = () => {
-  var app = Elm.Main.embed(document.getElementById('app'));
+  const app = Elm.Main.embed(document.getElementById('app'));
 
 
   ipcRenderer.on('podcast:state', (event, arg) => {
-    console.log(arg) // prints "pong"
+    console.log('podcast:state', arg)
+    app.ports.podcastState.send(arg)
   })
 
   //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"

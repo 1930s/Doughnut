@@ -31,11 +31,11 @@ podcastContextMenu : Podcast -> Menu PodcastContextMenu
 podcastContextMenu podcast =
   let
     items =
-    [ ContextMenu.actionItem (M_RenamePodcast podcast.id_) "Rename"
-    , ContextMenu.actionItem (M_ReloadPodcast podcast.id_) "Reload"
+    [ ContextMenu.actionItem (M_RenamePodcast podcast.id) "Rename"
+    , ContextMenu.actionItem (M_ReloadPodcast podcast.id) "Reload"
     , ContextMenu.separatorItem
-    , ContextMenu.actionItem (M_CopyPodcastFeed podcast.id_) "Copy Podcast URL"
-    , ContextMenu.actionItem (M_Unsubscribe podcast.id_) "Unsubscribe"
+    , ContextMenu.actionItem (M_CopyPodcastFeed podcast.id) "Copy Podcast URL"
+    , ContextMenu.actionItem (M_Unsubscribe podcast.id) "Unsubscribe"
     , ContextMenu.separatorItem
     , ContextMenu.actionItem M_RefreshAll "Refresh All"
     ]

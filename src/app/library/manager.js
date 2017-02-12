@@ -9,45 +9,37 @@ import { Podcast } from './models'
 
 class LibraryManager {
   constructor() {
+    this.loaded = false
   }
 
   load(loaded) {
+    const library = this
+
     // Run migrations
     Migrations.migrate(Sequelize, () => {
+      library.loaded = true
       loaded()
     })
-    
-    
-/*
-    this.sequelize = new Sequelize('database', 'username', 'password', {
-      dialect: 'sqlite',
-      storage: path.join(libraryPath, subscriptionsFileName)
-    })
-
-    this.sequelize
-      .authenticate()
-      .then((err) => {
-        // Run pending migrations
-        const umzug = new Umzug({
-          storage: 'sequelize'
-        })
-
-        console.log("Migrating")
-        umzug.up().then((migrations) => {
-          console.log("Migrated: ", migrations)
-          loaded(err)
-        })
-      })*/
-    
   }
 
+  /*
+  * Subscribe to podcast at feed url
+  */
   subscribe(url, callback = () => {}) {
+    if (!this.loaded) { throw 'Library not loaded' }
+
     Podcast.subscribe(url, (podcast) => {
       callback(podcast)
     })
   }
 
+  unsubscribe(podcast, options = {}, callback = () => {}) {
+
+  }
+
   podcasts(callback = () => {}) {
+    if (!this.loaded) { throw 'Library not loaded' }
+
     Podcast.findAll().then((podcasts) => {
       callback(podcasts)
     })

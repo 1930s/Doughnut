@@ -2,13 +2,21 @@ var electron = require('electron')
 var path = require('path')
 var jsonfile = require('jsonfile')
 var fs = require('fs')
+var os = require('os')
 import Logger from './logger'
 
 class Settings {
   constructor() {
     this.defaults = {
-      firstLaunch: true,
-      libraryPath: path.join(electron.app.getPath('music'), "Doughnut")
+      firstLaunch: true
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      this.defaults.libraryPath = path.join(electron.app.getPath('music'), "Doughnut")
+    } else if (process.env.NODE_ENV === 'test') {
+      this.defaults.libraryPath = path.join(os.tmpdir(), "Doughnut")
+    } else {
+      this.defaults.libraryPath = path.join(electron.app.getPath('music'), "Doughnut_dev")
     }
 
     Logger.log(`Settings file: ${this.settingsFile()}`)

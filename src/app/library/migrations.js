@@ -39,10 +39,11 @@ export default class Migrations {
 
   static migrate(sequelize, done) {
     // Subtract 1 from both sides so that we end up with an 0 based index
-    const latest = MIGRATIONS.length;
+    const latest = MIGRATIONS.length
 
     Migrations.nextUpVersion(sequelize, (nextUp) => {
       if (nextUp < latest) {
+        Logger.debug(`Migrating from version ${nextUp} to ${latest}`)
         Migrations.perform(sequelize, nextUp, () => {
           Migrations.migrate(sequelize, done)
         })

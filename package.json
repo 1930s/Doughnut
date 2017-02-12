@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "npm run watch",
-    "test": "NODE_ENV=test electron-mocha --recursive --require babel-core/register",
+    "test": "NODE_ENV=test electron-mocha test/test.js --require babel-core/register",
     "rebuild": "electron-rebuild",
     "app": "NODE_ENV=development electron build/",
     "watch:main": "watchify -v -t [ babelify ] ./src/app/main.js --exclude electron --im --no-detect-globals --node -o ./build/main.js -d",
@@ -42,6 +42,7 @@
     "electron-packager": "^8.5.1",
     "electron-rebuild": "^1.5.7",
     "elm-webpack-loader": "^4.2.0",
+    "expect.js": "^0.3.1",
     "extract-text-webpack-plugin": "^2.0.0-rc.3",
     "import-glob-loader": "^1.1.0",
     "node-sass": "^4.5.0",

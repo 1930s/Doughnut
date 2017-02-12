@@ -4,6 +4,7 @@ import Mouse exposing (Position)
 import ContextMenu exposing (Menu, MenuCallback)
 import SplitPane.SplitPane as SplitPane
 import Types exposing (..)
+import Json.Encode
 
 type alias Model =
   { test : String
@@ -23,3 +24,4 @@ type Msg
   SplitterMsg SplitPane.Msg
   | ShowPodcastContextMenu (Menu PodcastContextMenu)
   | HandlePodcastContextMenu MenuCallback
+  | PodcastState Json.Encode.Value
