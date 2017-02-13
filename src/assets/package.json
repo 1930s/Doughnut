@@ -4,5 +4,8 @@
   "version": "1.0.0",
   "author": "Chris Dyer",
   "license": "MIT",
-  "main": "main.js"
+  "main": "main.js",
+  "dependencies": {
+    "sqlite3": "^3.1.8"
+  }
 }

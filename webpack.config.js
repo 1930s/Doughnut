@@ -13,7 +13,14 @@ module.exports = {
     rules: [{
       test: /\.jsx?$/, // in case we want to use React elsewhere later
       exclude: /node_modules/,
-      use: 'babel-loader'
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: ['es2015']
+          }
+        }
+      ]
     }, {
       test:    /\.elm$/,
       exclude: [/elm-stuff/, /node_modules/],
