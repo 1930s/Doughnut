@@ -9,23 +9,7 @@ import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 list : Model -> Html Msg
 list model =
   ul []
-  [ li [] [text "Item 1"]
-  , li [] [text "Item 2"]
-  , li [] [text "Item 3"]
-  , li [] [text "Item 4"]
-  , li [] [text "Item 5"]
-  , li [] [text "Item 6"]
-  , li [] [text "Item 7"]
-  , li [] [text "Item 8"]
-  , li [] [text "Item 9"]
-  , li [] [text "Item 10"]
-  , li [] [text "Item 11"]
-  , li [] [text "Item 12"]
-  , li [] [text "Item 13"]
-  , li [] [text "Item 14"]
-  , li [] [text "Item 15"]
-  , li [] [text "Item 16"]
-  ]
+    (List.map (viewPodcast) model.podcasts)
 
 podcastContextMenu : Podcast -> Menu PodcastContextMenu
 podcastContextMenu podcast =
@@ -41,3 +25,7 @@ podcastContextMenu podcast =
     ]
   in
     Menu "Podcast" items
+
+viewPodcast : Podcast -> Html Msg
+viewPodcast pod =
+  li [] [text pod.title]

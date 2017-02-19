@@ -5,7 +5,7 @@ var fs = require('fs')
 import Settings from '../settings'
 import Migrations from './migrations'
 import Sequelize from './sequelize'
-import { Podcast } from './models'
+import { Podcast, Episode } from './models'
 
 class LibraryManager {
   constructor() {
@@ -27,10 +27,15 @@ class LibraryManager {
   */
   subscribe(url, callback = () => {}) {
     if (!this.loaded) { throw 'Library not loaded' }
+    const library = this
 
-    Podcast.subscribe(url, (podcast) => {
+    Podcast.subscribe(url).then((podcast) => {
       callback(podcast)
     })
+  }
+
+  reload(podcast, cb = () => {}) {
+    podcast.reload().then(cb)
   }
 
   unsubscribe(podcast, options = {}, callback = () => {}) {

@@ -5,7 +5,14 @@
   "author": "Chris Dyer",
   "license": "MIT",
   "main": "main.js",
+  "devDependencies": {
+    "electron": "^1.4.15"
+  },
   "dependencies": {
-    "sqlite3": "^3.1.8"
+    "feedparser": "^2.1.0",
+    "jsonfile": "^2.4.0",
+    "sequelize": "^3.30.2",
+    "sqlite3": "^3.1.8",
+    "umzug": "^1.11.0"
   }
 }

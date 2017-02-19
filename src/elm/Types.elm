@@ -6,7 +6,7 @@ type alias PodcastId = Int
 
 type alias Podcast =
   { id : PodcastId
-  , name : String
+  , title : String
   , feed : String
   , description : String
   , link : String
@@ -17,6 +17,8 @@ type alias Podcast =
   , imageUrl : String
   , imageBlog : String
   , lastParsed : Date
+  , createdAt : Date
+  , updatedAt : Date
   }
 
 type alias Episode =

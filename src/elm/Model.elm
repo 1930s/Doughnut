@@ -8,6 +8,7 @@ import Json.Encode
 
 type alias Model =
   { test : String
+  , podcasts : List Podcast
   , splitPane : SplitPane.State
   }
 
@@ -25,3 +26,4 @@ type Msg
   | ShowPodcastContextMenu (Menu PodcastContextMenu)
   | HandlePodcastContextMenu MenuCallback
   | PodcastState Json.Encode.Value
+  | FullPodcastState Json.Encode.Value

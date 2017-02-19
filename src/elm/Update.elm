@@ -5,13 +5,16 @@ import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import SplitPane.Bound exposing (createBound)
-import Ports exposing (podcastState)
+import Ports exposing (podcastState, podcastsState)
+import Decoders exposing (podcastDecoder, podcastsDecoder)
+import Json.Decode
 
 init : Config -> (Model, Cmd Msg)
 init config =
   let
     model =
     { test = ""
+    , podcasts = []
     , splitPane = SplitPane.init Horizontal
       |> withResizeLimits (createBound (percentage 0.25) (percentage 0.75))
       |> withSplitterAt (percentage 0.32)
@@ -36,11 +39,26 @@ update msg model =
       { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
     
     PodcastState json ->
-      model ! []
+      case Json.Decode.decodeValue podcastDecoder json of
+        Ok podcast ->
+          { model | test = "parsed" } ! []
+
+        Err error ->
+          model ! []
+    
+    FullPodcastState json ->
+      case Json.Decode.decodeValue podcastsDecoder json of
+        Ok podcasts ->
+          { model | podcasts = podcasts } ! []
+
+        Err error ->
+          { model | test = (toString error) } ! []
+
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.batch
   [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
   , podcastState PodcastState
+  , podcastsState FullPodcastState
   ]

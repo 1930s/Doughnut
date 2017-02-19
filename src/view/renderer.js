@@ -12,6 +12,11 @@ window.onload = () => {
     app.ports.podcastState.send(arg)
   })
 
+  ipcRenderer.on('podcasts:state', (event, arg) => {
+    console.log('podcasts:state', arg)
+    app.ports.podcastsState.send(arg)
+  })
+
   //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
   //ipcRenderer.send('asynchronous-message', 'ping')
 

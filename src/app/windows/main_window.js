@@ -8,12 +8,13 @@ export default class MainWindow {
     this.window = undefined
   }
 
-  sendState() {
+  sendFullState() {
     var self = this
-    Podcast.create({
-      name: "Test Podcast"
-    }).then(function(p) {
-      self.window.webContents.send('podcast:state', p)
+    Podcast.findAll().then((podcasts) => {
+      var json = podcasts.map((p) => {
+        return p.toJSON()
+      })
+      self.window.webContents.send('podcasts:state', json)
     })
   }
 
@@ -38,9 +39,8 @@ export default class MainWindow {
       mode: 'detach'
     })
 
-    mw.sendState()
     this.window.webContents.on('did-finish-load', () => {
-      mw.sendState()
+      mw.sendFullState()
 
       // Manually show the window now it has received it's initial state
       mw.window.show()

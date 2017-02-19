@@ -10,3 +10,4 @@ port globalIpc : String -> Cmd msg
 
 -- Main -> Elm
 port podcastState : (Json.Encode.Value -> msg) -> Sub msg
+port podcastsState : (Json.Encode.Value -> msg) -> Sub msg

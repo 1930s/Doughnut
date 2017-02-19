@@ -14,6 +14,7 @@ if (!fs.existsSync(libraryPath)) {
 
 var sequelize = new Sequelize('', '', '', {
   dialect: 'sqlite',
+  logging: false,
   storage: path.join(libraryPath, "Doughnut Library.dnl")
 }); 
 

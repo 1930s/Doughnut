@@ -1,8 +1,10 @@
 import DataType from 'sequelize'
+import Episode from './episode'
 import Model from '../sequelize'
 
 var FeedParser = require('feedparser')
 var request = require('request')
+var Promise = require('bluebird')
 
 const Podcast = Model.define('Podcast', {
   id: {
@@ -11,40 +13,122 @@ const Podcast = Model.define('Podcast', {
     autoIncrement: !0,       
     primaryKey: !0
   },
-  title: { type: DataType.STRING },
-  feed: { type: DataType.STRING },
-  description: { type: DataType.STRING },
-  link: { type: DataType.STRING },
-  author: { type: DataType.STRING },
-  pubDate: { type: DataType.DATE, field: 'pub_date' },
-  language: { type: DataType.STRING },
-  copyright: { type: DataType.STRING },
-  imageUrl: { type: DataType.STRING, field: 'image_url' },
-  imageBlob: { type: DataType.TEXT, field: 'image_blob' },
-  lastParsed: { type: DataType.DATE, field: 'last_parsed' }
+  title: { type: DataType.STRING, defaultValue: '' },
+  feed: { type: DataType.STRING, defaultValue: '' },
+  description: { type: DataType.STRING, defaultValue: '' },
+  link: { type: DataType.STRING, defaultValue: '' },
+  author: { type: DataType.STRING, defaultValue: '' },
+  pubDate: { type: DataType.DATE, field: 'pub_date', defaultValue: DataType.NOW },
+  language: { type: DataType.STRING, defaultValue: '' },
+  copyright: { type: DataType.STRING, defaultValue: '' },
+  imageUrl: { type: DataType.STRING, field: 'image_url', defaultValue: '' },
+  imageBlob: { type: DataType.BLOB, field: 'image_blob', defaultValue: '' },
+  lastParsed: { type: DataType.DATE, field: 'last_parsed', defaultValue: DataType.NOW }
 }, {
   tableName: 'podcasts',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   freezeTableName: true,
   classMethods: {
-    subscribe: function(url, callback) {
-      const podcast = Podcast.create({
-        title: "Test",
-        feed: url
-      }).then(callback)
-/*
-      podcast.reload((err) => {
-        loaded(err, podcast)
-      })*/
+    subscribe: function(url) {
+      return new Promise(function(resolve, reject) {
+        Podcast.create({
+          feed: url
+        })
+        .then(function(podcast) {
+          return podcast.reload()
+        })
+        .then(resolve)
+      })
     }
   },
   instanceMethods: {
+    /*
+    ** Fetches latest version of the feed, stores podcast changes then callback(podcast, [episodes])
+    */
+    reload: function() {
+      const podcast = this
 
+      return new Promise(function(resolve, reject) {
+        const req = request(podcast.feed)
+        const feedparser = new FeedParser()
+
+        var meta = {}
+        var episodes = []
+
+        req.on('error', function (error) {
+          console.log("Error: ", error)
+        });
+
+        req.on('response', function (res) {
+          var stream = this; // `this` is `req`, which is a stream
+
+          if (res.statusCode !== 200) {
+            console.log('Bad status code')
+          } else {
+            stream.pipe(feedparser)
+          }
+        })
+
+        feedparser.on('meta', function (parsed) {
+          meta = parsed
+        })
+
+        feedparser.on('readable', function () {
+          const stream = this
+          const meta = this.meta
+
+          var item
+          while (item = stream.read()) {
+            episodes.push(item)
+          }
+        })
+
+        feedparser.on('finish', function() {
+          podcast.update({
+            title: meta.title,
+            description: meta.description,
+            link: meta.link,
+            author: meta.author,
+            pubDate: meta.pubDate,
+            language: meta.language,
+            copyright: meta.copyright,
+            imageUrl: meta.image.url,
+            lastParsed: new Date()
+            //categories: meta.categories
+          })
+          .then((saved) => {
+            Promise.map(episodes, function(episode) {
+              return Episode.updateParsedEpisode(podcast, episode) 
+            }, {concurrency: 10})
+            .then(saved.reloadImage())
+            .then(resolve)
+          })
+        })
+      })
+    },
+
+    reloadImage: function() {
+      const podcast = this
+
+      return new Promise(function(resolve, reject) {
+        request(podcast.imageUrl, (err, resp, body) => {
+          if (err) {
+            reject(err)
+          } else {
+            podcast.update({
+              imageBlob: new Buffer(body)
+            }).then(resolve)
+          }
+        })
+      })
+    }
   }
 })
 
-export default Podcast
+Podcast.hasMany(Episode, { foreignKey: 'podcast_id' })
+
+export { Podcast, Episode }
 
 /*
 PodcastCategory = Sequelize.define('podcast_category', {})
@@ -63,42 +147,7 @@ Podcast.subscribe = (url, loaded) => {
 
 Podcast.prototype.reload = (callback) => {
   const podcast = this
-  const req = request(this.feed)
-  const feedparser = new FeedParser()
-
-  req.on('error', function (error) {
-    console.log("Error: ", error)
-  });
-
-  req.on('response', function (res) {
-    var stream = this; // `this` is `req`, which is a stream
-
-    if (res.statusCode !== 200) {
-      console.log('Bad status code')
-    } else {
-      stream.pipe(feedparser)
-    }
-  })
-
-  feedparser.on('meta', function (meta) {
-    podcast.parsePodcast(meta)
-  })
-
-  feedparser.on('readable', function () {
-    const stream = this
-    const meta = this.meta
-
-    var item
-    while (item = stream.read()) {
-      podcast.parseEpisode(item)
-    }
-  })
-
-  feedparser.on('finish', function() {
-    podcast.reloadImage(() => {
-      loaded(podcast)
-    })
-  })
+  
 }
 
 Podcast.prototype.reloadImage = (callback) => {

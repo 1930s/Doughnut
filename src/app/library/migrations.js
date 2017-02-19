@@ -13,8 +13,23 @@ const MIGRATIONS = [
     language TEXT,
     copyright TEXT,
     image_url TEXT,
-    image_blob TEXT,
+    image_blob BLOB,
     last_parsed DATE,
+    created_at DATE,
+    updated_at DATE
+  )
+  `,
+  `CREATE TABLE episodes (
+    id INTEGER PRIMARY KEY,
+    podcast_id INTEGER,
+    title TEXT,
+    description TEXT,
+    guid TEXT,
+    pub_date DATETIME,
+    link TEXT,
+    enclosure_url TEXT,
+    enclosure_size INTEGER,
+    favourite BOOL,
     created_at DATE,
     updated_at DATE
   )

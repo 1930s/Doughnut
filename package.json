@@ -16,7 +16,7 @@
     "release:main": "cross-env NODE_ENV=production browserify -t [ babelify ] ./src/app/main.js --exclude electron --im --no-detect-globals --node | uglifyjs -c warnings=false -m -d DEBUG=false > ./build/main.js",
     "release:view": "NODE_ENV=production webpack",
     "release:build": "npm-run-all -p release:main release:view",
-    "release:pack-osx": "electron-packager ./build Doughnut --out=dist/bin --download.cache=dist/cache --platform=darwin --arch=x64 --version=1.4.15 --overwrite --asar --icon=res/icon.icns",
+    "release:pack-osx": "electron-packager ./build Doughnut --out=dist/bin --download.cache=dist/cache --platform=darwin --arch=x64 --electron-version=1.4.15 --overwrite --asar --icon=res/icon.icns",
     "release:osx": "npm-run-all -s release:build release:pack-osx"
   },
   "repository": "https://github.com/electron/electron-quick-start",
@@ -43,16 +43,20 @@
     "electron-rebuild": "^1.5.7",
     "elm-webpack-loader": "^4.2.0",
     "expect.js": "^0.3.1",
+    "express": "^4.14.1",
     "extract-text-webpack-plugin": "^2.0.0-rc.3",
     "import-glob-loader": "^1.1.0",
     "node-sass": "^4.5.0",
     "npm-run-all": "^4.0.1",
+    "rss": "^1.2.2",
     "sass-loader": "^5.0.1",
     "style-loader": "^0.13.1",
     "watchify": "^3.9.0",
-    "webpack": "^2.2.1"
+    "webpack": "^2.2.1",
+    "xml": "^1.0.1"
   },
   "dependencies": {
+    "bluebird": "^3.4.7",
     "feedparser": "^2.1.0",
     "jsonfile": "^2.4.0",
     "sequelize": "^3.30.2",
