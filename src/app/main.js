@@ -5,8 +5,10 @@ import WindowManager from './window_manager'
 import Menu from './menu'
 import Settings from './settings'
 import Library from './library/manager'
+import AssetServer from './asset_server'
 
-const {dialog} = require('electron')
+const {dialog, app} = require('electron')
+const portfinder = require('portfinder')
 
 class Main {
   constructor() {
@@ -25,22 +27,42 @@ class Main {
   onReady() {
     Menu.createMenu()
 
-    Library().load((err) => {
-      if (err) {
-        dialog.showMessageBox({
-          title: "An error occured whilst loading your Doughnut library database"
-        })
-      }
-/*
-      Library().subscribe("test", function(t) {
-        console.log(t)
-      })*/
-/*
-      Library().podcasts((p) => {
-        console.log(p)
-      })*/
+    this.startAssetServer(() => {
+      Library().load((err) => {
+        if (err) {
+          dialog.showMessageBox({
+            title: "An error occured whilst loading your Doughnut library database"
+          })
+        }
+  /*
+        Library().subscribe("test", function(t) {
+          console.log(t)
+        })*/
+  /*
+        Library().podcasts((p) => {
+          console.log(p)
+        })*/
 
-      this.launchMainWindow()
+        /*Library().reload(1, () => {
+          console.log("Reloaded")
+        })*/
+
+        this.launchMainWindow()
+      })
+    })
+  }
+
+  startAssetServer(cb) {
+    const main = this
+
+    portfinder.getPortPromise()
+    .then((port) => {
+      main.server = new AssetServer(port)
+      cb()
+    })
+    .catch((err) => {
+      console.log(err)
+      app.quit()
     })
   }
 

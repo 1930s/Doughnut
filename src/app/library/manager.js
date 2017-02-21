@@ -34,8 +34,12 @@ class LibraryManager {
     })
   }
 
-  reload(podcast, cb = () => {}) {
-    podcast.reload().then(cb)
+  reload(id, cb = () => {}) {
+    Podcast.findOne({ id: id })
+    .then(function(podcast) {
+      return podcast.reload()
+    })
+    .then(cb)
   }
 
   unsubscribe(podcast, options = {}, callback = () => {}) {

@@ -89,7 +89,7 @@ const Podcast = Model.define('Podcast', {
             title: meta.title,
             description: meta.description,
             link: meta.link,
-            author: meta.author,
+            author: meta['itunes:author']['#'],
             pubDate: meta.pubDate,
             language: meta.language,
             copyright: meta.copyright,
@@ -112,15 +112,28 @@ const Podcast = Model.define('Podcast', {
       const podcast = this
 
       return new Promise(function(resolve, reject) {
-        request(podcast.imageUrl, (err, resp, body) => {
+        request({
+          url: podcast.imageUrl,
+          encoding: null
+        }, (err, resp, body) => {
           if (err) {
+            console.log("Error: ", err)
             reject(err)
           } else {
             podcast.update({
-              imageBlob: new Buffer(body)
+              imageBlob: body
             }).then(resolve)
           }
         })
+      })
+    },
+
+    viewJson: function() {
+      var json = this.toJSON()
+      if (json.Episodes) { delete json.Episodes }
+
+      return Object.assign({}, json, {
+        imageBlob: this.imageBlob.toString('base64')
       })
     }
   }

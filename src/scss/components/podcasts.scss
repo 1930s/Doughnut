@@ -9,12 +9,43 @@
   ul {
     list-style: none;
   }
+}
 
-  li {
-    height: 60px;
+.podcasts li {
+  height: 60px;
+  overflow: hidden;
+  padding: 5px;
 
-    &:active {
-      background: #EEE;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+
+  &:hover { cursor: default; }
+
+  .cover {
+    width: 50px;
+    height: 50px;
+    margin: 0 9px 0 0;
+    float: left;
+
+    img {
+      max-width: 100%;
     }
+  }
+
+  h2 {
+    font-size: 14px;
+    line-height: 16px;
+    margin: 2px 0 3px 0;
+  }
+
+  p {
+    font-size: 11px;
+    line-height: 13px;
+    margin: 2px 0;
+    color: #777;
+  }
+
+  &:active {
+    background: #EEE;
   }
 }

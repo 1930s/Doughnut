@@ -15,12 +15,26 @@ type alias Podcast =
   , language : String
   , copyright : String
   , imageUrl : String
-  , imageBlog : String
+  , imageBlob : String
   , lastParsed : Date
   , createdAt : Date
   , updatedAt : Date
+  , episodes : List Episode
   }
 
+type alias EpisodeId = Int
+
 type alias Episode =
-  { name : String
+  { id : EpisodeId
+  , podcastId : PodcastId
+  , title : String
+  , description : String
+  , guid : String
+  , pubDate : Date
+  , link : String
+  , enclosureUrl : String
+  , enclosureSize : Int
+  , favourite : Bool
+  , createdAt : Date
+  , updatedAt : Date
   }

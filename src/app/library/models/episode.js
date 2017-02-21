@@ -58,7 +58,10 @@ const Episode = Model.define('Episode', {
     }
   },
   instanceMethods: {
-    
+    viewJson: function() {
+      return Object.assign({}, this.toJSON(), {
+      })
+    }
   }
 })
 

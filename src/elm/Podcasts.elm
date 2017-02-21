@@ -28,4 +28,18 @@ podcastContextMenu podcast =
 
 viewPodcast : Podcast -> Html Msg
 viewPodcast pod =
-  li [] [text pod.title]
+  let
+    imageData = "data:image/jpeg;base64," ++ pod.imageBlob
+
+    epCount = List.length pod.episodes
+
+    contextMenu = podcastContextMenu pod
+  in
+    li [ open (ShowPodcastContextMenu contextMenu) ]
+    [ div [class "cover"]
+      [ img [ src imageData ] []
+      ]
+    , h2 [] [ text pod.title ]
+    , p [] [ text pod.author ]
+    , p [] [ text ((toString epCount) ++ " Episodes") ]
+    ]

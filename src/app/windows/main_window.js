@@ -1,7 +1,8 @@
 import Electron from 'electron'
 import url from 'url'
 import path from 'path'
-import {Podcast} from '../library/models'
+import {Podcast, Episode} from '../library/models'
+import Library from '../library/manager'
 
 export default class MainWindow {
   constructor() {
@@ -10,9 +11,15 @@ export default class MainWindow {
 
   sendFullState() {
     var self = this
-    Podcast.findAll().then((podcasts) => {
+    Podcast.findAll({ include: [ Episode ] }).then((podcasts) => {
       var json = podcasts.map((p) => {
-        return p.toJSON()
+        const episodes = p.Episodes.map((e) => {
+          return e.viewJson()
+        })
+
+        return Object.assign(p.viewJson(), {
+          episodes: episodes
+        })
       })
       self.window.webContents.send('podcasts:state', json)
     })
