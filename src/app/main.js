@@ -27,6 +27,8 @@ class Main {
   onReady() {
     Menu.createMenu()
 
+    this.windowManager().setupIPC()
+
     this.startAssetServer(() => {
       Library().load((err) => {
         if (err) {

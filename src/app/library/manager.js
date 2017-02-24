@@ -34,6 +34,15 @@ class LibraryManager {
     })
   }
 
+  loadPodcast(id) {
+    return new Promise((resolve, reject) => {
+      console.log('a')
+      Podcast.findOne({ id: id })
+      .then(resolve)
+      .catch(reject)
+    })
+  }
+
   reload(id, cb = () => {}) {
     Podcast.findOne({ id: id })
     .then(function(podcast) {

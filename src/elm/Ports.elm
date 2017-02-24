@@ -3,7 +3,13 @@ port module Ports exposing (..)
 import Types exposing (..)
 import Json.Encode
 
-port globalIpc : String -> Cmd msg
+port globalAction : String -> Cmd msg
+
+type alias ObjAction =
+  { action : String
+  , id : Int
+  }
+port objectAction : ObjAction -> Cmd msg
 
 -- Action -> Main
 

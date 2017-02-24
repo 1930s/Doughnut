@@ -2,6 +2,7 @@ module Podcasts exposing (list)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Model exposing (Model, Msg(..), PodcastContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
@@ -35,7 +36,7 @@ viewPodcast pod =
 
     contextMenu = podcastContextMenu pod
   in
-    li [ open (ShowPodcastContextMenu contextMenu) ]
+    li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pod) ]
     [ div [class "cover"]
       [ img [ src imageData ] []
       ]

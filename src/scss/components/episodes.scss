@@ -1,0 +1,73 @@
+.episodes {
+  height: 100%;
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  background: #FAFAFA;
+
+  ul {
+    list-style: none;
+  }
+}
+
+.episode {
+  height: 70px;
+  overflow: hidden;
+  padding: 5px 68px 5px 7px;
+  border-bottom: 1px solid #EEE;
+  border-left: 3px solid transparent;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+
+  &:hover { cursor: default; }
+
+  h2 {
+    font-size: 14px;
+    line-height: 16px;
+    margin: 2px 0 5px 0;
+  }
+
+  p {
+    font-size: 12px;
+    line-height: 15px;
+    margin: 2px 0 4px 0;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--selected {
+    background: #429AFF;
+    p, h2 {
+      color: #FFF;
+    }
+  }
+
+  &--unplayed {
+    border-left: 3px solid #429AFF;
+
+    h2 {
+      position: relative;
+      padding-left: 15px;
+
+      &:before {
+        content: ' ';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #429AFF;
+        border-radius: 100%;
+        left: 0;
+        top: 2px;
+      }
+    }
+  }
+
+  &--favourite {
+    border-left: 3px solid darken(gold, 10%);
+    background: gold;
+  }
+}

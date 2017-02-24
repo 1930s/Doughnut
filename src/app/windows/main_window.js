@@ -11,7 +11,7 @@ export default class MainWindow {
 
   sendFullState() {
     var self = this
-    Podcast.findAll({ include: [ Episode ] }).then((podcasts) => {
+    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcasts) => {
       var json = podcasts.map((p) => {
         const episodes = p.Episodes.map((e) => {
           return e.viewJson()
@@ -25,11 +25,25 @@ export default class MainWindow {
     })
   }
 
+  sendPodcastState(id) {
+    var self = this
+    Podcast.findOne({ id: id, include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcast) => {
+      const episodes = p.Episodes.map((e) => {
+        return e.viewJson()
+      })
+
+      return Object.assign(p.viewJson(), {
+        episodes: episodes
+      })
+      self.window.webContents.send('podcast:state', json)
+    })
+  }
+
   show() {
     const mw = this
 
     this.window = new Electron.BrowserWindow({
-      width: 900,
+      width: 760,
       height: 580,
       resizable: true,
       titleBarStyle: 'hidden-inset',

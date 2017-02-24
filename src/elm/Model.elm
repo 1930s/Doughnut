@@ -9,7 +9,10 @@ import Json.Encode
 type alias Model =
   { test : String
   , podcasts : List Podcast
+  , selectedPodcast : Maybe Podcast
+  , selectedEpisode : Maybe Episode
   , splitPane : SplitPane.State
+  , podcastContextMenu : Maybe (Menu PodcastContextMenu)
   }
 
 type PodcastContextMenu
@@ -23,6 +26,9 @@ type Msg
   = --OpenContextMenu (Menu ButtonMenuItem)
   --| MenuAction String
   SplitterMsg SplitPane.Msg
+  | SelectPodcast Podcast
+  | SelectEpisode Episode
+  | PlayEpisode Episode
   | ShowPodcastContextMenu (Menu PodcastContextMenu)
   | HandlePodcastContextMenu MenuCallback
   | PodcastState Json.Encode.Value

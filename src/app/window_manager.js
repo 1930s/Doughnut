@@ -4,6 +4,7 @@ import path from 'path'
 const { ipcMain } = require('electron')
 
 import MainWindow from './windows/main_window'
+import Library from './library/manager'
 
 export default class WindowManager {
   constructor() {
@@ -14,6 +15,8 @@ export default class WindowManager {
   }
 
   setupIPC() {
+    const wm = this
+
     // Global Action
     ipcMain.on('global', (event, arg) => {
       console.log(arg)  // prints "ping"
@@ -21,9 +24,16 @@ export default class WindowManager {
     })
 
     // Podcast Action
-    ipcMain.on('podcast', (event, arg) => {
-      console.log(arg)  // prints "ping"
-      event.sender.send('asynchronous-reply', 'pong')
+    ipcMain.on('podcast:reload', (event, arg) => {
+      console.log('podcast:reload', arg)
+
+      Library().loadPodcast(arg.id)
+        .then(function(podcast) {
+          return podcast.reload()
+        })
+        .then(function(loaded) {
+          console.log(loaded)
+        })
     })
 
     // Player Action
@@ -31,9 +41,8 @@ export default class WindowManager {
 
     // Episode Action
 
-    ipcMain.on('synchronous-message', (event, arg) => {
-      console.log(arg)  // prints "ping"
-      event.returnValue = 'pong'
+    ipcMain.on('episode:play', (event, arg) => {
+      console.log("episode:play", arg)
     })
   }
 

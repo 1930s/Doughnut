@@ -17,6 +17,10 @@ window.onload = () => {
     app.ports.podcastsState.send(arg)
   })
 
+  app.ports.objectAction.subscribe((action) => {
+    ipcRenderer.send(action.action, { id: action.id })
+  })
+
   //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
   //ipcRenderer.send('asynchronous-message', 'ping')
 

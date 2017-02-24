@@ -7,6 +7,7 @@ import Html.Events exposing (..)
 import Model exposing (..)
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import Podcasts
+import Episodes
 
 splitterConfig : ViewConfig Msg
 splitterConfig =
@@ -39,4 +40,10 @@ podcastsView model =
 episodesView : Model -> Html Msg
 episodesView model =
   div [class "episodes"]
-  [text "Episodes"]
+  [ case model.selectedPodcast of
+      Just selected ->
+        Episodes.list model selected
+      
+      Nothing ->
+        p [] [text "Please select a podcast"]
+  ]
