@@ -2,6 +2,7 @@ import DataType from 'sequelize'
 import Episode from './episode'
 import Model from '../sequelize'
 
+const moment = require('moment')
 var FeedParser = require('feedparser')
 var request = require('request')
 var Promise = require('bluebird')
@@ -23,7 +24,9 @@ const Podcast = Model.define('Podcast', {
   copyright: { type: DataType.STRING, defaultValue: '' },
   imageUrl: { type: DataType.STRING, field: 'image_url', defaultValue: '' },
   imageBlob: { type: DataType.BLOB, field: 'image_blob', defaultValue: '' },
-  lastParsed: { type: DataType.DATE, field: 'last_parsed', defaultValue: DataType.NOW }
+  lastParsed: { type: DataType.DATE, field: 'last_parsed', defaultValue: DataType.NOW },
+  downloadNew: { type: DataType.BOOLEAN, field: 'download_new', defaultValue: true },
+  deletePlayed: { type: DataType.BOOLEAN, field: 'delete_played', defaultValue: true }
 }, {
   tableName: 'podcasts',
   createdAt: 'created_at',
@@ -32,79 +35,114 @@ const Podcast = Model.define('Podcast', {
   classMethods: {
     subscribe: function(url) {
       return new Promise(function(resolve, reject) {
-        Podcast.create({
-          feed: url
-        })
-        .then(function(podcast) {
-          return podcast.reload()
-        })
-        .then(resolve)
+        Podcast.parseFeed(url)
+          .then(parsed => {
+            const meta = Podcast.sanitizeMeta(parsed.meta)
+            return Podcast.create(meta)
+          })
+          .then(function(podcast) {
+            return podcast.syncFeed()
+          })
+          .then(resolve)
+          .catch(reject)
       })
-    }
-  },
-  instanceMethods: {
-    /*
-    ** Fetches latest version of the feed, stores podcast changes then callback(podcast, [episodes])
-    */
-    reload: function() {
-      const podcast = this
+    },
 
-      return new Promise(function(resolve, reject) {
-        const req = request(podcast.feed)
+    parseFeed: function(feed) {
+      return new Promise( (resolve, reject) => {
+        var meta = {}
+        const items = []
         const feedparser = new FeedParser()
 
-        var meta = {}
-        var episodes = []
-
-        req.on('error', function (error) {
-          console.log("Error: ", error)
-        });
-
-        req.on('response', function (res) {
-          var stream = this; // `this` is `req`, which is a stream
-
-          if (res.statusCode !== 200) {
-            console.log('Bad status code')
-          } else {
-            stream.pipe(feedparser)
-          }
+        feedparser.on('error', (err) => {
+          reject(err)
         })
 
         feedparser.on('meta', function (parsed) {
           meta = parsed
         })
 
-        feedparser.on('readable', function () {
-          const stream = this
-          const meta = this.meta
-
-          var item
-          while (item = stream.read()) {
-            episodes.push(item)
-          }
+        feedparser.on('readable', () => {
+          let item
+          while(item = feedparser.read()) { items.push(item); }
+          return items
         })
 
-        feedparser.on('finish', function() {
-          podcast.update({
-            title: meta.title,
-            description: meta.description,
-            link: meta.link,
-            author: meta['itunes:author']['#'],
-            pubDate: meta.pubDate,
-            language: meta.language,
-            copyright: meta.copyright,
-            imageUrl: meta.image.url,
-            lastParsed: new Date()
-            //categories: meta.categories
+        request.get(feed)
+          .on('error', (err) => { reject(err); })
+          .pipe(feedparser)
+          .on('end', () => {
+            return resolve({
+              meta: Object.assign({}, meta, { feed: feed }),
+              items: items
+            });
           })
-          .then((saved) => {
-            Promise.map(episodes, function(episode) {
+      })
+    },
+
+    // Take raw feed meta and return podcast attributes
+    sanitizeMeta: function(meta) {
+      var author = meta['author']
+      if (meta['itunes:author'] && meta['itunes:author']['#']) {
+        author = meta['itunes:author']['#']
+      }
+
+      return {
+        title: meta.title,
+        feed: meta.feed,
+        description: meta.description,
+        link: meta.link,
+        author: author,
+        pubDate: meta.pubDate,
+        language: meta.language,
+        copyright: meta.copyright,
+        imageUrl: meta.image.url,
+        lastParsed: new Date()
+      }
+    }
+  },
+  instanceMethods: {
+    /*
+    ** Fetches latest version of the feed, stores podcast changes then resolve({podcast, newEpisodes})
+    */
+    syncFeed: function(cb = () => {}) {
+      const podcast = this
+
+      return new Promise((resolve, reject) => {
+        var foundEpisodes = []
+
+        Podcast.parseFeed(podcast.feed)
+          .then(parsed => {
+            const meta = Podcast.sanitizeMeta(parsed.meta)
+            
+            return Promise.map(parsed.items, episode => {
               return Episode.updateParsedEpisode(podcast, episode) 
             }, {concurrency: 10})
-            .then(saved.reloadImage())
-            .then(resolve)
+              .then((episodes) => {
+                foundEpisodes = episodes.filter((e) => { return e != false; })
+                return podcast.update(meta)
+              })
+              .catch(reject)
           })
-        })
+          .then(podcast => {
+            return podcast.reloadImage()
+          })
+          .then(podcast => {
+            resolve({
+              podcast,
+              found: foundEpisodes
+            })
+          })
+          .catch(reject)
+      })
+    },
+
+    newlyEpisodes: function(created) {
+      return Episode.findAll({
+        where: {
+          podcast_id: this.id,
+          new: true
+        }
       })
     },
 
@@ -122,7 +160,9 @@ const Podcast = Model.define('Podcast', {
           } else {
             podcast.update({
               imageBlob: body
-            }).then(resolve)
+            })
+            .then(resolve)
+            .catch(reject)
           }
         })
       })

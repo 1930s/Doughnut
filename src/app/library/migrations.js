@@ -16,7 +16,9 @@ const MIGRATIONS = [
     image_blob BLOB,
     last_parsed DATE,
     created_at DATE,
-    updated_at DATE
+    updated_at DATE,
+    download_new BOOL,
+    delete_played BOOL
   )
   `,
   `CREATE TABLE episodes (
@@ -58,7 +60,7 @@ export default class Migrations {
 
     Migrations.nextUpVersion(sequelize, (nextUp) => {
       if (nextUp < latest) {
-        Logger.debug(`Migrating from version ${nextUp} to ${latest}`)
+        Logger.info(`Migrating from version ${nextUp} to ${latest}`)
         Migrations.perform(sequelize, nextUp, () => {
           Migrations.migrate(sequelize, done)
         })

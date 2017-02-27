@@ -52,8 +52,11 @@ const Episode = Model.define('Episode', {
               pubDate: data.pubDate,
               link: data.link
             }).then(resolve)
+          } else {
+            resolve(false)
           }
         })
+        .catch(reject)
       })
     }
   },

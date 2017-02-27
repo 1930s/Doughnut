@@ -59,6 +59,9 @@
     "bluebird": "^3.4.7",
     "feedparser": "^2.1.0",
     "jsonfile": "^2.4.0",
+    "moment": "^2.17.1",
+    "nan": "^2.5.1",
+    "request-promise": "^4.1.1",
     "sequelize": "^3.30.2",
     "sqlite3": "^3.1.8",
     "umzug": "^1.11.0"

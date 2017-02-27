@@ -17,7 +17,7 @@ class Main {
 
     this.ipc = require( 'electron' ).ipcMain;
 
-    this._windowManager = new WindowManager(this);
+    this._windowManager = WindowManager()
   }
 
   windowManager() {
@@ -27,7 +27,7 @@ class Main {
   onReady() {
     Menu.createMenu()
 
-    this.windowManager().setupIPC()
+    this._windowManager.setupIPC()
 
     this.startAssetServer(() => {
       Library().load((err) => {

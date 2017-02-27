@@ -53,9 +53,15 @@ export default class Logger {
     console.error( '[' + Logger.formatDate() + ']', ...args );
   }
 
+  static info( ...args ) {
+    if (process.env.NODE_ENV !== 'test') {
+      Logger.log(...args)
+    }
+  }
+
   static debug( ...args ) {
     if (global.DEBUG || true) {
-      Logger.log(...args);
+      Logger.log(...args)
     }
   }
 }

@@ -76,6 +76,9 @@ podcastContextMenuUpdate menu r model =
     Just (M_ReloadPodcast id) ->
       model ! [Ipc.reloadPodcast id]
     
+    Just (M_Unsubscribe id) ->
+      model ! [Ipc.unsubscribePodcast id]
+    
     _ ->
       model ! []
 

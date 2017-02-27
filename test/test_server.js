@@ -7,7 +7,9 @@ const podcast = require('./fixtures/podcast.js')
 
 app.get('/feed.xml', function (req, res) {
   const feed = new RSS(podcast.feed)
-  for (var i = 0; i < podcast.items.length; i++) {
+  const items = req.query.items || 1
+
+  for (var i = 0; i < podcast.items.length && i < items; i++) {
     feed.item(podcast.items[i])
   }
 

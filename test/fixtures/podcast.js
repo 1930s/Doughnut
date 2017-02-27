@@ -12,11 +12,29 @@ module.exports = {
     {
       title: "First Item",
       description: "Use this for the content. It can include html.",
-      url: 'http://example.com/article4?this&that',
+      url: 'http://example.com/article1?this&that',
       guid: '1123',
       categories: ['Category 1','Category 2','Category 3','Category 4'],
       author: 'Guest Author',
       date: 'May 27, 2012'
+    },
+    {
+      title: "Second Item",
+      description: "Use this for the content. It can include html.",
+      url: 'http://example.com/article2?this&that',
+      guid: '2123',
+      categories: ['Category 1','Category 2','Category 3','Category 4'],
+      author: 'Guest Author',
+      date: 'May 28, 2012'
+    },
+    {
+      title: "Third Item",
+      description: "Use this for the content. It can include html.",
+      url: 'http://example.com/article3?this&that',
+      guid: '3123',
+      categories: ['Category 1','Category 2','Category 3','Category 4'],
+      author: 'Guest Author',
+      date: 'May 29, 2012'
     }
   ]
 }

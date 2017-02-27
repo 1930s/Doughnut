@@ -1,6 +1,8 @@
 var Umzug = require('umzug')
 var path = require('path')
 var fs = require('fs')
+const { dialog } = require('electron')
+const Promise = require('bluebird')
 
 import Settings from '../settings'
 import Migrations from './migrations'
@@ -10,6 +12,8 @@ import { Podcast, Episode } from './models'
 class LibraryManager {
   constructor() {
     this.loaded = false
+
+    this.downloads = []
   }
 
   load(loaded) {
@@ -25,34 +29,69 @@ class LibraryManager {
   /*
   * Subscribe to podcast at feed url
   */
-  subscribe(url, callback = () => {}) {
+  subscribe(url) {
     if (!this.loaded) { throw 'Library not loaded' }
-    const library = this
 
-    Podcast.subscribe(url).then((podcast) => {
-      callback(podcast)
+    return new Promise(function(resolve, reject) {
+      var preSubscribe = new Date()
+
+      Podcast.subscribe(url)
+        .then(result => {
+          return result.podcast
+        })
+        .then(resolve)
+        .catch(reject)
+    })
+  }
+
+  unsubscribe(podcast, opts) {
+    const options = Object.assign({
+      permanent: false
+    }, opts)
+
+    return new Promise((resolve, reject) => {
+      Podcast.findById(podcast.id)
+        .then(podcast => {
+          podcast.destroy()
+        })
+        .then(() => {
+          resolve(true)
+        })
+        .catch(reject)
     })
   }
 
   loadPodcast(id) {
     return new Promise((resolve, reject) => {
-      console.log('a')
       Podcast.findOne({ id: id })
       .then(resolve)
       .catch(reject)
     })
   }
 
-  reload(id, cb = () => {}) {
-    Podcast.findOne({ id: id })
-    .then(function(podcast) {
-      return podcast.reload()
+  reload(podcast) {
+    return new Promise((resolve, reject) => {
+      var preReload = new Date()
+
+      Podcast.findById(podcast.id)
+        .then(podcast => {
+          return podcast.syncFeed()
+        })
+        .then(result => {
+          if (result.found.length > 0 && result.podcast.downloadNew) {
+            result.found.forEach(e => {
+              library().downloadEpisode(e)
+            })
+          }
+          return result.podcast
+        })
+        .then(resolve)
+        .catch(reject)
     })
-    .then(cb)
   }
 
-  unsubscribe(podcast, options = {}, callback = () => {}) {
-
+  downloadEpisode(episode) {
+    this.downloads.push(episode)
   }
 
   podcasts(callback = () => {}) {

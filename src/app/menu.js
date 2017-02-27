@@ -1,8 +1,21 @@
+import WindowManager from './window_manager'
+
 export default class Menu {
   static createMenu() {
     const {app, Menu} = require('electron')
 
     const template = [
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'Subscribe',
+            click () {
+              WindowManager().subscribeWindow()
+            }
+          }
+        ]
+      },
       {
         label: 'Edit',
         submenu: [

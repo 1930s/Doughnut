@@ -16,6 +16,10 @@ reloadPodcast : PodcastId -> Cmd Msg
 reloadPodcast id =
   objectAction (ObjAction "podcast:reload" id)
 
+unsubscribePodcast : PodcastId -> Cmd Msg
+unsubscribePodcast id =
+  objectAction (ObjAction "podcast:unsubscribe" id)
+
 playEpisode : Episode -> Cmd Msg
 playEpisode ep =
   objectAction (ObjAction "episode:play" ep.id)

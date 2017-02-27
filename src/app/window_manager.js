@@ -1,16 +1,17 @@
 import Electron from 'electron'
 import url from 'url'
 import path from 'path'
-const { ipcMain } = require('electron')
+const { ipcMain, dialog } = require('electron')
 
 import MainWindow from './windows/main_window'
 import Library from './library/manager'
 
-export default class WindowManager {
+class WindowManager {
   constructor() {
     this._windows = {
       MainWindow: false,
-      WelcomeWindow: false
+      WelcomeWindow: false,
+      SubscribeWindow: false
     }
   }
 
@@ -24,6 +25,19 @@ export default class WindowManager {
     })
 
     // Podcast Action
+    ipcMain.on('podcast:subscribe', (event, arg) => {
+      console.log('podcast:subscribe', arg)
+      wm.subscribeWindow().close()
+
+      Library().subscribe(arg)
+      .then((podcast) => {
+        callback(podcast)
+      })
+      .catch((err) => {
+        dialog.showErrorBox('Invalid Feed', "Doughnut was unable to parse the feed at: " + url)
+      })
+    })
+
     ipcMain.on('podcast:reload', (event, arg) => {
       console.log('podcast:reload', arg)
 
@@ -33,6 +47,25 @@ export default class WindowManager {
         })
         .then(function(loaded) {
           console.log(loaded)
+        })
+    })
+
+    ipcMain.on('podcast:unsubscribe', (event, arg) => {
+      console.log('podcast:unsubscribe', arg)
+
+      Library().loadPodcast(arg.id)
+        .then(function(podcast) {
+          dialog.showMessageBox({
+            buttons: ['Leave Files', 'Delete Files'],
+            message: 'Delete Episodes?',
+            detail: `Would you like to permanently delete all downloaded episodes of ${podcast.title}`,
+          }, deleteFiles => {
+            if (deleteFiles) {
+              console.log("Delete files")
+            } else {
+              console.log("Leave files")
+            }
+          })
         })
     })
 
@@ -51,6 +84,25 @@ export default class WindowManager {
 
     this._windows.MainWindow = new MainWindow();
     return this._windows.MainWindow
+  }
+
+  subscribeWindow() {
+    if (this._windows.SubscribeWindow) { return this._windows.SubscribeWindow }
+
+    const w = new Electron.BrowserWindow({
+      width: 500,
+      height: 300,
+      resizable: false
+    })
+
+    w.loadURL(url.format({
+      pathname: path.join(__dirname, 'subscribe.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+
+    this._windows.SubscribeWindow = w
+    return w
   }
 
   welcomeWindow() {
@@ -72,4 +124,12 @@ export default class WindowManager {
     this._windows.WelcomeWindow = w
     return w
   }
+}
+
+export default function wm() {
+  if (!global._wm) {
+    global._wm = new WindowManager()
+  }
+  
+  return global._wm;
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Subscribe</title>
+    <link rel="stylesheet" href="./main.css">
+    <script src="./subscribe.js"></script>
+  </head>
+  <body>
+    <div id="subscribe">
+      <form onsubmit="subscribe()">
+        <label>Podcast Feed URL</label>
+        <input type="text" id="feed" placeholder="http://">
+        <input type="submit" value="Subscribe" />
+      </form>
+    </div>
+
+    <script>
+    const {ipcRenderer} = require('electron')
+
+    function subscribe() {
+      const feedUrl = document.getElementById('feed').value
+      ipcRenderer.send('podcast:subscribe', feedUrl)
+    }
+    </script>
+  </body>
+</html>
