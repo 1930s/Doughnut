@@ -16,7 +16,8 @@ module.exports = {
       guid: '1123',
       categories: ['Category 1','Category 2','Category 3','Category 4'],
       author: 'Guest Author',
-      date: 'May 27, 2012'
+      date: 'May 27, 2012',
+      enclosure: { url: "http://localhost:3000/enclosure.mp3" }
     },
     {
       title: "Second Item",
@@ -25,7 +26,8 @@ module.exports = {
       guid: '2123',
       categories: ['Category 1','Category 2','Category 3','Category 4'],
       author: 'Guest Author',
-      date: 'May 28, 2012'
+      date: 'May 28, 2012',
+      enclosure: { url: "http://localhost:3000/enclosure.mp3" }
     },
     {
       title: "Third Item",
@@ -34,7 +36,8 @@ module.exports = {
       guid: '3123',
       categories: ['Category 1','Category 2','Category 3','Category 4'],
       author: 'Guest Author',
-      date: 'May 29, 2012'
+      date: 'May 29, 2012',
+      enclosure: { url: "http://localhost:3000/enclosure.mp3" }
     }
   ]
 }

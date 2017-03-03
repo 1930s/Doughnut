@@ -21,6 +21,10 @@ app.get('/image.jpg', function (req, res) {
   res.sendFile(path.join(__dirname, '/fixtures/image.jpg'))
 })
 
+app.get('/enclosure.mp3', function(req, res) {
+  res.sendFile(path.join(__dirname, '/fixtures/enclosure.mp3'))
+})
+
 app.listen(3000, function () {
   console.log('Test podcast listening on port 3000')
 })

@@ -64,7 +64,7 @@ describe('Podcast', function() {
         Library().reload(p)
           .then(() => {
             // 2 new episodes should be found and scheduled for download
-            expect(Library().downloads.length).to.eql(2)
+            expect(Library().taskManager.queueCount()).to.eql(2)
 
             Episode.count().then((c) => {
               expect(c).to.eql(3)

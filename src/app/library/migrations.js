@@ -32,6 +32,7 @@ const MIGRATIONS = [
     enclosure_url TEXT,
     enclosure_size INTEGER,
     favourite BOOL,
+    downloaded BOOL,
     created_at DATE,
     updated_at DATE
   )

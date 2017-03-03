@@ -8,12 +8,13 @@ import Settings from '../settings'
 import Migrations from './migrations'
 import Sequelize from './sequelize'
 import { Podcast, Episode } from './models'
+import TaskManager from './tasks'
 
 class LibraryManager {
   constructor() {
     this.loaded = false
 
-    this.downloads = []
+    this.taskManager = new TaskManager()
   }
 
   load(loaded) {
@@ -24,6 +25,10 @@ class LibraryManager {
       library.loaded = true
       loaded()
     })
+  }
+
+  path() {
+    return Settings.get('libraryPath')
   }
 
   /*
@@ -91,7 +96,11 @@ class LibraryManager {
   }
 
   downloadEpisode(episode) {
-    this.downloads.push(episode)
+    this.taskManager.download(episode)
+  }
+
+  processTasks() {
+    this.taskManager.process()
   }
 
   podcasts(callback = () => {}) {

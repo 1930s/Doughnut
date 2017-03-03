@@ -4,6 +4,8 @@ import Model from '../sequelize'
 var Promise = require('bluebird')
 var FeedParser = require('feedparser')
 var request = require('request')
+var path = require('path')
+var sanitize = require("sanitize-filename")
 
 const Episode = Model.define('Episode', {
   id: {
@@ -20,7 +22,8 @@ const Episode = Model.define('Episode', {
   link: { type: DataType.STRING, defaultValue: '' },
   enclosureUrl: { type: DataType.STRING, field: 'enclosure_url', defaultValue: '' },
   enclosureSize: { type: DataType.INTEGER, field: 'enclosure_size', defaultValue: 0 },
-  favourite: { type: DataType.BOOLEAN, defaultValue: false }
+  favourite: { type: DataType.BOOLEAN, defaultValue: false },
+  downloaded: { type: DataType.BOOLEAN, defaultValue: false }
 }, {
   tableName: 'episodes',
   createdAt: 'created_at',
@@ -44,26 +47,44 @@ const Episode = Model.define('Episode', {
         .then((episodes) => {
           if (!episodes || episodes.length == 0) {
             // Episode is new, create it
-            Episode.create({
+            Episode.create(Object.assign({}, 
+              Episode.sanitizeMeta(data), {
               podcast_id: podcast.id,
-              title: data.title,
-              description: data.description,
-              guid: data.guid,
-              pubDate: data.pubDate,
-              link: data.link
-            }).then(resolve)
+            })).then(resolve)
           } else {
             resolve(false)
           }
         })
         .catch(reject)
       })
+    },
+
+    sanitizeMeta: function(data) {
+      var enclosure = {}
+      if (data.enclosures && data.enclosures.length > 0) {
+        enclosure = data.enclosures[0]
+      }
+
+      return {
+        title: data.title,
+        description: data.description,
+        guid: data.guid,
+        pubDate: data.pubDate,
+        link: data.link,
+        enclosureUrl: enclosure.url,
+        enclosureSize: enclosure.length
+      }
     }
   },
   instanceMethods: {
     viewJson: function() {
       return Object.assign({}, this.toJSON(), {
       })
+    },
+
+    fileName: function() {
+      const ext = path.extname(this.enclosureUrl)
+      return `${sanitize(this.title)}${ext}`
     }
   }
 })

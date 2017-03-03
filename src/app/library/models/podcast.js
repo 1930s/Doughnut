@@ -6,6 +6,8 @@ const moment = require('moment')
 var FeedParser = require('feedparser')
 var request = require('request')
 var Promise = require('bluebird')
+var path = require('path')
+var sanitize = require("sanitize-filename")
 
 const Podcast = Model.define('Podcast', {
   id: {
@@ -102,6 +104,14 @@ const Podcast = Model.define('Podcast', {
     }
   },
   instanceMethods: {
+    storagePath: function() {
+      return sanitize(this.title)
+    },
+
+    fileName: function(episode) {
+      return path.join(this.storagePath(), episode.fileName())
+    },
+
     /*
     ** Fetches latest version of the feed, stores podcast changes then resolve({podcast, newEpisodes})
     */
