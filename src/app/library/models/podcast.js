@@ -181,9 +181,10 @@ const Podcast = Model.define('Podcast', {
     viewJson: function() {
       var json = this.toJSON()
       if (json.Episodes) { delete json.Episodes }
+      if (json.imageBlob) { delete json.imageBlob }
 
       return Object.assign({}, json, {
-        imageBlob: this.imageBlob.toString('base64')
+        //imageBlob: this.imageBlob.toString('base64')
       })
     }
   }

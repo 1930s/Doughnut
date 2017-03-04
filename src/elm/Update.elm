@@ -55,8 +55,11 @@ update msg model =
     
     PodcastState json ->
       case Json.Decode.decodeValue podcastDecoder json of
-        Ok podcast ->
-          { model | test = "parsed" } ! []
+        Ok updated ->
+          let
+            updatePodcast = (\p -> if p.id == updated.id then updated else p)
+          in
+            { model | podcasts = (List.map updatePodcast model.podcasts) } ! []
 
         Err error ->
           model ! []

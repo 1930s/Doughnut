@@ -15,6 +15,8 @@ class Main {
     global.DEBUG = true;
     if( DEBUG ) { Logger.log( 'Initialize Application' ); }
 
+    console.log("DEBUG", process.env.DEBUG)
+
     this.ipc = require( 'electron' ).ipcMain;
 
     this._windowManager = WindowManager()
@@ -25,10 +27,6 @@ class Main {
   }
 
   onReady() {
-    Menu.createMenu()
-
-    this._windowManager.setupIPC()
-
     this.startAssetServer(() => {
       Library().load((err) => {
         if (err) {
@@ -48,6 +46,10 @@ class Main {
         /*Library().reload(1, () => {
           console.log("Reloaded")
         })*/
+
+        this._windowManager.setupIPC()
+
+        Menu.createMenu()
 
         this.launchMainWindow()
       })

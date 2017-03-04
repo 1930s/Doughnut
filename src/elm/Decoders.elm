@@ -34,7 +34,6 @@ podcastDecoder =
     |> required "language" Json.string
     |> required "copyright" Json.string
     |> required "imageUrl" Json.string
-    |> required "imageBlob" Json.string
     |> required "lastParsed" date
     |> required "created_at" date
     |> required "updated_at" date

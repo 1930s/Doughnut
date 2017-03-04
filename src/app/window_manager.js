@@ -13,6 +13,16 @@ class WindowManager {
       WelcomeWindow: false,
       SubscribeWindow: false
     }
+
+    Library().emitSubscribe(this.emitEvent.bind(this))
+  }
+
+  emitEvent(event, data) {
+    console.log("EMIT " + event)
+
+    if (this._windows.MainWindow) {
+      this._windows.MainWindow.emitEvent(event, data)
+    }
   }
 
   setupIPC() {
@@ -30,23 +40,20 @@ class WindowManager {
       wm.subscribeWindow().close()
 
       Library().subscribe(arg)
-      .then((podcast) => {
-        callback(podcast)
-      })
       .catch((err) => {
         dialog.showErrorBox('Invalid Feed', "Doughnut was unable to parse the feed at: " + url)
+        return null
       })
+
+      console.log('done')
     })
 
     ipcMain.on('podcast:reload', (event, arg) => {
       console.log('podcast:reload', arg)
 
       Library().loadPodcast(arg.id)
-        .then(function(podcast) {
-          return podcast.reload()
-        })
-        .then(function(loaded) {
-          console.log(loaded)
+        .then(podcast => {
+          return Library().reload(podcast)
         })
     })
 
@@ -61,10 +68,12 @@ class WindowManager {
             detail: `Would you like to permanently delete all downloaded episodes of ${podcast.title}`,
           }, deleteFiles => {
             if (deleteFiles) {
-              console.log("Delete files")
+              Library().unsubscribe(podcast, { permanent: true })
             } else {
-              console.log("Leave files")
+              Library().unsubscribe(podcast, { permanent: false })
             }
+
+            return null
           })
         })
     })

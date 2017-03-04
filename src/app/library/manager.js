@@ -10,10 +10,11 @@ import Sequelize from './sequelize'
 import { Podcast, Episode } from './models'
 import TaskManager from './tasks'
 
-class LibraryManager {
+export class LibraryManager {
   constructor() {
     this.loaded = false
 
+    this.emitReceivers = []
     this.taskManager = new TaskManager()
   }
 
@@ -31,17 +32,60 @@ class LibraryManager {
     return Settings.get('libraryPath')
   }
 
+  emitSubscribe(cb) {
+    this.emitReceivers.push(cb)
+  }
+
+  emit(event, data) {
+    this.emitReceivers.forEach(sub => {
+      sub(event, data)
+    })
+  }
+
+  emitFullPodcastState() {
+    const library = this
+    
+    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcasts) => {
+      var json = podcasts.map((p) => {
+        const episodes = p.Episodes.map((e) => {
+          return e.viewJson()
+        })
+
+        return Object.assign(p.viewJson(), {
+          episodes: episodes
+        })
+      })
+      library.emit('podcasts:state', json)
+    })
+  }
+
+  emitPodcastState(podcast) {
+    const library = this
+
+    Episode.findAll({ where: { podcast_id: podcast.id }, order: [['pubDate', 'DESC']]})
+      .then(episodes => {
+        library.emit('podcast:state', Object.assign(podcast.viewJson(), {
+          episodes: episodes
+        }))
+      })
+  }
+
   /*
   * Subscribe to podcast at feed url
   */
   subscribe(url) {
     if (!this.loaded) { throw 'Library not loaded' }
+    const library = this
 
     return new Promise(function(resolve, reject) {
       var preSubscribe = new Date()
 
       Podcast.subscribe(url)
         .then(result => {
+          // Emit
+          if (result && result.podcast) {
+            library.emitPodcastState(result.podcast)
+          }
           return result.podcast
         })
         .then(resolve)
@@ -50,6 +94,7 @@ class LibraryManager {
   }
 
   unsubscribe(podcast, opts) {
+    const library = this
     const options = Object.assign({
       permanent: false
     }, opts)
@@ -57,9 +102,10 @@ class LibraryManager {
     return new Promise((resolve, reject) => {
       Podcast.findById(podcast.id)
         .then(podcast => {
-          podcast.destroy()
+          return podcast.destroy()
         })
         .then(() => {
+          library.emit('podcast:unsubscribed', { id: podcast.id })
           resolve(true)
         })
         .catch(reject)
@@ -75,6 +121,8 @@ class LibraryManager {
   }
 
   reload(podcast) {
+    const library = this
+
     return new Promise((resolve, reject) => {
       var preReload = new Date()
 
@@ -83,9 +131,11 @@ class LibraryManager {
           return podcast.syncFeed()
         })
         .then(result => {
+          library.emitPodcastState(result.podcast)
+
           if (result.found.length > 0 && result.podcast.downloadNew) {
             result.found.forEach(e => {
-              library().downloadEpisode(e)
+              library.downloadEpisode(e)
             })
           }
           return result.podcast
@@ -101,14 +151,6 @@ class LibraryManager {
 
   processTasks() {
     this.taskManager.process()
-  }
-
-  podcasts(callback = () => {}) {
-    if (!this.loaded) { throw 'Library not loaded' }
-
-    Podcast.findAll().then((podcasts) => {
-      callback(podcasts)
-    })
   }
 }
 

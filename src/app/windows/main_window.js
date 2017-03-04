@@ -9,34 +9,8 @@ export default class MainWindow {
     this.window = undefined
   }
 
-  sendFullState() {
-    var self = this
-    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcasts) => {
-      var json = podcasts.map((p) => {
-        const episodes = p.Episodes.map((e) => {
-          return e.viewJson()
-        })
-
-        return Object.assign(p.viewJson(), {
-          episodes: episodes
-        })
-      })
-      self.window.webContents.send('podcasts:state', json)
-    })
-  }
-
-  sendPodcastState(id) {
-    var self = this
-    Podcast.findOne({ id: id, include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcast) => {
-      const episodes = p.Episodes.map((e) => {
-        return e.viewJson()
-      })
-
-      return Object.assign(p.viewJson(), {
-        episodes: episodes
-      })
-      self.window.webContents.send('podcast:state', json)
-    })
+  emitEvent(event, data) {
+    this.window.webContents.send(event, data)
   }
 
   show() {
@@ -61,7 +35,7 @@ export default class MainWindow {
     })
 
     this.window.webContents.on('did-finish-load', () => {
-      mw.sendFullState()
+     Library().emitFullPodcastState()
 
       // Manually show the window now it has received it's initial state
       mw.window.show()
