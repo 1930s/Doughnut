@@ -5,16 +5,38 @@ const { ipcMain, dialog } = require('electron')
 
 import MainWindow from './windows/main_window'
 import Library from './library/manager'
+import Player from './player'
 
 class WindowManager {
   constructor() {
+    const wm = this
+
     this._windows = {
       MainWindow: false,
       WelcomeWindow: false,
       SubscribeWindow: false
     }
 
+    this._player = new Player()
+    this._player.on('state', state => {
+      if (wm._windows.MainWindow) {
+        wm._windows.MainWindow.emitEvent('player:state', state)
+      }
+    })
+
     Library().emitSubscribe(this.emitEvent.bind(this))
+  }
+
+  main() {
+    return this.main
+  }
+
+  player() {
+    return this._player
+  }
+
+  teardown() {
+    this._player.destroy()
   }
 
   emitEvent(event, data) {
@@ -79,19 +101,53 @@ class WindowManager {
     })
 
     // Player Action
+    ipcMain.on('player:toggle', (event, arg) => {
+      console.log('player:toggle')
+      wm._player.toggle()
+    })
 
+    ipcMain.on('player:seek', (event, arg) => {
+      console.log('player:seek', arg)
+      wm._player.seekTo(arg)
+    })
 
     // Episode Action
 
     ipcMain.on('episode:play', (event, arg) => {
-      console.log("episode:play", arg)
+      console.log('episode:play', arg)
+
+      Library().loadEpisode(arg.id)
+        .then(episode => {
+          wm._player.play(episode)
+        })
+    })
+
+    ipcMain.on('episode:download', (event, arg) => {
+      console.log('episode:download', arg)
+
+      Library().loadEpisode(arg.id)
+        .then(episode => {
+          Library().downloadEpisode(episode)
+          Library().processTasks()
+        })
+    })
+
+    ipcMain.on('episode:favourite', (event, arg) => {
+      console.log('episode:favourite', arg)
+
+      Library().loadEpisode(arg.id)
+        .then(episode => {
+          episode.update({
+            favourite: !episode.favourite
+          })
+        })
     })
   }
 
-  mainWindow() {
+  mainWindow(server) {
     if (this._windows.MainWindow) { return this._windows.MainWindow }
 
-    this._windows.MainWindow = new MainWindow();
+    this._windows.MainWindow = new MainWindow(server);
     return this._windows.MainWindow
   }
 

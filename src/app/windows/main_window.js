@@ -5,7 +5,8 @@ import {Podcast, Episode} from '../library/models'
 import Library from '../library/manager'
 
 export default class MainWindow {
-  constructor() {
+  constructor(server) {
+    this.server = server
     this.window = undefined
   }
 
@@ -15,6 +16,7 @@ export default class MainWindow {
 
   show() {
     const mw = this
+    console.log(mw.server)
 
     this.window = new Electron.BrowserWindow({
       width: 760,
@@ -35,7 +37,10 @@ export default class MainWindow {
     })
 
     this.window.webContents.on('did-finish-load', () => {
-     Library().emitFullPodcastState()
+      mw.emitEvent('load', {
+        serverPort: mw.server.port
+      })
+      Library().emitFullPodcastState()
 
       // Manually show the window now it has received it's initial state
       mw.window.show()

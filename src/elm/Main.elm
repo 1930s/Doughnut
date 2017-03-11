@@ -2,11 +2,11 @@ module Main exposing (main)
 
 import Html as App
 import Model exposing (Model, Msg)
-import Config exposing (Config)
+import Types exposing (GlobalState)
 import Update
 import Window.Main
 
-main : Program Config Model Msg
+main : Program GlobalState Model Msg
 main =
   App.programWithFlags
     { init = Update.init

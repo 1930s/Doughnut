@@ -183,9 +183,7 @@ const Podcast = Model.define('Podcast', {
       if (json.Episodes) { delete json.Episodes }
       if (json.imageBlob) { delete json.imageBlob }
 
-      return Object.assign({}, json, {
-        //imageBlob: this.imageBlob.toString('base64')
-      })
+      return json
     }
   }
 })

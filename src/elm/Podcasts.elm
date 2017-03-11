@@ -10,7 +10,7 @@ import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 list : Model -> Html Msg
 list model =
   ul []
-    (List.map (viewPodcast) model.podcasts)
+    (List.map (\p -> viewPodcast p model.state) model.podcasts)
 
 podcastContextMenu : Podcast -> Menu PodcastContextMenu
 podcastContextMenu podcast =
@@ -27,8 +27,8 @@ podcastContextMenu podcast =
   in
     Menu "Podcast" items
 
-viewPodcast : Podcast -> Html Msg
-viewPodcast pod =
+viewPodcast : Podcast -> GlobalState -> Html Msg
+viewPodcast pod state =
   let
     epCount = List.length pod.episodes
 
@@ -36,7 +36,7 @@ viewPodcast pod =
   in
     li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pod) ]
     [ div [class "cover"]
-      [ img [ ] []
+      [ img [src ("http://localhost:" ++ (toString state.serverPort) ++ "/podcasts/image/" ++ (toString pod.id))] []
       ]
     , h2 [] [ text pod.title ]
     , p [] [ text pod.author ]

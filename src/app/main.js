@@ -8,9 +8,8 @@ import Library from './library/manager'
 import AssetServer from './asset_server'
 
 const {dialog, app} = require('electron')
-const portfinder = require('portfinder')
 
-class Main {
+export default class Main {
   constructor() {
     global.DEBUG = true;
     if( DEBUG ) { Logger.log( 'Initialize Application' ); }
@@ -27,51 +26,47 @@ class Main {
   }
 
   onReady() {
-    this.startAssetServer(() => {
-      Library().load((err) => {
-        if (err) {
-          dialog.showMessageBox({
-            title: "An error occured whilst loading your Doughnut library database"
-          })
-        }
-  /*
-        Library().subscribe("test", function(t) {
-          console.log(t)
-        })*/
-  /*
-        Library().podcasts((p) => {
-          console.log(p)
-        })*/
-
-        /*Library().reload(1, () => {
-          console.log("Reloaded")
-        })*/
-
-        this._windowManager.setupIPC()
-
-        Menu.createMenu()
-
-        this.launchMainWindow()
-      })
-    })
-  }
-
-  startAssetServer(cb) {
     const main = this
 
-    portfinder.getPortPromise()
-    .then((port) => {
-      main.server = new AssetServer(port)
-      cb()
-    })
-    .catch((err) => {
-      console.log(err)
-      app.quit()
-    })
+    AssetServer.boot()
+      .then((server) => {
+        main.server = server
+
+        Library().load((err) => {
+          if (err) {
+            dialog.showMessageBox({
+              title: "An error occured whilst loading your Doughnut library database"
+            })
+          }
+
+    /*
+          Library().subscribe("test", function(t) {
+            console.log(t)
+          })*/
+    /*
+          Library().podcasts((p) => {
+            console.log(p)
+          })*/
+
+          /*Library().reload(1, () => {
+            console.log("Reloaded")
+          })*/
+
+          main._windowManager.setupIPC()
+
+          Menu.createMenu()
+
+          main.launchMainWindow()
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        app.quit()
+      })
   }
 
   launchMainWindow() {
-    const mainWindow = this._windowManager.mainWindow()
+    const mainWindow = this._windowManager.mainWindow(this.server)
     mainWindow.show()
   }
 
@@ -95,6 +90,8 @@ Electron.app.on( 'ready', () => {
 
 Electron.app.on( 'quit', () => {
   if( DEBUG ) { Logger.log( 'Application is quit' ); }
+
+  main.windowManager().teardown()
 } );
 
 Electron.app.on( 'window-all-closed', () => {

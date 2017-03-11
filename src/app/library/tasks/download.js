@@ -3,6 +3,8 @@ const http = require('http')
 const url = require('url')
 const fs = require('fs')
 const path = require('path')
+const request = require('request')
+const progress = require('request-progress')
 
 import Library from '../manager'
 import { Podcast } from '../models'
@@ -24,38 +26,32 @@ export default class DownloadTask {
           }
           
           var file = fs.createWriteStream(
-            path.join(Library().path(), podcast.fileName(episode)),
-            { defaultEncoding: 'binary' }
+            path.join(Library().path(), podcast.fileName(episode))
           )
 
-          http.get(episode.enclosureUrl, response => {
-            response.setEncoding('binary')
+          var len = 0
+          var cur = 0
+          var total = 0
 
-            var len = parseInt(response.headers['content-length'], 10)
-            var cur = 0
-            var total = len / 1048576
+          progress(request(episode.enclosureUrl))
+          .on('progress', state => {
+            console.log(`Downloaded: ${state.percent}%`)
+          })
+          .on('end', () => {
+            file.end()
 
-            response.on('data', chunk => {
-              file.write(chunk)
-              cur += chunk.length
+            episode.update({
+              downloaded: true
             })
-
-            response.on('end', () => {
-              file.end()
-
-              episode.update({
-                downloaded: true
-              })
-              .then(saved => {
-                resolve(saved)
-              })
-            })
-
-            response.on('error', (err) => {
-              file.end()
-              reject(err)
+            .then(saved => {
+              resolve(saved)
             })
           })
+          .on('error', (err) => {
+            file.end()
+            reject(err)
+          })
+          .pipe(file)
         })
     })
   }

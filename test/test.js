@@ -9,6 +9,7 @@ describe("top", function () {
   describe("Library", function () {
     require('./library/podcast');
     require('./library/tasks');
+    require('./library/server');
   });
 
   after(function () {

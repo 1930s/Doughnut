@@ -3,6 +3,8 @@ port module Ports exposing (..)
 import Types exposing (..)
 import Json.Encode
 
+port errorDialog : String -> Cmd msg
+
 port globalAction : String -> Cmd msg
 
 type alias ObjAction =
@@ -11,9 +13,16 @@ type alias ObjAction =
   }
 port objectAction : ObjAction -> Cmd msg
 
+type alias FloatAction =
+  { action : String
+  , arg : Float
+  }
+port floatAction : FloatAction -> Cmd msg
+
 -- Action -> Main
 
 
 -- Main -> Elm
-port podcastState : (Json.Encode.Value -> msg) -> Sub msg
-port podcastsState : (Json.Encode.Value -> msg) -> Sub msg
+port podcastsUpdated : (List Int -> msg) -> Sub msg
+
+port playerState : (Json.Encode.Value -> msg) -> Sub msg

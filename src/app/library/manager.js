@@ -44,7 +44,11 @@ export class LibraryManager {
 
   emitFullPodcastState() {
     const library = this
-    
+
+    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then(podcasts => {
+      library.emit('podcasts:updated', podcasts.map(p => { return p.id }))
+    })
+    /*
     Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcasts) => {
       var json = podcasts.map((p) => {
         const episodes = p.Episodes.map((e) => {
@@ -56,18 +60,20 @@ export class LibraryManager {
         })
       })
       library.emit('podcasts:state', json)
-    })
+    })*/
   }
 
   emitPodcastState(podcast) {
     const library = this
 
+    library.emit('podcasts:updated', [podcast.id])
+/*
     Episode.findAll({ where: { podcast_id: podcast.id }, order: [['pubDate', 'DESC']]})
       .then(episodes => {
         library.emit('podcast:state', Object.assign(podcast.viewJson(), {
           episodes: episodes
         }))
-      })
+      })*/
   }
 
   /*
@@ -115,6 +121,14 @@ export class LibraryManager {
   loadPodcast(id) {
     return new Promise((resolve, reject) => {
       Podcast.findOne({ id: id })
+      .then(resolve)
+      .catch(reject)
+    })
+  }
+
+  loadEpisode(id) {
+    return new Promise((resolve, reject) => {
+      Episode.findById(id)
       .then(resolve)
       .catch(reject)
     })

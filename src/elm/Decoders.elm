@@ -18,6 +18,7 @@ episodeDecoder =
     |> required "enclosureUrl" Json.string
     |> required "enclosureSize" Json.int
     |> required "favourite" Json.bool
+    |> required "downloaded" Json.bool
     |> required "created_at" date
     |> required "updated_at" date
 
@@ -42,3 +43,11 @@ podcastDecoder =
 podcastsDecoder : Decoder (List Podcast)
 podcastsDecoder =
   list podcastDecoder
+
+playerStateDecoder : Decoder PlayerState
+playerStateDecoder =
+  decode PlayerState
+    |> required "pause" Json.bool
+    |> required "volume" Json.int
+    |> optional "duration" Json.float 0.0
+    |> optional "position" Json.float 0.0

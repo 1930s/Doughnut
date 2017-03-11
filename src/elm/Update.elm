@@ -1,27 +1,32 @@
 module Update exposing (init, update, subscriptions)
 
-import Config exposing (Config)
+import Types exposing (..)
 import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..), MenuCallback)
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import SplitPane.Bound exposing (createBound)
-import Ports exposing (podcastState, podcastsState)
-import Decoders exposing (podcastDecoder, podcastsDecoder)
+import Ports exposing (podcastsUpdated, playerState, errorDialog)
+import Decoders exposing (podcastDecoder, podcastsDecoder, playerStateDecoder)
 import Json.Decode
 import Ipc
+import Player
+import Http
 
-init : Config -> (Model, Cmd Msg)
-init config =
+init : GlobalState -> (Model, Cmd Msg)
+init state =
   let
     model =
-    { test = ""
+    { state = state
+    , loadCount = 0
     , podcasts = []
+    , player = Player.init
     , selectedPodcast = Nothing
     , selectedEpisode = Nothing
     , splitPane = SplitPane.init Horizontal
       |> withResizeLimits (createBound (percentage 0.25) (percentage 0.6))
       |> withSplitterAt (percentage 0.34)
     , podcastContextMenu = Nothing
+    , episodeContextMenu = Nothing
     }
   in
     (model, Cmd.none)
@@ -32,6 +37,9 @@ update msg model =
     ShowPodcastContextMenu menu ->
       { model | podcastContextMenu = Just menu } ! [(ContextMenu.showMenu HandlePodcastContextMenu menu)]
 
+    ShowEpisodeContextMenu menu ->
+      { model | episodeContextMenu = Just menu } ! [(ContextMenu.showMenu HandleEpisodeContextMenu menu)]
+
     SelectPodcast pod ->
       { model | selectedPodcast = Just pod } ! []
     
@@ -39,38 +47,46 @@ update msg model =
       { model | selectedEpisode = Just ep } ! []
     
     PlayEpisode ep ->
-      { model | selectedEpisode = Just ep } ! [ Ipc.playEpisode ep ]
+      { model | selectedEpisode = Just ep } ! [ Ipc.playEpisode ep.id ]
 
     HandlePodcastContextMenu r ->
       case model.podcastContextMenu of
         Just menu -> podcastContextMenuUpdate menu r model
         Nothing -> model ! []
-
-    --    Just (Item1 s) -> { model | test = s } ! []
-    --    Just Item2 -> { model | test = "Item2" } ! []
-    --    Nothing -> { model | test = "" } ! []
+    
+    HandleEpisodeContextMenu r ->
+      case model.episodeContextMenu of
+        Just menu -> episodeContextMenuUpdate menu r model
+        Nothing -> model ! []
 
     SplitterMsg paneMsg ->
       { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
     
-    PodcastState json ->
-      case Json.Decode.decodeValue podcastDecoder json of
-        Ok updated ->
-          let
-            updatePodcast = (\p -> if p.id == updated.id then updated else p)
-          in
-            { model | podcasts = (List.map updatePodcast model.podcasts) } ! []
-
-        Err error ->
-          model ! []
+    PodcastsUpdated ids ->
+      let
+        requests = List.map (\id -> reloadPodcast id model) ids
+      in
+        { model | loadCount = (List.length ids) } ! requests
     
-    FullPodcastState json ->
-      case Json.Decode.decodeValue podcastsDecoder json of
-        Ok podcasts ->
-          { model | podcasts = podcasts } ! []
+    PodcastLoaded (Ok podcast) ->
+      { model | podcasts = [podcast] } ! []
+
+    PodcastLoaded (Err err) ->
+      { model | loadCount = (model.loadCount - 1) } ! [errorDialog (toString err)]
+    
+    PlayerState json ->
+      case Json.Decode.decodeValue playerStateDecoder json of
+        Ok state ->
+          { model | player = state } ! []
 
         Err error ->
-          { model | test = (toString error) } ! []
+          model ! [errorDialog error]
+    
+    PlayerMsg subMsg ->
+      let
+        (state, cmds) = Player.update subMsg model.player
+      in
+        { model | player = state } ! [Cmd.map PlayerMsg cmds]
 
 
 podcastContextMenuUpdate : (Menu PodcastContextMenu) -> MenuCallback -> Model -> (Model, Cmd Msg)
@@ -85,10 +101,30 @@ podcastContextMenuUpdate menu r model =
     _ ->
       model ! []
 
+episodeContextMenuUpdate : (Menu EpisodeContextMenu) -> MenuCallback -> Model -> (Model, Cmd Msg)
+episodeContextMenuUpdate menu r model =
+  case ContextMenu.callback menu r of
+    Just (M_DownloadEpisode id) ->
+      model ! [Ipc.downloadEpisode id]
+    
+    Just (M_FavouriteEpisode id) ->
+      model ! [Ipc.favouriteEpisode id]
+    
+    _ ->
+      model ! []
+
+reloadPodcast : Int -> Model -> Cmd Msg
+reloadPodcast id model =
+  let
+    url = "http://localhost:" ++ (toString model.state.serverPort) ++ "/podcasts/" ++ (toString id)
+    request = Http.get url podcastDecoder
+  in
+    Http.send PodcastLoaded request
+
 subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.batch
   [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
-  , podcastState PodcastState
-  , podcastsState FullPodcastState
+  , podcastsUpdated PodcastsUpdated
+  , playerState Model.PlayerState
   ]

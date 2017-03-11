@@ -1,25 +1,40 @@
 module Ipc exposing (..)
 
 import Types exposing (..)
-import Ports exposing (ObjAction, objectAction, globalAction)
-import Model exposing (..)
+import Ports exposing (ObjAction, FloatAction, objectAction, globalAction, floatAction)
 
-play : Cmd Msg
+play : Cmd msg
 play =
-  globalAction "play"
+  globalAction "player:play"
 
-pause : Cmd Msg
+pause : Cmd msg
 pause =
-  globalAction "pause"
+  globalAction "player:pause"
 
-reloadPodcast : PodcastId -> Cmd Msg
+toggle : Cmd msg
+toggle =
+  globalAction "player:toggle"
+
+seekTo : Float -> Cmd msg
+seekTo pos =
+  floatAction (FloatAction "player:seek" pos)
+
+reloadPodcast : PodcastId -> Cmd msg
 reloadPodcast id =
   objectAction (ObjAction "podcast:reload" id)
 
-unsubscribePodcast : PodcastId -> Cmd Msg
+unsubscribePodcast : PodcastId -> Cmd msg
 unsubscribePodcast id =
   objectAction (ObjAction "podcast:unsubscribe" id)
 
-playEpisode : Episode -> Cmd Msg
-playEpisode ep =
-  objectAction (ObjAction "episode:play" ep.id)
+playEpisode : EpisodeId -> Cmd msg
+playEpisode id =
+  objectAction (ObjAction "episode:play" id)
+
+downloadEpisode : EpisodeId -> Cmd msg
+downloadEpisode id =
+  objectAction (ObjAction "episode:download" id)
+
+favouriteEpisode : EpisodeId -> Cmd msg
+favouriteEpisode id =
+  objectAction (ObjAction "episode:favourite" id)

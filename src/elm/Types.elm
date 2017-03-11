@@ -34,6 +34,18 @@ type alias Episode =
   , enclosureUrl : String
   , enclosureSize : Int
   , favourite : Bool
+  , downloaded : Bool
   , createdAt : Date
   , updatedAt : Date
+  }
+
+type alias GlobalState =
+  { serverPort : Int
+  }
+
+type alias PlayerState =
+  { pause : Bool
+  , volume : Int
+  , duration : Float
+  , position : Float
   }
