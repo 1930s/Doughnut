@@ -22,6 +22,10 @@ episodeDecoder =
     |> required "created_at" date
     |> required "updated_at" date
 
+episodeListDecoder : Decoder (List Episode)
+episodeListDecoder =
+  list episodeDecoder
+
 podcastDecoder : Decoder Podcast
 podcastDecoder =
   decode Podcast
@@ -50,3 +54,21 @@ playerStateDecoder =
     |> required "volume" Json.int
     |> optional "duration" Json.float 0.0
     |> optional "position" Json.float 0.0
+
+podcastLoadingDecoder : Decoder PodcastLoadingIpc
+podcastLoadingDecoder =
+  decode PodcastLoadingIpc
+    |> required "id" Json.int
+    |> required "loading" Json.bool
+
+podcastWrappedDecoder : Decoder PodcastWrapped
+podcastWrappedDecoder =
+  decode PodcastWrapped
+    |> required "podcast" podcastDecoder
+    |> required "episodes" episodeListDecoder
+    |> required "loading" Json.bool
+    |> required "selected" Json.bool
+
+podcastsStateDecoder : Decoder (List PodcastWrapped)
+podcastsStateDecoder =
+  list podcastWrappedDecoder

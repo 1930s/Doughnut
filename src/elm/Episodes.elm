@@ -9,10 +9,10 @@ import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Utils.Date exposing (dateFormat)
 import Icons
 
-list : Model -> Podcast -> Html Msg
-list model podcast =
+list : Model -> PodcastWrapped -> Html Msg
+list model pw =
   ul []
-    (List.map (viewEpisode model) podcast.episodes)
+    (List.map (viewEpisode model) pw.episodes)
 
 episodeContextMenu : Episode -> Menu EpisodeContextMenu
 episodeContextMenu episode =

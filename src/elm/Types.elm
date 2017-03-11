@@ -58,3 +58,8 @@ type alias PlayerState =
   , duration : Float
   , position : Float
   }
+
+type alias PodcastLoadingIpc =
+  { id : Int
+  , loading : Bool
+  }

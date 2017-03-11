@@ -24,6 +24,11 @@ window.onload = () => {
     ipcRenderer.send(action.action, action.arg)
   })
 
+  ipcRenderer.on('podcast:loading', (event, arg) => {
+    console.log('podcast:loading', arg)
+    app.ports.podcastLoading.send(arg)
+  })
+
   ipcRenderer.on('podcast:updated', (event, arg) => {
     console.log('podcast:updated', arg)
     app.ports.podcastUpdated.send(arg)

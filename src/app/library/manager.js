@@ -91,6 +91,14 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
+  updateEpisode(episode, args) {
+    const library = this
+    episode.update(args)
+      .then(updated => {
+        library.emit('episode:updated', updated)
+      })
+  }
+
   reload(podcast) {
     const library = this
 

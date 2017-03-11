@@ -8,29 +8,27 @@ export default class MainWindow {
   constructor(server) {
     this.server = server
     this.window = undefined
-
-    this.subscribe()
   }
 
   subscribe() {
-    const window = this.window
+    const w = this.window
     const library = Library()
 
-    library.on('podcast:loading', arg => {
-      if (window) {
-        window.webContents.send('podcast:loading', { id: arg.id, loading: arg.loading })
+    library.on('podcast:loading', arg => {      
+      if (w) {
+        w.webContents.send('podcast:loading', { id: arg.id, loading: arg.loading })
       }
     })
 
     library.on('podcast:updated', podcast => {
-      if (window) {
-        window.webContents.send('podcast:updated', podcast.viewJson())
+      if (w) {
+        w.webContents.send('podcast:updated', podcast.viewJson())
       }
     })
 
     library.on('episode:updated', episode => {
-      if (window) {
-        window.webContents.send('episode:updated', episode.viewJson())
+      if (w) {
+        w.webContents.send('episode:updated', episode.viewJson())
       }
     })
   }
@@ -58,6 +56,8 @@ export default class MainWindow {
 
     this.window.webContents.on('did-finish-load', () => {
       // Manually show the window now it has received it's initial state
+      this.subscribe()
+
       mw.window.show()
     })
 

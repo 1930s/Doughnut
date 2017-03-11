@@ -127,9 +127,7 @@ class WindowManager {
 
       Library().loadEpisode(arg.id)
         .then(episode => {
-          episode.update({
-            favourite: !episode.favourite
-          })
+          Library().updateEpisode(episode, { favourite: !episode.favourite })
         })
     })
   }

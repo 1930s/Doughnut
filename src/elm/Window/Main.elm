@@ -41,7 +41,7 @@ podcastsView model =
 episodesView : Model -> Html Msg
 episodesView model =
   div [class "episodes"]
-  [ case model.selectedPodcast of
+  [ case selectedPodcast model of
       Just selected ->
         podcastView selected model
       
@@ -49,35 +49,38 @@ episodesView model =
         p [] [text "Please select a podcast"]
   ]
 
-podcastView : Podcast -> Model -> Html Msg
-podcastView podcast model =
-  div []
-  [ div [class "podcast-detail"]
-    [ div [class "podcast-cover"]
-      [ img [src (imageUrl podcast)] []
-      ]
-    , div [class "podcast-info"]
-      [ h1 [] [ text podcast.title ]
-      , p [] [ text podcast.description ]
-      , table []
-        [ tr []
-          [ td [] [ text "Last Update" ]
-          , td [] [ text "27th February at 02:02"]
-          ]
-        , tr []
-          [ td [] [ text "Categories" ]
-          , td [] [ text "Comedy, TV & Film"]
-          ]
-        , tr []
-          [ td [] [ text "Owner" ]
-          , td [] [ text podcast.copyright]
-          ]
-        , tr []
-          [ td [] [ text "Website" ]
-          , td [] [ a [ href podcast.link ] [ text podcast.link ]]
+podcastView : PodcastWrapped -> Model -> Html Msg
+podcastView pw model =
+  let
+    podcast = pw.podcast
+  in
+    div []
+    [ div [class "podcast-detail"]
+      [ div [class "podcast-cover"]
+        [ img [src (imageUrl podcast)] []
+        ]
+      , div [class "podcast-info"]
+        [ h1 [] [ text podcast.title ]
+        , p [] [ text podcast.description ]
+        , table []
+          [ tr []
+            [ td [] [ text "Last Update" ]
+            , td [] [ text "27th February at 02:02"]
+            ]
+          , tr []
+            [ td [] [ text "Categories" ]
+            , td [] [ text "Comedy, TV & Film"]
+            ]
+          , tr []
+            [ td [] [ text "Owner" ]
+            , td [] [ text podcast.copyright]
+            ]
+          , tr []
+            [ td [] [ text "Website" ]
+            , td [] [ a [ href podcast.link ] [ text podcast.link ]]
+            ]
           ]
         ]
       ]
+    , Episodes.list model pw
     ]
-  , Episodes.list model podcast
-  ]

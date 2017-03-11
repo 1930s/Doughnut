@@ -5,8 +5,8 @@ import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..), MenuCallback)
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import SplitPane.Bound exposing (createBound)
-import Ports exposing (podcastsUpdated, playerState, errorDialog)
-import Decoders exposing (podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder)
+import Ports exposing (podcastLoading, podcastUpdated, episodeUpdated, playerState, errorDialog)
+import Decoders exposing (podcastLoadingDecoder, podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder, episodeListDecoder, podcastsStateDecoder)
 import Json.Decode
 import Ipc
 import Player
@@ -17,10 +17,8 @@ init state =
   let
     model =
     { state = state
-    , loadCount = 0
     , podcasts = []
     , player = Player.init
-    , selectedPodcast = Nothing
     , selectedEpisode = Nothing
     , splitPane = SplitPane.init Horizontal
       |> withResizeLimits (createBound (percentage 0.25) (percentage 0.6))
@@ -43,9 +41,37 @@ update msg model =
     PodcastsLoaded (Err err) ->
       { model | podcasts = [] } ! [errorDialog (toString err)]
     
+    EpisodesLoaded (Ok episodes) ->
+      let
+        podcast = case List.head episodes of
+          Just ep -> 
+            List.filter (\p -> p.podcast.id == ep.podcastId) model.podcasts |> List.head
+          Nothing -> Nothing
+        
+        podcast_id = case podcast of
+          Just p -> p.podcast.id
+          Nothing -> 0
+
+        updateEpisodes pw =
+          if pw.podcast.id == podcast_id then { pw | episodes = episodes } else pw
+      in
+        { model | podcasts = List.map updateEpisodes model.podcasts } ! []
+      
+    EpisodesLoaded (Err err) ->
+      model ! [errorDialog (toString err)]
+    
     -- IPC -> Elm
     PodcastLoading json ->
-      model ! []
+      case Json.Decode.decodeValue podcastLoadingDecoder json of
+        Ok loading ->
+          let
+            setLoading pw =
+              if pw.podcast.id == loading.id then { pw | loading = loading.loading } else pw
+          in
+            { model | podcasts = List.map setLoading model.podcasts } ! []
+        
+        Err err ->
+          model ! [errorDialog (toString err)]
 
     PodcastUpdated json ->
       case Json.Decode.decodeValue podcastDecoder json of
@@ -61,7 +87,7 @@ update msg model =
               Just found ->
                 { model | podcasts = List.map updatePodcast model.podcasts }
               Nothing ->
-                { model | podcasts = model.podcasts ++ [PodcastWrapper podcast [] False False] }
+                { model | podcasts = model.podcasts ++ [PodcastWrapped podcast [] False False] }
           in
             state ! [loadEpisodes podcast.id]
 
@@ -69,7 +95,22 @@ update msg model =
           model ! [errorDialog (toString err)]
 
     EpisodeUpdated json ->
-      model ! []
+      case Json.Decode.decodeValue episodeDecoder json of
+        Ok episode ->
+          let
+            updateEpisode e =
+              if e.id == episode.id then episode else e
+
+            updatePodcastEpisode pw =
+              if not (List.filter (\e -> e.id == episode.id) pw.episodes |> List.isEmpty) then
+                { pw | episodes = List.map updateEpisode pw.episodes }
+              else
+                pw
+          in
+            { model | podcasts = List.map updatePodcastEpisode model.podcasts } ! []
+
+        Err err ->
+          model ! [errorDialog (toString err)]
 
     -- Context Menus
 
@@ -82,7 +123,14 @@ update msg model =
     -- Selections
 
     SelectPodcast pod ->
-      { model | selectedPodcast = Just pod } ! []
+      let
+        selectPodcast pw =
+          if pw.podcast.id == pod.podcast.id then
+            { pw | selected = True }
+          else
+            { pw | selected = False }
+      in
+        { model | podcasts = List.map selectPodcast model.podcasts } ! []
     
     SelectEpisode ep ->
       { model | selectedEpisode = Just ep } ! []
@@ -142,34 +190,28 @@ episodeContextMenuUpdate menu r model =
     _ ->
       model ! []
 
-reloadPodcast : Int -> Cmd Msg
-reloadPodcast id =
-  let
-    url = "http://localhost:" ++ (toString serverPort) ++ "/podcasts/" ++ (toString id)
-    request = Http.get url podcastDecoder
-  in
-    Http.send PodcastLoaded request
-
 loadAllPodcasts : Cmd Msg
 loadAllPodcasts =
   let
     url = "http://localhost:" ++ (toString serverPort) ++ "/podcasts"
-    request = Http.get url podcastListDecoder
+    request = Http.get url podcastsStateDecoder
   in
-    Http.send AllPodcastsLoaded request
+    Http.send PodcastsLoaded request
 
-reloadEpisode : Int -> Cmd Msg
-reloadEpisode id =
+loadEpisodes : Int -> Cmd Msg
+loadEpisodes id =
   let
-    url = "http://localhost:" ++ (toString serverPort) ++ "/episodes/" ++ (toString id)
-    request = Http.get url episodeDecoder
+    url = "http://localhost:" ++ (toString serverPort) ++ "/podcasts/" ++ (toString id) ++ "/episodes"
+    request = Http.get url episodeListDecoder
   in
-    Http.send EpisodeLoaded request
+    Http.send EpisodesLoaded request
 
 subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.batch
   [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
-  , podcastsUpdated PodcastsUpdated
+  , podcastLoading PodcastLoading
+  , podcastUpdated PodcastUpdated
+  , episodeUpdated EpisodeUpdated
   , playerState Model.PlayerState
   ]

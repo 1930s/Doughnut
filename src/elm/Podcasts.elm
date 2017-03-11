@@ -28,14 +28,15 @@ podcastContextMenu podcast =
   in
     Menu "Podcast" items
 
-viewPodcast : Podcast -> GlobalState -> Html Msg
-viewPodcast pod state =
+viewPodcast : PodcastWrapped -> GlobalState -> Html Msg
+viewPodcast pw state =
   let
-    epCount = List.length pod.episodes
+    epCount = List.length pw.episodes
 
+    pod = pw.podcast
     contextMenu = podcastContextMenu pod
   in
-    li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pod) ]
+    li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pw) ]
     [ div [class "cover"]
       [ img [src (imageUrl pod)] []
       ]

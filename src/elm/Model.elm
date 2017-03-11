@@ -12,7 +12,6 @@ type alias Model =
   { state : GlobalState
   , podcasts : List PodcastWrapped
   , player : PlayerState
-  , selectedPodcast : Maybe Podcast
   , selectedEpisode : Maybe Episode
   , splitPane : SplitPane.State
   , podcastContextMenu : Maybe (Menu PodcastContextMenu)
@@ -34,7 +33,7 @@ type Msg
   = --OpenContextMenu (Menu ButtonMenuItem)
   --| MenuAction String
   SplitterMsg SplitPane.Msg
-  | SelectPodcast Podcast
+  | SelectPodcast PodcastWrapped
   | SelectEpisode Episode
   | PlayEpisode Episode
   | ShowPodcastContextMenu (Menu PodcastContextMenu)
@@ -45,6 +44,11 @@ type Msg
   | PodcastUpdated Json.Encode.Value
   | EpisodeUpdated Json.Encode.Value
   | PlayerState Json.Encode.Value
-  | PodcastsLoaded (Result Http.Error (List Podcast))
-  | EpisodesLoaded (Result Http.Error Episode)
+  | PodcastsLoaded (Result Http.Error (List PodcastWrapped))
+  | EpisodesLoaded (Result Http.Error (List Episode))
   | PlayerMsg Player.Msg
+
+selectedPodcast : Model -> Maybe PodcastWrapped
+selectedPodcast model =
+  List.filter (\p -> p.selected == True) model.podcasts
+    |> List.head

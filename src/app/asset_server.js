@@ -50,9 +50,12 @@ export default class AssetServer {
             return e.viewJson()
           })
 
-          return Object.assign(podcast.viewJson(), {
-            episodes: episodes
-          })
+          return {
+            podcast: podcast.viewJson(),
+            episodes: episodes,
+            loading: false,
+            selected: false
+          }
         }) 
         
         res.json(response)
@@ -63,23 +66,17 @@ export default class AssetServer {
       })
     })
 
-    this.app.get('/podcasts/:id', (req, res) => {
-      Podcast.findOne({
-        where: { id: req.params.id },
-        attributes: { exclude: ['imageBlob']},
-        include: [ Episode ], 
-        order: [[ Episode, 'pubDate', 'DESC' ]]
+    this.app.get('/podcasts/:id/episodes', (req, res) => {
+      Episode.findAll({
+        where: { podcast_id: req.params.id },
+        order: [['pubDate', 'DESC']]
       })
-      .then(podcast => {
-        const episodes = podcast.Episodes.map((e) => {
+      .then(episodes => {
+        const response = episodes.map((e) => {
           return e.viewJson()
         })
 
-        res.json(
-          Object.assign(podcast.viewJson(), {
-            episodes: episodes
-          })
-        )
+        res.json(response)
       })
       .catch(err => {
         console.log(err)
