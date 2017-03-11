@@ -10,8 +10,7 @@ import Http
 
 type alias Model =
   { state : GlobalState
-  , loadCount : Int
-  , podcasts : List Podcast
+  , podcasts : List PodcastWrapped
   , player : PlayerState
   , selectedPodcast : Maybe Podcast
   , selectedEpisode : Maybe Episode
@@ -42,7 +41,10 @@ type Msg
   | ShowEpisodeContextMenu (Menu EpisodeContextMenu)
   | HandlePodcastContextMenu MenuCallback
   | HandleEpisodeContextMenu MenuCallback
-  | PodcastsUpdated (List Int)
-  | PodcastLoaded (Result Http.Error Podcast)
+  | PodcastLoading Json.Encode.Value
+  | PodcastUpdated Json.Encode.Value
+  | EpisodeUpdated Json.Encode.Value
   | PlayerState Json.Encode.Value
+  | PodcastsLoaded (Result Http.Error (List Podcast))
+  | EpisodesLoaded (Result Http.Error Episode)
   | PlayerMsg Player.Msg

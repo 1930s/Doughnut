@@ -32,7 +32,7 @@ describe('Task', function() {
       setInterval(() => {
         // Poll for episode to be downloaded
         Episode.findById(episode.id).then((ep) => {
-          if (ep.downloaded && !tested) {
+          if (ep && ep.downloaded && !tested) {
             tested = true
             const exists = path.join(Library().path(), subscribed.fileName(ep))
             expect(fs.existsSync(exists)).to.eql(true)

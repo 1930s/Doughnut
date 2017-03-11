@@ -10,6 +10,7 @@ import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, c
 import Podcasts
 import Episodes
 import Player
+import Utils.Podcast exposing (imageUrl)
 
 splitterConfig : ViewConfig Msg
 splitterConfig =
@@ -53,7 +54,7 @@ podcastView podcast model =
   div []
   [ div [class "podcast-detail"]
     [ div [class "podcast-cover"]
-      [ img [src "http://placehold.it/150x150"] []
+      [ img [src (imageUrl podcast)] []
       ]
     , div [class "podcast-info"]
       [ h1 [] [ text podcast.title ]

@@ -2,6 +2,9 @@ module Types exposing (..)
 
 import Date exposing (Date)
 
+serverPort : Int
+serverPort = 14857
+
 type alias PodcastId = Int
 
 type alias Podcast =
@@ -18,7 +21,6 @@ type alias Podcast =
   , lastParsed : Date
   , createdAt : Date
   , updatedAt : Date
-  , episodes : List Episode
   }
 
 type alias EpisodeId = Int
@@ -39,8 +41,15 @@ type alias Episode =
   , updatedAt : Date
   }
 
+type alias PodcastWrapped =
+  { podcast : Podcast
+  , episodes : List Episode
+  , loading : Bool
+  , selected : Bool
+  }
+
 type alias GlobalState =
-  { serverPort : Int
+  {
   }
 
 type alias PlayerState =

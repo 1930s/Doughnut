@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Model exposing (Model, Msg(..), PodcastContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
+import Utils.Podcast exposing (imageUrl)
 
 list : Model -> Html Msg
 list model =
@@ -36,7 +37,7 @@ viewPodcast pod state =
   in
     li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pod) ]
     [ div [class "cover"]
-      [ img [src ("http://localhost:" ++ (toString state.serverPort) ++ "/podcasts/image/" ++ (toString pod.id))] []
+      [ img [src (imageUrl pod)] []
       ]
     , h2 [] [ text pod.title ]
     , p [] [ text pod.author ]

@@ -5,13 +5,13 @@ var Promise = require('bluebird')
 import { Podcast, Episode } from './library/models'
 
 export default class AssetServer {
-  constructor(port) {
+  constructor() {
     this.app = express()
-    this.port = port
+    this.port = 14857
 
     this.initRoutes()
 
-    this.server = this.app.listen(port, () => {
+    this.server = this.app.listen(this.port, () => {
       //console.log("Listening on port " + port)
     })
   }
@@ -38,10 +38,35 @@ export default class AssetServer {
   }
 
   initRoutes() {
+    this.app.get('/podcasts', (req, res) => {
+      Podcast.findAll({
+        attributes: { exclude: ['imageBlob']},
+        include: [ Episode ], 
+        order: [[ Episode, 'pubDate', 'DESC' ]]
+      })
+      .then(podcasts => {
+        const response = podcasts.map(podcast => {
+          const episodes = podcast.Episodes.map((e) => {
+            return e.viewJson()
+          })
+
+          return Object.assign(podcast.viewJson(), {
+            episodes: episodes
+          })
+        }) 
+        
+        res.json(response)
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({})
+      })
+    })
+
     this.app.get('/podcasts/:id', (req, res) => {
       Podcast.findOne({
         where: { id: req.params.id },
-        attributes: [{ exclude: 'imageBlob' }],
+        attributes: { exclude: ['imageBlob']},
         include: [ Episode ], 
         order: [[ Episode, 'pubDate', 'DESC' ]]
       })
@@ -58,6 +83,7 @@ export default class AssetServer {
       })
       .catch(err => {
         console.log(err)
+        res.json({})
       })
     })
 

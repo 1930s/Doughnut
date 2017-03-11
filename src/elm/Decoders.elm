@@ -38,10 +38,9 @@ podcastDecoder =
     |> required "lastParsed" date
     |> required "created_at" date
     |> required "updated_at" date
-    |> optional "episodes" (list episodeDecoder) []
 
-podcastsDecoder : Decoder (List Podcast)
-podcastsDecoder =
+podcastListDecoder : Decoder (List Podcast)
+podcastListDecoder =
   list podcastDecoder
 
 playerStateDecoder : Decoder PlayerState

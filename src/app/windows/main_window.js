@@ -8,15 +8,35 @@ export default class MainWindow {
   constructor(server) {
     this.server = server
     this.window = undefined
+
+    this.subscribe()
   }
 
-  emitEvent(event, data) {
-    this.window.webContents.send(event, data)
+  subscribe() {
+    const window = this.window
+    const library = Library()
+
+    library.on('podcast:loading', arg => {
+      if (window) {
+        window.webContents.send('podcast:loading', { id: arg.id, loading: arg.loading })
+      }
+    })
+
+    library.on('podcast:updated', podcast => {
+      if (window) {
+        window.webContents.send('podcast:updated', podcast.viewJson())
+      }
+    })
+
+    library.on('episode:updated', episode => {
+      if (window) {
+        window.webContents.send('episode:updated', episode.viewJson())
+      }
+    })
   }
 
   show() {
     const mw = this
-    console.log(mw.server)
 
     this.window = new Electron.BrowserWindow({
       width: 760,
@@ -37,11 +57,6 @@ export default class MainWindow {
     })
 
     this.window.webContents.on('did-finish-load', () => {
-      mw.emitEvent('load', {
-        serverPort: mw.server.port
-      })
-      Library().emitFullPodcastState()
-
       // Manually show the window now it has received it's initial state
       mw.window.show()
     })

@@ -23,6 +23,8 @@ port floatAction : FloatAction -> Cmd msg
 
 
 -- Main -> Elm
-port podcastsUpdated : (List Int -> msg) -> Sub msg
+port podcastLoading : (Json.Encode.Value -> msg) -> Sub msg
+port podcastUpdated : (Json.Encode.Value -> msg) -> Sub msg
+port episodeUpdated : (Json.Encode.Value -> msg) -> Sub msg
 
 port playerState : (Json.Encode.Value -> msg) -> Sub msg

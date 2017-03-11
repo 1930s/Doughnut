@@ -3,6 +3,7 @@ var path = require('path')
 var fs = require('fs')
 const { dialog } = require('electron')
 const Promise = require('bluebird')
+const EventEmitter = require('events')
 
 import Settings from '../settings'
 import Migrations from './migrations'
@@ -10,11 +11,11 @@ import Sequelize from './sequelize'
 import { Podcast, Episode } from './models'
 import TaskManager from './tasks'
 
-export class LibraryManager {
+export class LibraryManager extends EventEmitter {
   constructor() {
-    this.loaded = false
+    super()
 
-    this.emitReceivers = []
+    this.loaded = false
     this.taskManager = new TaskManager()
   }
 
@@ -32,50 +33,6 @@ export class LibraryManager {
     return Settings.get('libraryPath')
   }
 
-  emitSubscribe(cb) {
-    this.emitReceivers.push(cb)
-  }
-
-  emit(event, data) {
-    this.emitReceivers.forEach(sub => {
-      sub(event, data)
-    })
-  }
-
-  emitFullPodcastState() {
-    const library = this
-
-    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then(podcasts => {
-      library.emit('podcasts:updated', podcasts.map(p => { return p.id }))
-    })
-    /*
-    Podcast.findAll({ include: [ Episode ], order: [[ Episode, 'pubDate', 'DESC' ]] }).then((podcasts) => {
-      var json = podcasts.map((p) => {
-        const episodes = p.Episodes.map((e) => {
-          return e.viewJson()
-        })
-
-        return Object.assign(p.viewJson(), {
-          episodes: episodes
-        })
-      })
-      library.emit('podcasts:state', json)
-    })*/
-  }
-
-  emitPodcastState(podcast) {
-    const library = this
-
-    library.emit('podcasts:updated', [podcast.id])
-/*
-    Episode.findAll({ where: { podcast_id: podcast.id }, order: [['pubDate', 'DESC']]})
-      .then(episodes => {
-        library.emit('podcast:state', Object.assign(podcast.viewJson(), {
-          episodes: episodes
-        }))
-      })*/
-  }
-
   /*
   * Subscribe to podcast at feed url
   */
@@ -90,7 +47,7 @@ export class LibraryManager {
         .then(result => {
           // Emit
           if (result && result.podcast) {
-            library.emitPodcastState(result.podcast)
+            library.emit('podcast:updated', result.podcast)
           }
           return result.podcast
         })
@@ -139,13 +96,15 @@ export class LibraryManager {
 
     return new Promise((resolve, reject) => {
       var preReload = new Date()
+      library.emit('podcast:loading', { id: podcast.id, loading: true })
 
       Podcast.findById(podcast.id)
         .then(podcast => {
           return podcast.syncFeed()
         })
         .then(result => {
-          library.emitPodcastState(result.podcast)
+          library.emit('podcast:loading', { id: podcast.id, loading: false })
+          library.emit('podcast:updated', result.podcast)
 
           if (result.found.length > 0 && result.podcast.downloadNew) {
             result.found.forEach(e => {

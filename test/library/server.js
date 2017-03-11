@@ -30,6 +30,19 @@ describe('Server', function() {
     server.close()
   })
 
+  it('serves all podcasts data', done => {
+    superagent(server.app)
+      .get(`/podcasts`)
+      .expect('Content-Type', /json/)
+      .end(function(err, res) {
+        if (err) throw err;
+
+        expect(res.body.length).to.eql(1)
+        expect(res.body[0].episodes.length).to.eql(1)
+        done()
+      })
+  })
+
   it('serves podcast data', done => {
     superagent(server.app)
       .get(`/podcasts/${subscribed.id}`)

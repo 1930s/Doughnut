@@ -70,6 +70,7 @@
     "nan": "^2.5.1",
     "node-mpv": "^1.0.3",
     "portfinder": "^1.0.13",
+    "request-progress": "^3.0.0",
     "request-promise": "^4.1.1",
     "sanitize-filename": "^1.6.1",
     "sequelize": "^3.30.2",

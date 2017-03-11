@@ -179,11 +179,23 @@ const Podcast = Model.define('Podcast', {
     },
 
     viewJson: function() {
-      var json = this.toJSON()
-      if (json.Episodes) { delete json.Episodes }
-      if (json.imageBlob) { delete json.imageBlob }
-
-      return json
+      return {
+        id: this.id,
+        title: this.title,
+        feed: this.feed,
+        description: this.description,
+        link: this.link,
+        author: this.author,
+        pubDate: this.pubDate,
+        language: this.language,
+        copyright: this.copyright,
+        imageUrl: this.imageUrl,
+        lastParsed: this.lastParsed,
+        downloadNew: this.downloadNew,
+        deletePlayed: this.deletePlayed,
+        created_at: this.created_at,
+        updated_at: this.updated_at
+      }
     }
   }
 })

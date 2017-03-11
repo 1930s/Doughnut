@@ -78,8 +78,21 @@ const Episode = Model.define('Episode', {
   },
   instanceMethods: {
     viewJson: function() {
-      return Object.assign({}, this.toJSON(), {
-      })
+      return {
+        id: this.id,
+        podcast_id: this.podcast_id,
+        title: this.title,
+        description: this.description,
+        guid: this.guid,
+        pubDate: this.pubDate,
+        link: this.link,
+        enclosureUrl: this.enclosureUrl,
+        enclosureSize: this.enclosureSize,
+        favourite: this.favourite,
+        downloaded: this.downloaded,
+        created_at: this.created_at,
+        updated_at: this.updated_at
+      }
     },
 
     fileName: function() {

@@ -96,7 +96,12 @@
 
   .podcast-cover {
     flex-grow: 0;
-    max-width: 200px;  
+    max-width: 168px;
+
+    img {
+      max-width: 168px;
+      max-height: 168px;
+    }
   }
 
   .podcast-info {

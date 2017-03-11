@@ -23,8 +23,6 @@ class WindowManager {
         wm._windows.MainWindow.emitEvent('player:state', state)
       }
     })
-
-    Library().emitSubscribe(this.emitEvent.bind(this))
   }
 
   main() {
@@ -37,14 +35,6 @@ class WindowManager {
 
   teardown() {
     this._player.destroy()
-  }
-
-  emitEvent(event, data) {
-    console.log("EMIT " + event)
-
-    if (this._windows.MainWindow) {
-      this._windows.MainWindow.emitEvent(event, data)
-    }
   }
 
   setupIPC() {

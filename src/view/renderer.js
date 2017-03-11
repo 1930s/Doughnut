@@ -6,30 +6,32 @@ var loaded = false
 var app = null
 
 window.onload = () => {
-  ipcRenderer.on('load', (event, globalState) => {
-    console.log('load', globalState)
-    app = Elm.Main.embed(document.getElementById('app'), globalState)
+  app = Elm.Main.embed(document.getElementById('app'), {})
 
-    app.ports.errorDialog.subscribe((message) => {
-      remote.dialog.showErrorBox("View Error", message)
-    })
-
-    app.ports.objectAction.subscribe((action) => {
-      ipcRenderer.send(action.action, { id: action.id })
-    })
-
-    app.ports.globalAction.subscribe((action) => {
-      ipcRenderer.send(action, {})
-    })
-
-    app.ports.floatAction.subscribe((action) => {
-      ipcRenderer.send(action.action, action.arg)
-    })
+  app.ports.errorDialog.subscribe((message) => {
+    remote.dialog.showErrorBox("View Error", message)
   })
 
-  ipcRenderer.on('podcasts:updated', (event, arg) => {
-    console.log('podcasts:updated', arg)
-    app.ports.podcastsUpdated.send(arg)
+  app.ports.objectAction.subscribe((action) => {
+    ipcRenderer.send(action.action, { id: action.id })
+  })
+
+  app.ports.globalAction.subscribe((action) => {
+    ipcRenderer.send(action, {})
+  })
+
+  app.ports.floatAction.subscribe((action) => {
+    ipcRenderer.send(action.action, action.arg)
+  })
+
+  ipcRenderer.on('podcast:updated', (event, arg) => {
+    console.log('podcast:updated', arg)
+    app.ports.podcastUpdated.send(arg)
+  })
+
+  ipcRenderer.on('episode:updated', (event, arg) => {
+    console.log('episode:updated', arg)
+    app.ports.episodeUpdated.send(arg)
   })
 
   ipcRenderer.on('player:state', (event, arg) => {

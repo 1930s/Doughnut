@@ -6,16 +6,22 @@ import Library, { LibraryManager } from '../../src/app/library/manager.js'
 import { Podcast, Episode } from '../../src/app/library/models'
 
 describe('Podcast', function() {
-  var receiver = sinon.spy()
-  beforeEach((done) => {
-    Library().load(() => {
-      Library().emitSubscribe(receiver)
-      done()
-    })
+  beforeEach(done => {
+    Library().load(done)
   })
 
   it('should subscribe to a podcast with valid feed', function(done) {
     const feed = "http://localhost:3000/feed.xml"
+
+    Library().on('podcast:updated', podcast => {
+      Episode.find({
+        where: { title: fixture.items[0].title }
+      }).then((e) => {
+        expect(e.guid).to.eql(fixture.items[0].guid)
+
+        done()
+      })
+    })
 
     Library().subscribe(feed)
       .then(function(podcast) {
@@ -24,16 +30,6 @@ describe('Podcast', function() {
         }).then((p) => {
           expect(p.title).to.eql(fixture.feed.title)
           expect(p.imageBlob.length).to.be.greaterThan(100)
-
-          expect(receiver.calledWith('podcasts:updated', [p.id])).to.eql(true)
-
-          Episode.find({
-            where: { title: fixture.items[0].title }
-          }).then((e) => {
-            expect(e.guid).to.eql(fixture.items[0].guid)
-
-            done()
-          })
         })
       })
   })
@@ -61,19 +57,6 @@ describe('Podcast', function() {
           subscribed = pod
           done()
         })
-    })
-
-    it('should emit single podcast state', function(done) {
-      Library().emitReceivers = []
-      Library().emitSubscribe(function(e, d) {
-        expect(e).to.eql('podcasts:updated')
-        expect(d).to.eql([subscribed.id])
-
-        done()
-        Library().emitReceivers = []
-      })
-
-      Library().emitPodcastState(subscribed)
     })
 
     it('should detect existing episodes', function(done) {
@@ -110,12 +93,15 @@ describe('Podcast', function() {
     })
 
     it('should unsubscribe from podcast', function(done) {
+      Library().on('podcast:unsubscribed', podcast => {
+        expect(podcast.id).to.eql(subscribed.id)
+        done()
+      })
+
       Library().unsubscribe(subscribed)
         .then(function() {
           Podcast.count().then(function(c) {
             expect(c).to.eql(0)
-            expect(receiver.calledWith('podcast:unsubscribed', { id: subscribed.id })).to.eql(true)
-            done()
           })
         })
     })
