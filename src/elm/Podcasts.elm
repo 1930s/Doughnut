@@ -7,11 +7,14 @@ import Model exposing (Model, Msg(..), PodcastContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Utils.Podcast exposing (imageUrl)
+import Icons
 
 list : Model -> Html Msg
 list model =
-  ul []
-    (List.map (\p -> viewPodcast p model.state) model.podcasts)
+  div [class "podcasts-list"]
+  [ ul []
+      (List.map (\p -> viewPodcast p model.state) model.podcasts)
+  ]
 
 podcastContextMenu : Podcast -> Menu PodcastContextMenu
 podcastContextMenu podcast =
@@ -32,15 +35,25 @@ viewPodcast : PodcastWrapped -> GlobalState -> Html Msg
 viewPodcast pw state =
   let
     epCount = List.length pw.episodes
+    unplayedEpCount = List.filter (\e -> not e.played) pw.episodes
+      |> List.length
 
     pod = pw.podcast
     contextMenu = podcastContextMenu pod
   in
     li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pw) ]
-    [ div [class "cover"]
+    [ div [class "podcast-list-cover"]
       [ img [src (imageUrl pod)] []
       ]
-    , h2 [] [ text pod.title ]
-    , p [] [ text pod.author ]
-    , p [] [ text ((toString epCount) ++ " Episodes") ]
+    , div [class "podcast-list-detail"]
+      [ h2 [] [ text pod.title ]
+      , p [] [ text pod.author ]
+      , p [] [ text ((toString epCount) ++ " Episodes") ]
+      ]
+    , if pw.loading then
+        div [class "podcast-list-loading"]
+        [ Icons.spinner
+        ]
+      else
+        div [class "podcast-list-unplayed"] [text (toString unplayedEpCount)]
     ]

@@ -23,7 +23,8 @@ const Episode = Model.define('Episode', {
   enclosureUrl: { type: DataType.STRING, field: 'enclosure_url', defaultValue: '' },
   enclosureSize: { type: DataType.INTEGER, field: 'enclosure_size', defaultValue: 0 },
   favourite: { type: DataType.BOOLEAN, defaultValue: false },
-  downloaded: { type: DataType.BOOLEAN, defaultValue: false }
+  downloaded: { type: DataType.BOOLEAN, defaultValue: false },
+  played: { type: DataType.BOOLEAN, defaultValue: false }
 }, {
   tableName: 'episodes',
   createdAt: 'created_at',
@@ -90,6 +91,7 @@ const Episode = Model.define('Episode', {
         enclosureSize: this.enclosureSize,
         favourite: this.favourite,
         downloaded: this.downloaded,
+        played: this.played,
         created_at: this.created_at,
         updated_at: this.updated_at
       }

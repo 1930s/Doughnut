@@ -19,6 +19,7 @@ episodeDecoder =
     |> required "enclosureSize" Json.int
     |> required "favourite" Json.bool
     |> required "downloaded" Json.bool
+    |> required "played" Json.bool
     |> required "created_at" date
     |> required "updated_at" date
 

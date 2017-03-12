@@ -33,6 +33,7 @@ const MIGRATIONS = [
     enclosure_size INTEGER,
     favourite BOOL,
     downloaded BOOL,
+    played BOOL,
     created_at DATE,
     updated_at DATE
   )

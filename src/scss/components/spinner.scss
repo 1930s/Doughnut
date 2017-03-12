@@ -1,0 +1,21 @@
+$base-line-height: 18px;
+$spin-duration: 1s;
+$pulse-duration: 750ms;
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  border-radius: 50%;
+  width: $base-line-height;
+  height: $base-line-height;
+  border: .2rem solid rgba(#D9307A, 0.2);
+  border-top-color: #D9307A;
+  animation: spin $spin-duration infinite linear;
+}

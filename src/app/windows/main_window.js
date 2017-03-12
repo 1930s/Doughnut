@@ -10,26 +10,30 @@ export default class MainWindow {
     this.window = undefined
   }
 
+  send(message, arg) {
+    if (this.window) {
+      this.window.webContents.send(message, arg)
+    }
+  }
+
   subscribe() {
-    const w = this.window
+    const mw = this
     const library = Library()
 
     library.on('podcast:loading', arg => {      
-      if (w) {
-        w.webContents.send('podcast:loading', { id: arg.id, loading: arg.loading })
-      }
+      mw.send('podcast:loading', { id: arg.id, loading: arg.loading })
     })
 
     library.on('podcast:updated', podcast => {
-      if (w) {
-        w.webContents.send('podcast:updated', podcast.viewJson())
-      }
+      mw.send('podcast:updated', podcast.viewJson())
     })
 
     library.on('episode:updated', episode => {
-      if (w) {
-        w.webContents.send('episode:updated', episode.viewJson())
-      }
+      mw.send('episode:updated', episode.viewJson())
+    })
+
+    library.on('task:state', state => {
+      console.log(state)
     })
   }
 

@@ -2,6 +2,12 @@ module Icons exposing (..)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Html exposing (Html)
+import Html.Attributes as A
+
+spinner : Html msg
+spinner =
+  Html.div [A.class "loading"] []
 
 skipForwardIcon : Svg msg
 skipForwardIcon =
@@ -56,5 +62,24 @@ bookmarkIcon =
       ]
       [ polygon [ fill "#FED530", fillRule "nonzero", points "7.28571429 1 0.173469388 1 0.173469388 25 7.28571429 18.2237714 14.3979592 25 14.3979592 1" ] []
       , Svg.path [ d "M1,1.5 L14,1.5", id "Line", strokeOpacity "0.697860054", stroke "#CBAB25", strokeWidth "3", strokeLinecap "square" ] []
+      ]
+    ]
+
+cogIcon : Svg msg
+cogIcon =
+  svg [ width "17px", height "27px", viewBox "6 5 88 90" ] 
+    [ g [ stroke "none", strokeWidth "1", fill "none", fillRule "evenodd", transform "translate(6.000000, 5.637820)"
+      ]
+      [ Svg.path [ d "M37.84375,0.36219 L34.8125,11.04969 C32.03399,11.81515 29.38869,12.90505 26.9375,14.29969 L17.21875,8.89344 L8.53125,17.58094 L13.9375,27.29969 C12.54285,29.75087 11.45297,32.39617 10.6875,35.17467 L0,38.20597 L0,50.5184 L10.6875,53.5497 C11.45297,56.3282 12.54285,58.9735 13.9375,61.4247 L8.53125,71.1434 L17.21875,79.8309 L26.9375,74.4247 C29.38869,75.8193 32.03399,76.9092 34.8125,77.6747 L37.84375,88.3622 L50.15625,88.3622 L53.1875,77.6747 C55.96602,76.9092 58.61131,75.8193 61.0625,74.4247 L70.78125,79.8309 L79.46875,71.1434 L74.0625,61.4247 C75.45713,58.9735 76.54704,56.3282 77.3125,53.5497 L88,50.5184 L88,38.20597 L77.3125,35.17467 C76.54704,32.39617 75.45713,29.75087 74.0625,27.29969 L79.46875,17.58094 L70.78125,8.89344 L61.0625,14.29969 C58.61131,12.90505 55.96602,11.81515 53.1875,11.04969 L50.15625,0.36219 L37.84375,0.36219 Z M44,24.36219 C55.04568,24.36219 64,33.31657 64,44.3622 C64,55.4078 55.04568,64.3622 44,64.3622 C32.95432,64.3622 24,55.4078 24,44.3622 C24,33.31657 32.95432,24.36219 44,24.36219 Z", fill "#888888", fillRule "nonzero" ] []
+      ]
+    ]
+
+plusIcon : Svg msg
+plusIcon =
+  svg [ width "17px", height "27px", viewBox "70 -22 87 87" ] 
+    [ g [ stroke "none", strokeWidth "1", fill "none", fillRule "evenodd", transform "translate(70.000000, -22.000000)"
+      ]
+      [ rect [ fill "#888888", x "37", y "0", width "13", height "87"] []
+      , rect [ fill "#888888", transform "translate(43.500000, 43.500000) rotate(-90.000000) translate(-43.500000, -43.500000)", x "37", y "-3.55271368e-15", width "13", height "87"] []
       ]
     ]

@@ -18,9 +18,9 @@
 }
 
 .episode {
-  height: 70px;
+  height: 76px;
   overflow: hidden;
-  padding: 5px 68px 5px 7px;
+  padding: 6px 68px 6px 7px;
   border-bottom: 1px solid #EEE;
   border-left: 3px solid transparent;
   position: relative;
@@ -31,16 +31,16 @@
   &:hover { cursor: default; }
 
   h2 {
-    font-size: 14px;
-    line-height: 16px;
-    margin: 2px 0 5px 0;
+    font-size: 15px;
+    line-height: 17px;
+    margin: 2px 0 6px 0;
   }
 
   p {
-    font-size: 12px;
-    line-height: 15px;
+    font-size: 13px;
+    line-height: 16px;
     margin: 2px 0 4px 0;
-    color: #777;
+    color: #888;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,6 +86,18 @@
       padding-left: 25px;
     }
   }
+
+  &--downloaded {
+    &:after {
+      content: ' ';
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #CCC;
+    }
+  }
 }
 
 .podcast-detail {
@@ -105,7 +117,7 @@
   }
 
   .podcast-info {
-    margin: 5px 0 0 15px;
+    margin: 5px 15px 0 15px;
     flex-grow: 1;
   }
 

@@ -20,7 +20,7 @@ class WindowManager {
     this._player = new Player()
     this._player.on('state', state => {
       if (wm._windows.MainWindow) {
-        wm._windows.MainWindow.emitEvent('player:state', state)
+        wm._windows.MainWindow.send('player:state', state)
       }
     })
   }
