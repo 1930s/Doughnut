@@ -17,6 +17,8 @@ export default class Player extends EventEmitter {
       "--cache-default=2048"
     ])
 
+    const player = this
+
     this.state = {
       pause: false,
       volume: 60,
@@ -24,10 +26,16 @@ export default class Player extends EventEmitter {
       mediaTitle: "",
       position: 0
     }
+    this.episode = null
+
+    this.savedStateStale = false
+    setInterval(() => {
+      if (!player.state.pause) {
+        player.savedStateStale = true
+      }
+    }, 3000)
 
     this.mpv.volume(this.state.volume)
-
-    const player = this
 
     this.mpv.on('statuschange', mpvStatus => {
       player.state = Object.assign(player.state, {
@@ -36,7 +44,12 @@ export default class Player extends EventEmitter {
         duration: mpvStatus.duration,
         mediaTitle: mpvStatus.mediaTitle,
       })
+
       player.emit('state', player.state)
+
+      if (player.savedStateStale && player.episode) {
+        player.saveState()
+      }
     })
 
     this.mpv.on('timeposition', seconds => {
@@ -61,6 +74,8 @@ export default class Player extends EventEmitter {
       this.mpv.stop()
     }
 
+    this.episode = episode
+
     if (episode.downloaded) {
       Podcast.findById(episode.podcast_id)
         .then(podcast => {
@@ -71,6 +86,10 @@ export default class Player extends EventEmitter {
     } else {
       console.log("Playing: ", episode.enclosureUrl)
       this.mpv.loadStream(episode.enclosureUrl)
+    }
+
+    if (episode.playPosition > 0) {
+      this.seekTo(episode.playPosition)
     }
 
     this.mpv.play()
@@ -86,5 +105,17 @@ export default class Player extends EventEmitter {
 
   seekTo(position) {
     this.mpv.goToPosition(position)
+  }
+
+  saveState() {
+    const player = this
+
+    if (player.episode) {
+      player.episode.update({
+        playPosition: Math.round(player.state.position)
+      }).then(saved => {
+        player.episode = saved
+      })
+    }
   }
 }

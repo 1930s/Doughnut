@@ -10,6 +10,7 @@ import Migrations from './migrations'
 import Sequelize from './sequelize'
 import { Podcast, Episode } from './models'
 import TaskManager from './tasks'
+import Task from './task'
 
 export class LibraryManager extends EventEmitter {
   constructor() {
@@ -17,6 +18,7 @@ export class LibraryManager extends EventEmitter {
 
     this.loaded = false
     this.taskManager = new TaskManager()
+    this.tasks = []
   }
 
   load(loaded) {
@@ -34,6 +36,32 @@ export class LibraryManager extends EventEmitter {
   }
 
   /*
+  * Task tracking
+  */
+
+  registerTask(task) {
+    this.tasks.push(task)
+    this.emitTaskState()
+    return task
+  }
+
+  completeTask(task) {
+    for (var i = this.tasks.length - 1; i >= 0; i--) {
+      if (this.tasks[i].id() === task.id()) {
+        this.tasks.splice(i, 1)
+      }
+    }
+
+    this.emitTaskState()
+  }
+
+  emitTaskState() {
+    this.emit('tasks', {
+      processing: this.tasks.length > 0
+    })
+  }
+
+  /*
   * Subscribe to podcast at feed url
   */
   subscribe(url) {
@@ -41,7 +69,7 @@ export class LibraryManager extends EventEmitter {
     const library = this
 
     return new Promise(function(resolve, reject) {
-      var preSubscribe = new Date()
+      const task = library.registerTask(new Task())
 
       Podcast.subscribe(url)
         .then(result => {
@@ -49,6 +77,8 @@ export class LibraryManager extends EventEmitter {
           if (result && result.podcast) {
             library.emit('podcast:updated', result.podcast)
           }
+          
+          library.completeTask(task)
           return result.podcast
         })
         .then(resolve)

@@ -32,8 +32,9 @@ export default class MainWindow {
       mw.send('episode:updated', episode.viewJson())
     })
 
-    library.on('task:state', state => {
-      console.log(state)
+    library.on('tasks', state => {
+      console.log('tasks', state)
+      mw.send('task:state', state)
     })
   }
 

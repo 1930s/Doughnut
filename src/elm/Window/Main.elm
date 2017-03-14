@@ -48,7 +48,7 @@ libraryControlView model =
   [ button [class "library-settings"]
     [ Icons.cogIcon
     ]
-  , if True then
+  , if model.tasks.processing then
       div [class "library-processing"]
       [ Icons.spinner
       ]

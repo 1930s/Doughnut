@@ -48,6 +48,11 @@ podcastListDecoder : Decoder (List Podcast)
 podcastListDecoder =
   list podcastDecoder
 
+taskStateDecoder : Decoder TaskState
+taskStateDecoder =
+  decode TaskState
+    |> required "processing" Json.bool
+
 playerStateDecoder : Decoder PlayerState
 playerStateDecoder =
   decode PlayerState

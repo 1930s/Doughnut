@@ -34,6 +34,7 @@ const MIGRATIONS = [
     favourite BOOL,
     downloaded BOOL,
     played BOOL,
+    play_position INTEGER,
     created_at DATE,
     updated_at DATE
   )

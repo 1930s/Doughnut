@@ -5,8 +5,8 @@ import Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..), MenuCallback)
 import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
 import SplitPane.Bound exposing (createBound)
-import Ports exposing (podcastLoading, podcastUpdated, episodeUpdated, playerState, errorDialog)
-import Decoders exposing (podcastLoadingDecoder, podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder, episodeListDecoder, podcastsStateDecoder)
+import Ports exposing (podcastLoading, podcastUpdated, episodeUpdated, playerState, errorDialog, taskState)
+import Decoders exposing (podcastLoadingDecoder, podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder, episodeListDecoder, podcastsStateDecoder, taskStateDecoder)
 import Json.Decode
 import Ipc
 import Player
@@ -19,6 +19,7 @@ init state =
     { state = state
     , podcasts = []
     , player = Player.init
+    , tasks = Types.TaskState False
     , selectedEpisode = Nothing
     , splitPane = SplitPane.init Horizontal
       |> withResizeLimits (createBound (percentage 0.25) (percentage 0.6))
@@ -151,10 +152,22 @@ update msg model =
     SplitterMsg paneMsg ->
       { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
     
+    TaskState json ->
+      case Json.Decode.decodeValue taskStateDecoder json of
+        Ok state ->
+          { model | tasks = state } ! []
+        
+        Err error ->
+          model ! [errorDialog error]
+
     PlayerState json ->
       case Json.Decode.decodeValue playerStateDecoder json of
         Ok state ->
-          { model | player = state } ! []
+          let
+            { player } = model
+            playerModel = { player | state = state }
+          in
+            { model | player = playerModel } ! []
 
         Err error ->
           model ! [errorDialog error]
@@ -214,4 +227,5 @@ subscriptions model =
   , podcastUpdated PodcastUpdated
   , episodeUpdated EpisodeUpdated
   , playerState Model.PlayerState
+  , taskState Model.TaskState
   ]

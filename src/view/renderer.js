@@ -44,6 +44,11 @@ window.onload = () => {
     app.ports.playerState.send(arg)
   })
 
+  ipcRenderer.on('task:state', (event, arg) => {
+    console.log('task:state', arg)
+    app.ports.taskState.send(arg)
+  })
+
 
   //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
   //ipcRenderer.send('asynchronous-message', 'ping')

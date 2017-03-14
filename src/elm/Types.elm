@@ -53,6 +53,12 @@ type alias GlobalState =
   {
   }
 
+type alias PlayerModel =
+  { state : PlayerState
+  , seeking : Bool
+  , seekingPosition : Float
+  }
+
 type alias PlayerState =
   { pause : Bool
   , volume : Int
@@ -63,4 +69,8 @@ type alias PlayerState =
 type alias PodcastLoadingIpc =
   { id : Int
   , loading : Bool
+  }
+
+type alias TaskState =
+  { processing : Bool
   }
