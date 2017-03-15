@@ -38,8 +38,8 @@ podcastsView : Model -> Html Msg
 podcastsView model =
   div [class "podcasts"]
   [ Podcasts.list model
-  , libraryControlView model
   , TaskManager.view model
+  , libraryControlView model
   ]
 
 libraryControlView : Model -> Html Msg

@@ -29,13 +29,20 @@ export default class Player extends EventEmitter {
     this.episode = null
 
     this.savedStateStale = false
-    setInterval(() => {
-      if (!player.state.pause) {
-        player.savedStateStale = true
-      }
-    }, 3000)
+    // Crudely rate limit the current position saves
+    setInterval(() => { player.savedStateStale = true }, 3000)
 
     this.mpv.volume(this.state.volume)
+
+    this.onStarted = () => {}
+    this.mpv.on('started', mpvStatus => {
+      player.onStarted()
+      player.onStarted = () => {}
+    })
+
+    this.mpv.on('paused', mpvStatus => {
+      player.saveState()
+    })
 
     this.mpv.on('statuschange', mpvStatus => {
       player.state = Object.assign(player.state, {
@@ -46,10 +53,6 @@ export default class Player extends EventEmitter {
       })
 
       player.emit('state', player.state)
-
-      if (player.savedStateStale && player.episode) {
-        player.saveState()
-      }
     })
 
     this.mpv.on('timeposition', seconds => {
@@ -57,6 +60,10 @@ export default class Player extends EventEmitter {
         position: seconds
       })
       player.emit('state', player.state)
+
+      if (player.savedStateStale && player.episode) {
+        player.saveState()
+      }
     })
   }
 
@@ -88,8 +95,11 @@ export default class Player extends EventEmitter {
       this.mpv.loadStream(episode.enclosureUrl)
     }
 
-    if (episode.playPosition > 0) {
-      this.seekTo(episode.playPosition)
+    if (this.episode.playPosition > 0) {
+      this.onStarted = () => {
+        console.log("Resuming at: ", this.episode.playPosition)
+        this.seekTo(this.episode.playPosition)
+      }
     }
 
     this.mpv.play()
@@ -109,6 +119,7 @@ export default class Player extends EventEmitter {
 
   saveState() {
     const player = this
+    this.savedStateStale = false
 
     if (player.episode) {
       player.episode.update({
