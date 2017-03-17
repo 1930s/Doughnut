@@ -37,7 +37,7 @@ podcastDecoder =
     |> required "link" Json.string
     |> required "author" Json.string
     |> required "pubDate" date
-    |> required "language" Json.string
+    |> optional "language" Json.string "en"
     |> required "copyright" Json.string
     |> required "imageUrl" Json.string
     |> required "lastParsed" date

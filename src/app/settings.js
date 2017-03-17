@@ -11,7 +11,7 @@ class Settings {
       firstLaunch: true
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    if (this.isProduction()) {
       this.defaults.libraryPath = path.join(electron.app.getPath('music'), "Doughnut")
     } else if (process.env.NODE_ENV === 'test') {
       this.defaults.libraryPath = path.join(os.tmpdir(), "Doughnut")
@@ -28,8 +28,12 @@ class Settings {
     return electron.app.getPath('userData')
   }
 
+  isDevelopment() {
+    return process.mainModule.filename.indexOf('app.asar') === -1
+  }
+
   isProduction() {
-    return process.env.NODE_ENV === 'production';
+    return !this.isDevelopment()
   }
 
   settingsFile() {

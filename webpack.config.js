@@ -6,7 +6,7 @@ module.exports = {
     view: './src/view/renderer.js'
   },
   output: {
-    path: './build',
+    path: './compiled',
     filename: '[name].js'
   },
   module: {

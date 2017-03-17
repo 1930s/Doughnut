@@ -13,7 +13,7 @@ list : Model -> Html Msg
 list model =
   div [class "podcasts-list"]
   [ ul []
-      (List.map (\p -> viewPodcast p model.state) model.podcasts)
+      (List.map (viewPodcast model.state) model.podcasts)
   ]
 
 podcastContextMenu : Podcast -> Menu PodcastContextMenu
@@ -31,8 +31,8 @@ podcastContextMenu podcast =
   in
     Menu "Podcast" items
 
-viewPodcast : PodcastWrapped -> GlobalState -> Html Msg
-viewPodcast pw state =
+viewPodcast : GlobalState -> PodcastWrapped -> Html Msg
+viewPodcast state pw =
   let
     epCount = List.length pw.episodes
     unplayedEpCount = List.filter (\e -> not e.played) pw.episodes

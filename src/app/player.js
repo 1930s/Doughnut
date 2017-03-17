@@ -4,14 +4,21 @@ const EventEmitter = require('events')
 
 import Library from './library/manager'
 import { Podcast } from './library/models'
+import Settings from './settings'
 
 export default class Player extends EventEmitter {
   constructor() {
     super()
 
+    if (Settings.isProduction()) {
+      var binary = path.join(__dirname, "../mac/mpv")
+    } else {
+      var binary = path.join(__dirname, "mac/mpv")
+    }
+
     this.mpv = new mpvLink({
       "audio_only": true,
-      binary: path.join(__dirname, "darwin/mpv")
+      binary: binary
     }, [
       "--cache=auto",
       "--cache-default=2048"

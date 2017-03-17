@@ -5,14 +5,29 @@
   "author": "Chris Dyer",
   "license": "MIT",
   "main": "main.js",
+  "build": {
+    "appId": "com.cdyer.doughnut",
+    "productName": "Doughnut",
+    "extraResources": "${os}/**/*"
+  },
   "devDependencies": {
     "electron": "^1.4.15"
   },
   "dependencies": {
+    "bluebird": "^3.4.7",
+    "crypto": "0.0.3",
     "feedparser": "^2.1.0",
     "jsonfile": "^2.4.0",
+    "moment": "^2.17.1",
+    "nan": "^2.5.1",
+    "node-mpv": "^1.0.3",
+    "portfinder": "^1.0.13",
+    "request-progress": "^3.0.0",
+    "request-promise": "^4.1.1",
+    "sanitize-filename": "^1.6.1",
     "sequelize": "^3.30.2",
     "sqlite3": "^3.1.8",
-    "umzug": "^1.11.0"
+    "umzug": "^1.11.0",
+    "uuid": "^3.0.1"
   }
 }

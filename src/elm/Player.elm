@@ -52,7 +52,7 @@ update msg model =
           newPosition = Basics.min (Basics.max 0 (state.duration - 1)) (state.position + 30.0)
           updated = { state | position = newPosition }
         in
-          { model | state = state } ! [ Ipc.seekTo newPosition ]
+          { model | state = updated } ! [ Ipc.seekTo newPosition ]
       
       SkipBack ->
         let

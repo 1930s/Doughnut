@@ -85,7 +85,7 @@ export default class AssetServer {
     })
 
     this.app.get('/podcasts/image/:id', (req, res) => {
-      Podcast.findOne({ id: req.params.id })
+      Podcast.findById(req.params.id)
       .then((pod) => {
         res.send(new Buffer(pod.imageBlob, 'binary'))
       })

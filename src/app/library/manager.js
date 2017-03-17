@@ -107,7 +107,7 @@ export class LibraryManager extends EventEmitter {
 
   loadPodcast(id) {
     return new Promise((resolve, reject) => {
-      Podcast.findOne({ id: id })
+      Podcast.findById(id)
       .then(resolve)
       .catch(reject)
     })
