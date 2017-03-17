@@ -1,5 +1,5 @@
 node_modules
-build
+./build
 compiled
 elm-stuff
 test.mp3
