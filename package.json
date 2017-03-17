@@ -12,6 +12,7 @@
     "watch:main": "watchify -v -t [ babelify ] ./src/app/main.js --exclude electron --im --no-detect-globals --node -o ./compiled/main.js -d",
     "watch:view": "webpack --progress --colors --watch",
     "watch": "npm-run-all -p watch:*",
+    "clean": "rm -rf compiled",
     "build:view": "elm make ./src/elm/Main.elm --output ./src/assets/elm.js && browserify -t [ babelify ] ./src/view/view.js -o ./src/assets/view.js",
     "release:main": "cross-env NODE_ENV=production browserify -t [ babelify ] ./src/app/main.js --exclude electron --im --no-detect-globals --node -o ./compiled/main.js",
     "release:view": "NODE_ENV=production webpack",

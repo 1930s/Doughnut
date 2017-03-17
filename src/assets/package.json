@@ -8,7 +8,10 @@
   "build": {
     "appId": "com.cdyer.doughnut",
     "productName": "Doughnut",
-    "extraResources": "${os}/**/*"
+    "extraResources": "${os}/**/*",
+    "directories": {
+      "output": "../dist"
+    }
   },
   "devDependencies": {
     "electron": "^1.4.15"
