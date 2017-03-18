@@ -111,6 +111,7 @@ const Episode = Model.define('Episode', {
         favourite: this.favourite,
         downloaded: this.downloaded,
         played: this.played,
+        playPosition: this.playPosition,
         created_at: this.created_at,
         updated_at: this.updated_at
       }

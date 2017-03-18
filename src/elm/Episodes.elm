@@ -31,14 +31,19 @@ viewEpisode model ep =
     selected = case model.selectedEpisode of
       Just s -> s.id == ep.id
       Nothing -> False
+    
+    new = if (ep.played == False) && (ep.playPosition == 0) then
+        True
+      else
+        False
 
     contextMenu = episodeContextMenu ep
   in
     li [ classList
       [ ("episode", True)
       , ("episode--favourite", ep.favourite)
-      --, ("episode--unplayed", ep.)
-      , ("episode--downloaded", ep.downloaded)
+      , ("episode--played", ep.played)
+      , ("episode--new", new)
       , ("episode--selected", selected)
       ]
     , open (ShowEpisodeContextMenu contextMenu)
@@ -49,7 +54,16 @@ viewEpisode model ep =
         div [ class "bookmark" ] [ Icons.bookmarkIcon ]
       else
         text ""
-    , h2 [] [ text ep.title ]
+    , if ep.downloaded then
+        div [ class "downloaded" ] [ Icons.downloadedIcon ]
+      else
+        text ""
+    , h2 []
+      [ if not ep.played then 
+          Icons.playPosition ep.playPosition
+        else
+          text ""
+      , text ep.title ]
     , p [] [ text ep.description ]
     , p []
       [ text (dateFormat ep.pubDate)

@@ -55,6 +55,16 @@ pauseIcon =
       ]
     ]
 
+downloadedIcon : Svg msg
+downloadedIcon =
+  svg [ width "30px", height "30px", viewBox "803 606 30 30" ] 
+    [ g [ stroke "none", strokeWidth "1", fill "none", fillRule "evenodd", transform "translate(803.000000, 606.000000)"
+      ]
+      [ polygon [ fill "#1971EC", points "0 0 30 0 30 30" ] []
+      , Svg.path [ d "M18.0985544,10.950292 C19.1872692,12.2583624 20.2761672,13.5664327 21.364882,14.8745031 C21.4451474,14.9705284 21.539157,15.00553 21.6300512,14.9992994 C21.7209454,15.00553 21.8153214,14.9707117 21.8952204,14.8745031 C22.9839352,13.5664327 24.0728332,12.2583624 25.1615479,10.950292 C25.3631278,10.7085794 25.2460282,10.3100009 24.896562,10.3100009 L23.5260019,10.3100009 L23.5260019,4.37512189 C23.5260019,4.1706099 23.3553919,4 23.15088,4 L20.1092224,4 C19.9047104,4 19.7341005,4.1706099 19.7341005,4.37512189 L19.7341005,10.3100009 L18.3635404,10.3100009 C18.0140741,10.3100009 17.8969745,10.7085794 18.0985544,10.950292 Z", fill "#FFFFFF", fillRule "nonzero" ] []
+      ]
+    ]
+
 bookmarkIcon : Svg msg
 bookmarkIcon =
   svg [ width "17px", height "27px", viewBox "343 463 17 27" ] 
@@ -83,3 +93,13 @@ plusIcon =
       , rect [ fill "#888888", transform "translate(43.500000, 43.500000) rotate(-90.000000) translate(-43.500000, -43.500000)", x "37", y "-3.55271368e-15", width "13", height "87"] []
       ]
     ]
+
+playPosition : Int -> Svg msg
+playPosition played =
+  let
+    total = 31.4
+    perc = 26
+  in
+    svg [ width "14px", height "14px", viewBox "0 0 32 32", A.style [("transform", "rotate(-90deg)"), ("background", "#1971EC"), ("border-radius", "50%")] ] 
+      [ circle [ r "16", cx "16", cy "16", fill "#1971EC", stroke "#FFF", strokeWidth "33", strokeDasharray "38 100"] []
+      ]

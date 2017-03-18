@@ -32,8 +32,14 @@
 
   h2 {
     font-size: 15px;
-    line-height: 17px;
+    line-height: 15px;
     margin: 2px 0 6px 0;
+
+    > svg {
+      vertical-align: middle;
+      margin-right: 0.5em;
+      margin-bottom: 3px;
+    }
   }
 
   p {
@@ -46,30 +52,12 @@
     text-overflow: ellipsis;
   }
 
-  &--selected {
-    background: #429AFF;
-    p, h2 {
-      color: #FFF;
-    }
-  }
+  &--new {
+    background: #EBF4FF;
+    border-bottom: 1px solid #C5DDFF;
 
-  &--unplayed {
-    border-left: 3px solid #429AFF;
-
-    h2 {
-      position: relative;
-      padding-left: 15px;
-
-      &:before {
-        content: ' ';
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background: #429AFF;
-        border-radius: 100%;
-        left: 0;
-        top: 2px;
-      }
+    &:first-child {
+      border-top: 1px solid #C5DDFF;
     }
   }
 
@@ -87,16 +75,17 @@
     }
   }
 
-  &--downloaded {
-    &:after {
-      content: ' ';
-      width: 10px;
-      height: 10px;
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: #CCC;
+  &--selected {
+    background: #429AFF;
+    p, h2 {
+      color: #FFF;
     }
+  }
+
+  .downloaded {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 }
 

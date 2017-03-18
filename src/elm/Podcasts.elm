@@ -35,7 +35,7 @@ viewPodcast : GlobalState -> PodcastWrapped -> Html Msg
 viewPodcast state pw =
   let
     epCount = List.length pw.episodes
-    unplayedEpCount = List.filter (\e -> not e.played) pw.episodes
+    unplayedEpCount = List.filter (\e -> not (e.played || e.playPosition > 0)) pw.episodes
       |> List.length
 
     pod = pw.podcast
