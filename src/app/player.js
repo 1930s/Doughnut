@@ -48,7 +48,7 @@ class Player extends EventEmitter {
       pause: false,
       volume: Settings.get('player', { volume: 60 }).volume,
       duration: 0,
-      mediaTitle: "",
+      title: "",
       position: 0
     }
     this.episode = null
@@ -69,8 +69,7 @@ class Player extends EventEmitter {
       player.state = Object.assign(player.state, {
         pause: mpvStatus.pause,
         volume: mpvStatus.volume,
-        duration: mpvStatus.duration,
-        mediaTitle: mpvStatus.mediaTitle,
+        duration: mpvStatus.duration
       })
 
       player.emit('state', player.state)
@@ -151,6 +150,7 @@ class Player extends EventEmitter {
       }
     }
 
+    this.state.title = episode.title
     this.mpv.play()
   }
 
@@ -174,18 +174,19 @@ class Player extends EventEmitter {
 
   }
 
-  volumeUp() {
-    const adjusted = Math.min(this.state.volume + 10, 100)
-    this.mpv.volume(adjusted)
+  setVolume(volume) {
+    const clamped = Math.max(0, Math.min(100, volume))
 
-    Settings.set('player', { volume: adjusted })
+    this.mpv.volume(clamped)
+    Settings.set('player', { volume: clamped })
+  }
+
+  volumeUp() {
+    this.setVolume(this.state.volume + 10)
   }
 
   volumeDown() {
-    const adjusted = Math.max(this.state.volume - 10, 0)
-    this.mpv.volume(adjusted)
-
-    Settings.set('player', { volume: adjusted })
+    this.setVolume(this.state.volume - 10)
   }
 }
 

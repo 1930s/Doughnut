@@ -62,6 +62,7 @@ playerStateDecoder =
     |> required "volume" Json.int
     |> optional "duration" Json.float 0.0
     |> optional "position" Json.float 0.0
+    |> optional "title" Json.string ""
 
 podcastLoadingDecoder : Decoder PodcastLoadingIpc
 podcastLoadingDecoder =

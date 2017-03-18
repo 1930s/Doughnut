@@ -26,8 +26,9 @@ view model =
   div [class "main-window"]
   [ div [class "title-bar"]
     [ Html.map PlayerMsg (Player.view model.player)
-    , div [class "search"]
-      []
+    , div [class "misc-controls"]
+      [ Html.map PlayerMsg (Player.volumeControl model.player)
+      ]
     ]
   , main_ []
     [ SplitPane.view splitterConfig (podcastsView model) (episodesView model) model.splitPane

@@ -109,6 +109,10 @@ class WindowManager {
       Player.seekTo(arg)
     })
 
+    ipcMain.on('player:volume', (event, arg) => {
+      Player.setVolume(arg)
+    })
+
     // Episode Action
 
     ipcMain.on('episode:play', (event, arg) => {

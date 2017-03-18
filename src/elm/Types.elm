@@ -59,6 +59,7 @@ type alias PlayerModel =
   { state : PlayerState
   , seeking : Bool
   , seekingPosition : Float
+  , adjustingVolume : Int
   }
 
 type alias PlayerState =
@@ -66,6 +67,7 @@ type alias PlayerState =
   , volume : Int
   , duration : Float
   , position : Float
+  , title : String
   }
 
 type alias PodcastLoadingIpc =

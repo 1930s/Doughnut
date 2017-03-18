@@ -1,4 +1,4 @@
-module Player exposing (Msg(..), init, update, view)
+module Player exposing (Msg(..), init, update, view, volumeControl)
 
 import Types exposing (PlayerState, PlayerModel)
 import Html exposing (..)
@@ -15,13 +15,15 @@ type Msg
   | SeekPreview String
   | StartSeeking
   | FinishSeeking
+  | SlideVolume String
+  | AdjustVolume
 
 init : PlayerModel
 init = 
   let
-    state = PlayerState True 50 0.0 0.0
+    state = PlayerState True 50 0.0 0.0 ""
   in
-    PlayerModel state False 0.0
+    PlayerModel state False 0.0 0
 
 update : Msg -> PlayerModel -> (PlayerModel, Cmd Msg)
 update msg model =
@@ -67,6 +69,15 @@ update msg model =
           updated = { state | position = position }
         in
           { model | state = updated, seekingPosition = position } ! []
+      
+      SlideVolume volStr ->
+        { model | adjustingVolume = (String.toInt volStr) |> Result.withDefault 0 } ! []
+      
+      AdjustVolume ->
+        let
+          updated = { state | volume = model.adjustingVolume }
+        in
+          { model | state = updated } ! [ Ipc.setVolume model.adjustingVolume ]
 
 
 timestamp : Int -> String
@@ -91,7 +102,11 @@ view model =
     positionStr = timestamp (round position)
     remainingStr = timestamp (round (state.duration - position))
   in
-    div [class "player"]
+    div [ classList 
+      [ ("player", True)
+      , ("player--playing", (not state.pause))
+      ]
+    ]
     [ button [class "player-control", onClick SkipBack] [ Icons.skipBackIcon ]
     , button [class "player-control", onClick Toggle]
       [ if state.pause then
@@ -102,15 +117,31 @@ view model =
     , button [class "player-control", onClick SkipForward] [ Icons.skipForwardIcon ]
     , div [class "seek-bar"]
       [ span [] [text positionStr]
-      , input
-        [type_ "range"
-        , H.min "0"
-        , H.max (toString state.duration)
-        , value (toString position)
-        , onInput SeekPreview
-        , onMouseDown StartSeeking
-        , onMouseUp FinishSeeking
-        ] []
+      , div []
+        [ span [] [text state.title]
+        , input
+          [ type_ "range"
+          , H.min "0"
+          , H.max (toString state.duration)
+          , value (toString position)
+          , onInput SeekPreview
+          , onMouseDown StartSeeking
+          , onMouseUp FinishSeeking
+          ] []
+        ]
       , span [] [text remainingStr]
       ]
     ]
+
+volumeControl : PlayerModel -> Html Msg
+volumeControl model =
+  div []
+  [ input
+    [ type_ "range"
+    , class "volume-slider"
+    , H.min "0"
+    , H.max "100"
+    , onInput SlideVolume
+    , onMouseUp AdjustVolume
+    ] []
+  ]

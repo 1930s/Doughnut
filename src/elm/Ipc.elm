@@ -19,6 +19,10 @@ seekTo : Float -> Cmd msg
 seekTo pos =
   floatAction (FloatAction "player:seek" pos)
 
+setVolume : Int -> Cmd msg
+setVolume volume =
+  floatAction (FloatAction "player:volume" (toFloat volume))
+
 reloadPodcast : PodcastId -> Cmd msg
 reloadPodcast id =
   objectAction (ObjAction "podcast:reload" id)
@@ -62,3 +66,4 @@ unFavouriteEpisode id =
 revealEpisode : EpisodeId -> Cmd msg
 revealEpisode id =
   objectAction (ObjAction "episode:reveal" id)
+
