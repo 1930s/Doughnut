@@ -39,6 +39,7 @@ type alias Episode =
   , downloaded : Bool
   , played : Bool
   , playPosition : Int
+  , duration : Int
   , createdAt : Date
   , updatedAt : Date
   }

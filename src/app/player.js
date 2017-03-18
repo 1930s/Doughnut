@@ -24,7 +24,7 @@ import Library from './library/manager'
 import { Podcast } from './library/models'
 import Settings from './settings'
 
-export default class Player extends EventEmitter {
+class Player extends EventEmitter {
   constructor() {
     super()
 
@@ -46,16 +46,12 @@ export default class Player extends EventEmitter {
 
     this.state = {
       pause: false,
-      volume: 60,
+      volume: Settings.get('player', { volume: 60 }).volume,
       duration: 0,
       mediaTitle: "",
       position: 0
     }
     this.episode = null
-
-    this.savedStateStale = false
-    // Crudely rate limit the current position saves
-    setInterval(() => { player.savedStateStale = true }, 3000)
 
     this.mpv.volume(this.state.volume)
 
@@ -66,7 +62,7 @@ export default class Player extends EventEmitter {
     })
 
     this.mpv.on('paused', mpvStatus => {
-      player.saveState()
+      player.saveEpisodeState()
     })
 
     this.mpv.on('statuschange', mpvStatus => {
@@ -78,18 +74,48 @@ export default class Player extends EventEmitter {
       })
 
       player.emit('state', player.state)
+      player.saveEpisodeState()
     })
 
     this.mpv.on('timeposition', seconds => {
       player.state = Object.assign(player.state, {
         position: seconds
       })
-      player.emit('state', player.state)
 
-      if (player.savedStateStale && player.episode) {
-        player.saveState()
-      }
+      player.emit('state', player.state)
+      player.saveEpisodeState()
     })
+  }
+
+  saveEpisodeState() {
+    if (this.episode) {
+      var updatesNeeded = {}
+
+      if (this.episode.duration < 1) {
+        updatesNeeded.duration = Math.round(this.state.duration)
+      } 
+
+      const playPosition = Math.round(this.state.position)
+      if (this.state.position > 0 &&
+          this.episode.playPosition != playPosition) {
+        updatesNeeded.playPosition = playPosition
+      }
+
+      // Mark as played once over 90% played
+      if (this.state.duration > 0) {
+        const percentPlayed = (this.state.position / this.state.duration) * 100
+        if (this.episode.played == false && percentPlayed >= 90) {
+          updatesNeeded.played = true
+        }
+      }
+
+      if (Object.keys(updatesNeeded).length >= 1) {
+        const player = this
+        player.episode.update(updatesNeeded).then(episode => {
+          player.episode = episode
+        })
+      }
+    }
   }
 
   destroy() {
@@ -111,9 +137,7 @@ export default class Player extends EventEmitter {
     if (episode.downloaded) {
       Podcast.findById(episode.podcast_id)
         .then(podcast => {
-          const episodeFile = path.join(Library().path(), podcast.fileName(episode))
-          console.log("Playing: ", episodeFile)
-          this.mpv.loadFile(episodeFile)
+          this.mpv.loadFile(Library().episodeFilePath(podcast, episode))
         })
     } else {
       console.log("Playing: ", episode.enclosureUrl)
@@ -142,16 +166,27 @@ export default class Player extends EventEmitter {
     this.mpv.goToPosition(position)
   }
 
-  saveState() {
-    const player = this
-    this.savedStateStale = false
+  skipForward() {
 
-    if (player.episode) {
-      player.episode.update({
-        playPosition: Math.round(player.state.position)
-      }).then(saved => {
-        player.episode = saved
-      })
-    }
+  }
+
+  skipBack() {
+
+  }
+
+  volumeUp() {
+    const adjusted = Math.min(this.state.volume + 10, 100)
+    this.mpv.volume(adjusted)
+
+    Settings.set('player', { volume: adjusted })
+  }
+
+  volumeDown() {
+    const adjusted = Math.max(this.state.volume - 10, 0)
+    this.mpv.volume(adjusted)
+
+    Settings.set('player', { volume: adjusted })
   }
 }
+
+export default new Player()

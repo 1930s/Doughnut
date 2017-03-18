@@ -21,6 +21,7 @@ episodeDecoder =
     |> required "downloaded" Json.bool
     |> required "played" Json.bool
     |> required "playPosition" Json.int
+    |> required "duration" Json.int
     |> required "created_at" date
     |> required "updated_at" date
 

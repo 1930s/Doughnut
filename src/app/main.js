@@ -35,18 +35,12 @@ export default class Main {
     console.log("DEBUG", process.env.DEBUG)
 
     this.ipc = require( 'electron' ).ipcMain;
-
-    this._windowManager = WindowManager()
-  }
-
-  windowManager() {
-    return this._windowManager
   }
 
   onReady() {
     const main = this
 
-    AssetServer.boot()
+    AssetServer.setup()
       .then((server) => {
         main.server = server
 
@@ -57,20 +51,7 @@ export default class Main {
             })
           }
 
-    /*
-          Library().subscribe("test", function(t) {
-            console.log(t)
-          })*/
-    /*
-          Library().podcasts((p) => {
-            console.log(p)
-          })*/
-
-          /*Library().reload(1, () => {
-            console.log("Reloaded")
-          })*/
-
-          main._windowManager.setupIPC()
+          WindowManager.setup()
 
           Menu.createMenu()
 
@@ -84,12 +65,12 @@ export default class Main {
   }
 
   launchMainWindow() {
-    const mainWindow = this._windowManager.mainWindow(this.server)
+    const mainWindow = WindowManager.mainWindow(this.server)
     mainWindow.show()
   }
 
   launchWelcomeWindow() {
-    this._windowManager.welcomeWindow()
+    WindowManager.welcomeWindow()
   }
 
   onWindowAllClosed() {
@@ -109,7 +90,7 @@ Electron.app.on( 'ready', () => {
 Electron.app.on( 'quit', () => {
   if( DEBUG ) { Logger.log( 'Application is quit' ); }
 
-  main.windowManager().teardown()
+  WindowManager.teardown()
 } );
 
 Electron.app.on( 'window-all-closed', () => {

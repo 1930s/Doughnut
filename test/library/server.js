@@ -15,7 +15,7 @@ describe('Server', function() {
 
   beforeEach(done => {
     Library().load(() => {
-      AssetServer.boot().then((booted) => {
+      AssetServer.setup().then((booted) => {
         server = booted
         Library().subscribe("http://localhost:3000/feed.xml?items=1")
           .then(function(pod) {

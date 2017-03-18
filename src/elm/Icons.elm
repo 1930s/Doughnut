@@ -94,12 +94,14 @@ plusIcon =
       ]
     ]
 
-playPosition : Int -> Svg msg
-playPosition played =
+playPosition : Int -> Int -> Svg msg
+playPosition played total =
   let
-    total = 31.4
-    perc = 26
+    percent = if total > 0 then
+        ((toFloat played) / (toFloat total)) * 100
+      else
+        0
   in
     svg [ width "14px", height "14px", viewBox "0 0 32 32", A.style [("transform", "rotate(-90deg)"), ("background", "#1971EC"), ("border-radius", "50%")] ] 
-      [ circle [ r "16", cx "16", cy "16", fill "#1971EC", stroke "#FFF", strokeWidth "33", strokeDasharray "38 100"] []
+      [ circle [ r "16", cx "16", cy "16", fill "#1971EC", stroke "#FFF", strokeWidth "33", strokeDasharray ((toString percent) ++ " 100")] []
       ]

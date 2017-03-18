@@ -219,6 +219,7 @@ const Podcast = Model.define('Podcast', {
 })
 
 Podcast.hasMany(Episode, { foreignKey: 'podcast_id' })
+Episode.belongsTo(Podcast, { foreignKey: 'podcast_id' })
 
 export { Podcast, Episode }
 

@@ -18,9 +18,36 @@ episodeContextMenu : Episode -> Menu EpisodeContextMenu
 episodeContextMenu episode =
   let
     items =
-    [ ContextMenu.actionItem (M_DownloadEpisode episode.id) "Download"
-    , ContextMenu.actionItem (M_FavouriteEpisode episode.id) "Favourite"
+    [ ContextMenu.actionItem (M_PlayEpisode episode.id) "Play Now"
     , ContextMenu.separatorItem
+    , if not episode.played then
+        ContextMenu.actionItem (M_MarkPlayed episode.id) "Mark as Played"
+      else
+        ContextMenu.disabledItem (M_MarkPlayed episode.id) "Mark as Played"
+    , if episode.played then
+        ContextMenu.actionItem (M_MarkUnplayed episode.id) "Mark as Unplayed"
+      else
+        ContextMenu.disabledItem (M_MarkUnplayed episode.id) "Mark as Unplayed"
+    , if not episode.favourite then
+        ContextMenu.actionItem (M_MarkFavourite episode.id) "Mark as Favourite"
+      else
+        ContextMenu.disabledItem (M_MarkFavourite episode.id) "Mark as Favourite"
+    , if episode.favourite then
+        ContextMenu.actionItem (M_UnmarkFavourite episode.id) "Unmark Favourite"
+      else
+        ContextMenu.disabledItem (M_UnmarkFavourite episode.id) "Unmark Favourite"
+    , ContextMenu.separatorItem
+    , if not episode.downloaded then
+        ContextMenu.actionItem (M_DownloadEpisode episode.id) "Download"
+      else
+        ContextMenu.disabledItem (M_DownloadEpisode episode.id) "Download"
+    , if episode.downloaded then
+        ContextMenu.actionItem (M_ShowFinder episode.id) "Show in Finder"
+      else
+        ContextMenu.disabledItem (M_ShowFinder episode.id) "Show in Finder"
+    , ContextMenu.separatorItem
+    , ContextMenu.actionItem (M_MarkAllPlayed episode.podcastId) "Mark all as Played"
+    , ContextMenu.actionItem (M_MarkAllUnplayed episode.podcastId) "Mark all as Unplayed"
     ]
   in
     Menu "Episode" items
@@ -60,7 +87,7 @@ viewEpisode model ep =
         text ""
     , h2 []
       [ if not ep.played then 
-          Icons.playPosition ep.playPosition
+          Icons.playPosition ep.playPosition ep.duration
         else
           text ""
       , text ep.title ]

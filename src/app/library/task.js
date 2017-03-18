@@ -28,10 +28,6 @@ export default class Task {
     }, props)
   }
 
-  id() {
-    return this.id
-  }
-
   anonymous() {
     return this.args.anonymous
   }

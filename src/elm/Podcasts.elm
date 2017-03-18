@@ -54,6 +54,8 @@ viewPodcast state pw =
         div [class "podcast-list-loading"]
         [ Icons.spinner
         ]
-      else
+      else if unplayedEpCount > 0 then
         div [class "podcast-list-unplayed"] [text (toString unplayedEpCount)]
+      else
+        text ""
     ]

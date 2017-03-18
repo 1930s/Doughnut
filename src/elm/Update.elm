@@ -134,7 +134,15 @@ update msg model =
         { model | podcasts = List.map selectPodcast model.podcasts } ! []
     
     SelectEpisode ep ->
-      { model | selectedEpisode = Just ep } ! []
+      case model.selectedEpisode of
+        Just selected ->
+          if (selected.id == ep.id) then
+            { model | selectedEpisode = Nothing } ! []
+          else
+            { model | selectedEpisode = Just ep } ! []
+
+        Nothing ->
+          { model | selectedEpisode = Just ep } ! []
     
     PlayEpisode ep ->
       { model | selectedEpisode = Just ep } ! [ Ipc.playEpisode ep.id ]
@@ -194,12 +202,33 @@ podcastContextMenuUpdate menu r model =
 episodeContextMenuUpdate : (Menu EpisodeContextMenu) -> MenuCallback -> Model -> (Model, Cmd Msg)
 episodeContextMenuUpdate menu r model =
   case ContextMenu.callback menu r of
+    Just (M_PlayEpisode id) ->
+      model ! [Ipc.playEpisode id]
+
+    Just (M_MarkPlayed id) ->
+      model ! [Ipc.markPlayedEpisode id]
+
+    Just (M_MarkUnplayed id) ->
+      model ! [Ipc.markUnplayedEpisode id]
+
+    Just (M_MarkFavourite id) ->
+      model ! [Ipc.favouriteEpisode id]
+
+    Just (M_UnmarkFavourite id) ->
+      model ! [Ipc.unFavouriteEpisode id]
+
     Just (M_DownloadEpisode id) ->
       model ! [Ipc.downloadEpisode id]
+          
+    Just (M_ShowFinder id) -> 
+      model ! [Ipc.revealEpisode id]
     
-    Just (M_FavouriteEpisode id) ->
-      model ! [Ipc.favouriteEpisode id]
+    Just (M_MarkAllPlayed podcastId) ->
+      model ! [Ipc.markAllPlayedPodcast podcastId]
     
+    Just (M_MarkAllUnplayed podcastId) ->
+      model ! [Ipc.markAllUnplayedPodcast podcastId]
+
     _ ->
       model ! []
 

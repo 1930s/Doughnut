@@ -25,9 +25,13 @@ var _user$project$Native_ContextMenu = function() {
         if (item.itemType.ctor === 'Separator') {
           menu.append(new MenuItem({type: 'separator'}))
         } else if (item.itemType.ctor === 'Action') {
-          menu.append(new MenuItem({label: items[i].label, click(menuItem) {
-            callback(_elm_lang$core$Native_Scheduler.succeed(menuItem.label));
-          }}))
+          menu.append(new MenuItem({
+            label: items[i].label,
+            enabled: !items[i].disabled,
+            click(menuItem) {
+              callback(_elm_lang$core$Native_Scheduler.succeed(menuItem.label));
+            }
+          }))
         }
       }
 

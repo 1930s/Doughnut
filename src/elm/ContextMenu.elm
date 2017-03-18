@@ -1,4 +1,4 @@
-module ContextMenu exposing (open, MenuCallback, MenuItemType(..), MenuItem, Menu, showMenu, callback, actionItem, separatorItem)
+module ContextMenu exposing (open, MenuCallback, MenuItemType(..), MenuItem, Menu, showMenu, callback, actionItem, disabledItem, separatorItem)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -21,6 +21,7 @@ type alias MenuItem types =
   { itemType : MenuItemType
   , identifier : Maybe types
   , label : String
+  , disabled : Bool
   }
 
 type alias Menu types =
@@ -30,11 +31,15 @@ type alias Menu types =
 
 actionItem : types -> String -> MenuItem types
 actionItem t label =
-  MenuItem Action (Just t) label
+  MenuItem Action (Just t) label False
+
+disabledItem : types -> String -> MenuItem types
+disabledItem t label =
+  MenuItem Action (Just t) label True
 
 separatorItem : MenuItem types
 separatorItem =
-  MenuItem Separator Nothing ""
+  MenuItem Separator Nothing "" False
 
 open : msg -> Attribute msg
 open m =

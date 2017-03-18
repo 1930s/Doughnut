@@ -1,14 +1,4 @@
-import Electron from 'electron'
-import url from 'url'
-import path from 'path'
-const { ipcMain, dialog } = require('electron')
-
-import MainWindow from './windows/main_window'
-import Library from './library/manager'
-import Player from './player'
-
-class WindowManager {
-  /*
+/*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
  * 
@@ -26,7 +16,17 @@ class WindowManager {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-constructor() {
+import Electron from 'electron'
+import url from 'url'
+import path from 'path'
+const { ipcMain, dialog, shell } = require('electron')
+
+import MainWindow from './windows/main_window'
+import Library from './library/manager'
+import Player from './player'
+
+class WindowManager {
+  constructor() {
     const wm = this
 
     this._windows = {
@@ -35,8 +35,7 @@ constructor() {
       SubscribeWindow: false
     }
 
-    this._player = new Player()
-    this._player.on('state', state => {
+    Player.on('state', state => {
       if (wm._windows.MainWindow) {
         wm._windows.MainWindow.send('player:state', state)
       }
@@ -47,26 +46,15 @@ constructor() {
     return this.main
   }
 
-  player() {
-    return this._player
-  }
-
   teardown() {
-    this._player.destroy()
+    Player.destroy()
   }
 
-  setupIPC() {
+  setup() {
     const wm = this
-
-    // Global Action
-    ipcMain.on('global', (event, arg) => {
-      console.log(arg)  // prints "ping"
-      event.sender.send('asynchronous-reply', 'pong')
-    })
 
     // Podcast Action
     ipcMain.on('podcast:subscribe', (event, arg) => {
-      console.log('podcast:subscribe', arg)
       wm.subscribeWindow().close()
 
       Library().subscribe(arg)
@@ -79,8 +67,6 @@ constructor() {
     })
 
     ipcMain.on('podcast:reload', (event, arg) => {
-      console.log('podcast:reload', arg)
-
       Library().loadPodcast(arg.id)
         .then(podcast => {
           return Library().reload(podcast)
@@ -88,8 +74,6 @@ constructor() {
     })
 
     ipcMain.on('podcast:unsubscribe', (event, arg) => {
-      console.log('podcast:unsubscribe', arg)
-
       Library().loadPodcast(arg.id)
         .then(function(podcast) {
           dialog.showMessageBox({
@@ -108,15 +92,21 @@ constructor() {
         })
     })
 
+    ipcMain.on('podcast:played', (event, arg) => {
+      Library().markPodcastAllPlayed(arg.id, true)
+    })
+
+    ipcMain.on('podcast:unplayed', (event, arg) => {
+      Library().markPodcastAllPlayed(arg.id, false)
+    })
+
     // Player Action
     ipcMain.on('player:toggle', (event, arg) => {
-      console.log('player:toggle')
-      wm._player.toggle()
+      Player.toggle()
     })
 
     ipcMain.on('player:seek', (event, arg) => {
-      console.log('player:seek', arg)
-      wm._player.seekTo(arg)
+      Player.seekTo(arg)
     })
 
     // Episode Action
@@ -126,13 +116,11 @@ constructor() {
 
       Library().loadEpisode(arg.id)
         .then(episode => {
-          wm._player.play(episode)
+          Player.play(episode)
         })
     })
 
     ipcMain.on('episode:download', (event, arg) => {
-      console.log('episode:download', arg)
-
       Library().loadEpisode(arg.id)
         .then(episode => {
           Library().downloadEpisode(episode)
@@ -141,11 +129,25 @@ constructor() {
     })
 
     ipcMain.on('episode:favourite', (event, arg) => {
-      console.log('episode:favourite', arg)
+      Library().markEpisodeFavourite(arg.id, true)
+    })
 
+    ipcMain.on('episode:unfavourite', (event, arg) => {
+      Library().markEpisodeFavourite(arg.id, false)
+    })
+
+    ipcMain.on('episode:played', (event, arg) => {
+      Library().markEpisodePlayed(arg.id, true)
+    })
+
+    ipcMain.on('episode:unplayed', (event, arg) => {
+      Library().markEpisodePlayed(arg.id, false)
+    })
+
+    ipcMain.on('episode:reveal', (event, arg) => {
       Library().loadEpisode(arg.id)
         .then(episode => {
-          Library().updateEpisode(episode, { favourite: !episode.favourite })
+          shell.showItemInFolder(Library().episodeFilePath(episode.Podcast, episode))
         })
     })
   }
@@ -197,10 +199,4 @@ constructor() {
   }
 }
 
-export default function wm() {
-  if (!global._wm) {
-    global._wm = new WindowManager()
-  }
-  
-  return global._wm;
-}
+export default new WindowManager()

@@ -34,7 +34,7 @@ export default class AssetServer {
     })
   }
 
-  static boot(cb) {
+  static setup(cb) {
     return new Promise((resolve, reject) => {
       portfinder.getPortPromise()
         .then((port) => {

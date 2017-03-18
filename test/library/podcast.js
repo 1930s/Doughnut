@@ -52,7 +52,7 @@ describe('Podcast', function() {
   describe('when subscribed', function() {
     var subscribed = null
     beforeEach((done) => {
-      Library().subscribe("http://localhost:3000/feed.xml?items=1")
+      Library().subscribe("http://localhost:3000/feed.xml?items=2")
         .then(function(pod) {
           subscribed = pod
           done()
@@ -61,12 +61,12 @@ describe('Podcast', function() {
 
     it('should detect existing episodes', function(done) {
       Episode.count().then((c) => {
-        expect(c).to.eql(1)
+        expect(c).to.eql(2)
 
         Library().reload(subscribed)
           .then(() => {
             Episode.count().then((c) => {
-              expect(c).to.eql(1)
+              expect(c).to.eql(2)
               done()
             })
           })
@@ -82,7 +82,7 @@ describe('Podcast', function() {
         Library().reload(p)
           .then(() => {
             // 2 new episodes should be found and scheduled for download
-            expect(Library().taskManager.queueCount()).to.eql(2)
+            expect(Library().taskManager.queueCount()).to.eql(1)
 
             Episode.count().then((c) => {
               expect(c).to.eql(3)
@@ -104,6 +104,92 @@ describe('Podcast', function() {
             expect(c).to.eql(0)
           })
         })
+    })
+
+    it('marks all episodes played', function(done) {
+      Library().on('podcast:updated', podcast => {
+        Episode.findOne({ where: { podcast_id: subscribed.id }})
+          .then(episode => {
+            expect(episode.played).to.eql(true)
+            done()
+          })
+      })
+
+      Library().markPodcastAllPlayed(subscribed.id, true)
+    })
+
+    it('marks all episodes unplayed', function(done) {
+      Library().on('podcast:updated', podcast => {
+        Episode.findOne({ where: { podcast_id: subscribed.id }})
+          .then(episode => {
+            expect(episode.played).to.eql(false)
+            done()
+          })
+      })
+
+      Library().markPodcastAllPlayed(subscribed.id, false)
+    })
+
+    it('marks single episode as played', function(done) {
+      Library().on('episode:updated', episode => {
+        Episode.count({ where: { played: true }})
+          .then(c => {
+            expect(c).to.eql(1)
+            done()
+          })
+      })
+
+      Episode.findOne().then(episode => {
+        Library().markEpisodePlayed(episode.id, true)
+      })
+    })
+
+    it('unmarks single episode as played', function(done) {
+      Library().on('episode:updated', episode => {
+        Episode.count({ where: { played: true }})
+          .then(c => {
+            expect(c).to.eql(0)
+            done()
+          })
+      })
+
+      Episode.findOne().then(episode => {
+        episode.update({ played: true })
+          .then(episode => {
+            Library().markEpisodePlayed(episode.id, false)
+          })        
+      })
+    })
+
+    it('marks single episode as favourite', function(done) {
+      Library().on('episode:updated', episode => {
+        Episode.count({ where: { favourite: true }})
+          .then(c => {
+            expect(c).to.eql(1)
+            done()
+          })
+      })
+
+      Episode.findOne().then(episode => {
+        Library().markEpisodeFavourite(episode.id, true)
+      })
+    })
+
+    it('unmarks single episode as favourite', function(done) {
+      Library().on('episode:updated', episode => {
+        Episode.count({ where: { favourite: true }})
+          .then(c => {
+            expect(c).to.eql(0)
+            done()
+          })
+      })
+
+      Episode.findOne().then(episode => {
+        episode.update({ favourite: true })
+          .then(episode => {
+            Library().markEpisodeFavourite(episode.id, false)
+          })        
+      })
     })
   })
 })

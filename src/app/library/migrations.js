@@ -56,6 +56,9 @@ const MIGRATIONS = [
     created_at DATE,
     updated_at DATE
   )
+  `,
+  `ALTER TABLE episodes ADD COLUMN duration INTEGER DEFAULT 0;
+  UPDATE episodes SET duration = 0;
   `
 ]
 

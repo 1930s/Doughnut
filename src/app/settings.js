@@ -21,6 +21,7 @@ var path = require('path')
 var jsonfile = require('jsonfile')
 var fs = require('fs')
 var os = require('os')
+var merge = require('deepmerge')
 import Logger from './logger'
 
 class Settings {
@@ -66,6 +67,10 @@ class Settings {
     jsonfile.writeFileSync(this.settingsFile(), this.loaded)
   }
 
+  store() {
+    jsonfile.writeFile(this.settingsFile(), this.loaded)
+  }
+
   load() {
     this.loaded = this.defaults
 
@@ -82,9 +87,15 @@ class Settings {
     }
   }
 
-  get(key) {
+  get(key, fallback = null) {
     this.loadIfNeeded()
-    return this.loaded[key]
+    return this.loaded[key] || fallback
+  }
+
+  set(key, val) {
+    this.loadIfNeeded()
+    this.loaded[key] = merge(this.loaded[key], val)
+    this.store()
   }
 }
 

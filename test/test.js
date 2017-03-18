@@ -6,7 +6,11 @@ describe("top", function () {
     common.dropLibrary(done)
   });
 
-  describe("Library", function () {
+  describe("App", function() {
+    require('./app/settings');
+  })
+
+  describe("Library", function() {
     require('./library/podcast');
     require('./library/tasks');
     require('./library/server');

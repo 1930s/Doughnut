@@ -64,12 +64,7 @@ export class LibraryManager extends EventEmitter {
   }
 
   completeTask(task) {
-    for (var i = this.tasks.length - 1; i >= 0; i--) {
-      if (this.tasks[i].id() === task.id()) {
-        this.tasks.splice(i, 1)
-      }
-    }
-
+    this.tasks = this.tasks.filter(t => { return t.id !== task.id })
     this.emitTaskState()
   }
 
@@ -133,10 +128,52 @@ export class LibraryManager extends EventEmitter {
 
   loadEpisode(id) {
     return new Promise((resolve, reject) => {
-      Episode.findById(id)
+      Episode.find({ where: { id: id }, include: [Podcast] })
       .then(resolve)
       .catch(reject)
     })
+  }
+
+  episodeFilePath(podcast, episode) {
+    return path.join(this.path(), podcast.fileName(episode))
+  }
+
+  markEpisodePlayed(episodeId, played = true) {
+    const library = this
+
+    Episode.findById(episodeId)
+      .then(episode => {
+        episode.update({ played: played })
+          .then(updated => {
+            library.emit('episode:updated', updated)
+          })
+      })
+  }
+
+  markEpisodeFavourite(episodeId, favourite = true) {
+    const library = this
+
+    Episode.findById(episodeId)
+      .then(episode => {
+        episode.update({ favourite: favourite })
+          .then(updated => {
+            library.emit('episode:updated', updated)
+          })
+      })
+  }
+
+  markPodcastAllPlayed(podcastId, played = true) {
+    const library = this
+
+    Podcast.findById(podcastId)
+      .then(podcast => {
+        Episode.update(
+          { played: played },
+          { where: { podcast_id: podcast.id }}
+        ).then((count, rows) => {
+          library.emit('podcast:updated', podcast)
+        })
+      })
   }
 
   updateEpisode(episode, args) {

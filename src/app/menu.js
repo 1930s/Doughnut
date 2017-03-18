@@ -15,13 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const electron = require('electron')
 
 import WindowManager from './window_manager'
+import Player from './player'
+
+var MENUS = {
+  FILE: 0,
+  EDIT: 1,
+  VIEW: 2,
+  ITEM: 3,
+  CONTROL: 4,
+  WINDOW: 5,
+  HELP: 6
+}
+
+if (process.platform === 'darwin') {
+  MENUS = {
+    FILE: 1,
+    EDIT: 2,
+    VIEW: 3,
+    ITEM: 4,
+    CONTROL: 5,
+    WINDOW: 6,
+    HELP: 7
+  }
+}
 
 export default class Menu {
   static createMenu() {
-    const {app, Menu} = require('electron')
-
     const template = [
       {
         label: 'File',
@@ -29,7 +51,7 @@ export default class Menu {
           {
             label: 'Subscribe',
             click () {
-              WindowManager().subscribeWindow()
+              WindowManager.subscribeWindow()
             }
           }
         ]
@@ -76,25 +98,110 @@ export default class Menu {
             role: 'forcereload'
           },
           {
+            type: 'separator'
+          },
+          {
             role: 'toggledevtools'
           },
           {
             type: 'separator'
           },
           {
-            role: 'resetzoom'
-          },
+            role: 'togglefullscreen'
+          }
+        ]
+      },
+      {
+        label: 'Item',
+        submenu: [
           {
-            role: 'zoomin'
-          },
-          {
-            role: 'zoomout'
+            label: 'Reload',
+            accelerator: 'Alt+CmdOrCtrl+R'
           },
           {
             type: 'separator'
           },
           {
-            role: 'togglefullscreen'
+            label: 'Play Now',
+            accelerator: 'CmdOrCtrl+P'
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Mark as Played',
+            accelerator: 'Ctrl+Cmd+M'
+          },
+          {
+            label: 'Mark as Unplayed',
+            accelerator: 'Shift+Cmd+M'
+          },
+          {
+            label: 'Mark as Favourite',
+            accelerator: 'CmdOrCtrl+B'
+          },
+          {
+            label: 'Unmark Favourite',
+            accelerator: 'Shift+CmdOrCtrl+B'
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Mark all as Played'
+          },
+          {
+            label: 'Mark all as Unplayed'
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Download',
+            accelerator: 'CmdOrCtrl+L'
+          }
+        ]
+      },
+      {
+        label: 'Control',
+        submenu: [
+          {
+            label: 'Backward 30 seconds',
+            accelerator: 'CmdOrCtrl+Left',
+            click() {
+              Player.skipBack()
+            }
+          },
+          {
+            label: 'Play',
+            accelerator: 'MediaPlayPause',
+            click() {
+              Player.toggle()
+            }
+          },
+          {
+            label: 'Forward 30 seconds',
+            accelerator: 'CmdOrCtrl+Right',
+            click() {
+              Player.skipForward()
+            }
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Increase Volume',
+            accelerator: 'CmdOrCtrl+Up',
+            click() {
+              Player.volumeUp()
+            }
+          },
+          {
+            label: 'Decrease Volume',
+            accelerator: 'CmdOrCtrl+Down',
+            click() {
+              Player.volumeDown()
+            }
           }
         ]
       },
@@ -172,7 +279,7 @@ export default class Menu {
         }
       )
       // Window menu.
-      template[3].submenu = [
+      template[6].submenu = [
         {
           label: 'Close',
           accelerator: 'CmdOrCtrl+W',
@@ -197,7 +304,11 @@ export default class Menu {
       ]
     }
 
-    const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu)
+    const menu = electron.Menu.buildFromTemplate(template)
+    electron.Menu.setApplicationMenu(menu)
+  }
+
+  mutateMenu() {
+
   }
 }

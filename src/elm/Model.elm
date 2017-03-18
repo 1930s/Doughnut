@@ -27,8 +27,16 @@ type PodcastContextMenu
   | M_RefreshAll
 
 type EpisodeContextMenu
-  = M_DownloadEpisode EpisodeId
-  | M_FavouriteEpisode EpisodeId
+  = M_PlayEpisode EpisodeId
+  | M_MarkPlayed EpisodeId
+  | M_MarkUnplayed EpisodeId
+  | M_MarkFavourite EpisodeId
+  | M_UnmarkFavourite EpisodeId
+  | M_DeleteEpisode EpisodeId
+  | M_ShowFinder EpisodeId
+  | M_DownloadEpisode EpisodeId
+  | M_MarkAllPlayed PodcastId
+  | M_MarkAllUnplayed PodcastId
 
 type Msg
   = --OpenContextMenu (Menu ButtonMenuItem)

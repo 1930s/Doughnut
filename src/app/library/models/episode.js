@@ -43,7 +43,8 @@ const Episode = Model.define('Episode', {
   favourite: { type: DataType.BOOLEAN, defaultValue: false },
   downloaded: { type: DataType.BOOLEAN, defaultValue: false },
   played: { type: DataType.BOOLEAN, defaultValue: false },
-  playPosition: { type: DataType.INTEGER, field: 'play_position', defaultValue: 0 }
+  playPosition: { type: DataType.INTEGER, field: 'play_position', defaultValue: 0 },
+  duration: { type: DataType.INTEGER, defaultValue: 0 }
 }, {
   tableName: 'episodes',
   createdAt: 'created_at',
@@ -112,6 +113,7 @@ const Episode = Model.define('Episode', {
         downloaded: this.downloaded,
         played: this.played,
         playPosition: this.playPosition,
+        duration: Math.round(this.duration),
         created_at: this.created_at,
         updated_at: this.updated_at
       }
