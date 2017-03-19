@@ -26,14 +26,24 @@ const progress = require('request-progress')
 
 import Library from '../manager'
 import { Podcast } from '../models'
+import Task from './task'
 
-export default class DownloadTask {
-  constructor(episode) {
-    this.episode = episode
+export default class DownloadTask extends Task {
+  description() {
+    if (this.args.episode) {
+      return this.args.episode.title
+    } else {
+      return ""
+    }
   }
 
   run() {
-    const episode = this.episode
+    const task = this
+    const episode = this.args.episode
+    if (!episode) {
+      console.log("No episode supplied to download task")
+      return 
+    }
 
     return new Promise(function(resolve, reject) {
       Podcast.findById(episode.podcast_id)
@@ -53,17 +63,15 @@ export default class DownloadTask {
 
           progress(request(episode.enclosureUrl))
           .on('progress', state => {
-            console.log(`Downloaded: ${state.percent}%`)
+            task.setProgress(Math.round(state.percent * 100))
           })
           .on('end', () => {
             file.end()
 
-            episode.update({
+            Library().updateEpisode(episode, {
               downloaded: true
             })
-            .then(saved => {
-              resolve(saved)
-            })
+            .then(resolve)
           })
           .on('error', (err) => {
             file.end()

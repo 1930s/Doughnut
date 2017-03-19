@@ -27,16 +27,21 @@ import Settings from '../settings'
 import Migrations from './migrations'
 import Sequelize from './sequelize'
 import { Podcast, Episode } from './models'
-import TaskManager from './tasks'
-import Task from './task'
+import TaskQueue from './tasks/queue'
+import Task from './tasks/task'
+import DownloadTask from './tasks/download'
 
 export class LibraryManager extends EventEmitter {
   constructor() {
     super()
 
     this.loaded = false
-    this.taskManager = new TaskManager()
+    this.downloadQueue = new TaskQueue()
+    this.downloadQueue.on('state', this.emitTaskState.bind(this))
+
     this.tasks = []
+
+    this.scheduleReload()
   }
 
   load(loaded) {
@@ -51,6 +56,22 @@ export class LibraryManager extends EventEmitter {
 
   path() {
     return Settings.get('libraryPath')
+  }
+
+  scheduleReload() {
+    if (this.reloadSchedule) {
+      clearInterval(this.reloadSchedule)
+    }
+
+    // Delay 2.5s before initial reload
+    const library = this
+    setTimeout(() => {
+      library.reloadAll()
+
+      setInterval(() => {
+        library.reloadAll()
+      }, Settings.get('library', { refreshInterval: 30 * 60 }).refreshInterval * 1000)
+    }, 2500)
   }
 
   /*
@@ -69,8 +90,11 @@ export class LibraryManager extends EventEmitter {
   }
 
   emitTaskState() {
+    const progressTasks = this.downloadQueue.state()
+
     this.emit('tasks', {
-      processing: this.tasks.length > 0
+      processing: this.tasks.length > 0,
+      tasks: progressTasks
     })
   }
 
@@ -178,7 +202,7 @@ export class LibraryManager extends EventEmitter {
 
   updateEpisode(episode, args) {
     const library = this
-    episode.update(args)
+    return episode.update(args)
       .then(updated => {
         library.emit('episode:updated', updated)
       })
@@ -211,12 +235,26 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  downloadEpisode(episode) {
-    this.taskManager.download(episode)
+  reloadAll() {
+    const library = this
+
+    return new Promise((resolve, reject) => {
+      Podcast.findAll()
+        .then(podcasts => {
+          return Promise.map(podcasts, podcast => {
+            return library.reload(podcast) 
+          }, { concurrency: 1 })
+        })
+        .catch(err => {
+          console.log("Failed to reload all podcasts: ", err)
+        })
+    })
   }
 
-  processTasks() {
-    this.taskManager.process()
+  downloadEpisode(episode) {
+    var task = new DownloadTask({ episode: episode })
+    this.downloadQueue.push(task)
+    this.downloadQueue.start()
   }
 }
 

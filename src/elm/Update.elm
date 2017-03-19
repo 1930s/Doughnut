@@ -19,7 +19,7 @@ init state =
     { state = state
     , podcasts = []
     , player = Player.init
-    , tasks = Types.TaskState False
+    , tasks = Types.TaskState False []
     , selectedEpisode = Nothing
     , splitPane = SplitPane.init Horizontal
       |> withResizeLimits (createBound (percentage 0.25) (percentage 0.6))

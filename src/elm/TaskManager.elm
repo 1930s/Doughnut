@@ -3,24 +3,24 @@ module TaskManager exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Model exposing (..)
+import Types exposing (..)
 import Icons
 
 view : Model -> Html Msg
 view model =
   if True then
     div [class "tasks"] 
-    [ taskView model
-    ]
+      (List.map taskView model.tasks.tasks)
   else
     div [] [text ""]
 
-taskView : Model -> Html Msg
-taskView model =
+taskView : LibraryTask -> Html Msg
+taskView task =
   div [class "task"]
-  [ progressBar 5 10
+  [ progressBar task.progress 100
   , div [class "task-info"]
-    [ span [] [text "#323: My Cousin Quinny Part II"]
-    , span [] [text "50%"]
+    [ span [] [text task.description]
+    , span [] [text ((toString task.progress) ++ "%")]
     ]
   ]
 

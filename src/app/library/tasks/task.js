@@ -17,15 +17,41 @@
  */
 
 const Promise = require('bluebird')
+const uuidV1 = require('uuid/v1')
+const EventEmitter = require('events')
 
-export default class BaseTask {
-  constructor(manager, args) {
-    this.manager = manager
-    this.args = args
+export default class Task extends EventEmitter {
+  constructor(props) {
+    super()
+
+    this.id = uuidV1()
+    this.progress = 0
+
+    this.args = Object.assign({}, {
+      anonymous: true,
+      indeterminate: true
+    }, props)
   }
 
-  name() {
-    return "Task"
+  setProgress(percent) {
+    this.progress = percent
+    this.emit('state', this.state())
+  }
+
+  anonymous() {
+    return this.args.anonymous
+  }
+
+  description() {
+    return ""
+  }
+
+  state() {
+    return {
+      id: this.id,
+      progress: this.progress,
+      description: this.description()
+    }
   }
 
   run() {

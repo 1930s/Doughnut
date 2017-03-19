@@ -50,10 +50,18 @@ podcastListDecoder : Decoder (List Podcast)
 podcastListDecoder =
   list podcastDecoder
 
+libraryTaskDecoder : Decoder LibraryTask
+libraryTaskDecoder =
+  decode LibraryTask
+    |> required "id" Json.string
+    |> required "progress" Json.int
+    |> required "description" Json.string
+
 taskStateDecoder : Decoder TaskState
 taskStateDecoder =
   decode TaskState
     |> required "processing" Json.bool
+    |> required "tasks" (Json.list libraryTaskDecoder)
 
 playerStateDecoder : Decoder PlayerState
 playerStateDecoder =

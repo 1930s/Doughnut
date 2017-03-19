@@ -51,7 +51,6 @@ export default class MainWindow {
     })
 
     library.on('tasks', state => {
-      console.log('tasks', state)
       mw.send('task:state', state)
     })
   }

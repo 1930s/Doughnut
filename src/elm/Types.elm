@@ -77,4 +77,11 @@ type alias PodcastLoadingIpc =
 
 type alias TaskState =
   { processing : Bool
+  , tasks : List LibraryTask
+  }
+
+type alias LibraryTask =
+  { id : String
+  , progress : Int
+  , description : String
   }

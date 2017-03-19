@@ -16,44 +16,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DownloadTask from './tasks/download'
+const EventEmitter = require('events')
 
-export default class TaskManager {
+export default class TaskQueue extends EventEmitter {
   constructor() {
+    super()
+
     this.tasks = []
     this.processingTasks = false
   }
 
+  emitState() {
+    this.emit('state', this.state())
+  }
+
   // Tasks
-  download(episode) {
-    this.tasks.push(new DownloadTask(episode))
+  push(task) {
+    this.tasks.push(task)
+
+    const queue = this
+    task.on('state', this.emitState.bind(this))
   }
 
   // Management Methods
-  popTask() {
+  removeLast() {
     if (this.tasks.length > 0) {
-      return this.tasks.slice(0, 1)[0]
+      this.tasks.splice(0, 1)
+    }
+  }
+
+  currentTask() {
+    if (this.tasks.length > 0) {
+      return this.tasks[0]
     } else {
       return null
     }
   }
 
   run(task) {
-    const manager = this
+    const queue = this
+    queue.emitState()
+
     task.run()
     .then(() => {
-      const next = manager.popTask()
+      queue.removeLast()
+      const next = queue.currentTask()
       if (next) {
-        run(next)
+        queue.run(next)
       } else {
-        manager.processingTasks = false
+        queue.processingTasks = false
       }
+
+      queue.emitState()
     })
   }
 
-  process() {
+  start() {
     if (!this.processingTasks) {
-      const next = this.popTask()
+      const next = this.currentTask()
       if (next) {
         this.processingTasks = true
         this.run(next)
@@ -61,7 +81,17 @@ export default class TaskManager {
     }
   }
 
-  queueCount() {
+  count() {
     return this.tasks.length
+  }
+
+  state() {
+    if (this.tasks && this.tasks.length > 0) {
+      return this.tasks.map((t, i) => {
+        return t.state()
+      })
+    } else {
+      return []
+    }
   }
 }

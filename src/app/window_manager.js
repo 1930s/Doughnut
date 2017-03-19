@@ -128,7 +128,6 @@ class WindowManager {
       Library().loadEpisode(arg.id)
         .then(episode => {
           Library().downloadEpisode(episode)
-          Library().processTasks()
         })
     })
 
