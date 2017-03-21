@@ -30,8 +30,13 @@ view model =
       [ Html.map PlayerMsg (Player.volumeControl model.player)
       ]
     ]
-  , main_ []
-    [ SplitPane.view splitterConfig (podcastsView model) (episodesView model) model.splitPane
+  , main_ [class "podcasts-split"]
+    [ --SplitPane.view splitterConfig (podcastsView model) (episodesView model) model.splitPane
+      podcastsView model
+    , div [id "gutter-1", class "gutter gutter-horizontal"] []
+    , episodesView model
+    , div [id "gutter-2", class "gutter gutter-horizontal"] []
+    , detailView model
     ]
   ]
 
@@ -65,7 +70,7 @@ episodesView model =
   div [class "episodes"]
   [ case selectedPodcast model of
       Just selected ->
-        podcastView selected model
+        Episodes.list model selected
       
       Nothing ->
         p [] [text "Please select a podcast"]
@@ -106,3 +111,7 @@ podcastView pw model =
       ]
     , Episodes.list model pw
     ]
+  
+detailView : Model -> Html Msg
+detailView model =
+  div [class "detail"] [text "detail"]

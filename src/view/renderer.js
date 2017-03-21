@@ -1,5 +1,6 @@
 var Elm = require('../elm/Main');
 var CSS = require('../scss/main.scss');
+var Split = require('./split.js');
 
 const { ipcRenderer, remote } = require('electron')
 var loaded = false
@@ -7,6 +8,16 @@ var app = null
 
 window.onload = () => {
   app = Elm.Main.embed(document.getElementById('app'), {})
+
+  app.ports.loaded.subscribe(() => {
+    var splitter = Split(['.podcasts', '.episodes', '.detail'], {
+      gutterSize: 11,
+      minSize: [200, 200, 0],
+      snapOffset: 10
+    })
+
+    splitter.setSizes([28, 32, 40])
+  })
 
   app.ports.errorDialog.subscribe((message) => {
     remote.dialog.showErrorBox("View Error", message)

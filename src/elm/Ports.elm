@@ -3,6 +3,8 @@ port module Ports exposing (..)
 import Types exposing (..)
 import Json.Encode
 
+port loaded : Bool -> Cmd msg
+
 port errorDialog : String -> Cmd msg
 
 port globalAction : String -> Cmd msg

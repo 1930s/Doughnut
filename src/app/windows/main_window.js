@@ -59,11 +59,13 @@ export default class MainWindow {
     const mw = this
 
     this.window = new Electron.BrowserWindow({
-      width: 760,
-      height: 580,
+      minWidth: 800,
+      minHeight: 540,
+      width: 900,
+      height: 540,
       resizable: true,
       titleBarStyle: 'hidden-inset',
-      show: false
+      show: false,
     })
 
     this.window.loadURL(url.format({

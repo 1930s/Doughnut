@@ -28,8 +28,9 @@ init state =
     , episodeContextMenu = Nothing
     }
   in
-    (model, Cmd.batch [
-      loadAllPodcasts
+    (model, Cmd.batch
+    [ loadAllPodcasts
+    , Ports.loaded True
     ])
 
 update : Msg -> Model -> (Model, Cmd Msg)
