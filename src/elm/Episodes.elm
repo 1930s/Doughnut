@@ -70,6 +70,7 @@ viewEpisode model ep =
       [ ("episode", True)
       , ("episode--favourite", ep.favourite)
       , ("episode--played", ep.played)
+      , ("episode--unplayed", not ep.played)
       , ("episode--new", new)
       , ("episode--selected", selected)
       ]
@@ -85,14 +86,26 @@ viewEpisode model ep =
         div [ class "downloaded" ] [ Icons.downloadedIcon ]
       else
         text ""
-    , h2 []
-      [ if not ep.played then 
-          Icons.playPosition ep.playPosition ep.duration
-        else
-          text ""
-      , text ep.title ]
-    , p [] [ text ep.description ]
+    , if not ep.played then 
+        unplayedBar ep.playPosition ep.duration
+      else
+        text ""
+    , h2 [] [ text ep.title ]
+    , p [class "episode-summary"] [ text ep.description ]
     , p []
       [ text (dateFormat ep.pubDate)
       ]
     ]
+
+unplayedBar : Int -> Int -> Html Msg
+unplayedBar played total =
+  let
+    percent = if total > 0 then
+        ((toFloat played) / (toFloat total)) * 100
+      else
+        0
+    
+    barWidthPercent = (100 - percent) |> toString
+  in
+    div [class "unplayed-bar", style [("width", barWidthPercent ++ "%")]]
+    []

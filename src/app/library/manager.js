@@ -205,6 +205,7 @@ export class LibraryManager extends EventEmitter {
     return episode.update(args)
       .then(updated => {
         library.emit('episode:updated', updated)
+        return updated
       })
   }
 

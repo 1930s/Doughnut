@@ -13,6 +13,7 @@ import Player
 import Utils.Podcast exposing (imageUrl)
 import TaskManager
 import Icons
+import MainWindow.Detail
 
 splitterConfig : ViewConfig Msg
 splitterConfig =
@@ -36,7 +37,7 @@ view model =
     , div [id "gutter-1", class "gutter gutter-horizontal"] []
     , episodesView model
     , div [id "gutter-2", class "gutter gutter-horizontal"] []
-    , detailView model
+    , MainWindow.Detail.view model
     ]
   ]
 

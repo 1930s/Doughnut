@@ -76,13 +76,21 @@ class Player extends EventEmitter {
       player.saveEpisodeState()
     })
 
+    // Slightly crude rate limiting solution, so playPosition is only saved every 20 seconds when normally playing
+    var saveNeeded = false
+    setInterval(() => { saveNeeded = true}, 20000)
+
     this.mpv.on('timeposition', seconds => {
       player.state = Object.assign(player.state, {
         position: seconds
       })
 
       player.emit('state', player.state)
-      player.saveEpisodeState()
+
+      if (saveNeeded) {
+        player.saveEpisodeState()
+        saveNeeded = false
+      }
     })
   }
 
@@ -110,9 +118,11 @@ class Player extends EventEmitter {
 
       if (Object.keys(updatesNeeded).length >= 1) {
         const player = this
-        player.episode.update(updatesNeeded).then(episode => {
-          player.episode = episode
-        })
+        console.log("Saving: ", updatesNeeded)
+        Library().updateEpisode(player.episode, updatesNeeded)
+          .then(episode => {
+            player.episode = episode
+          })
       }
     }
   }

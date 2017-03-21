@@ -14,23 +14,17 @@
 
   ul {
     list-style: none;
-
-    li:nth-child(even) {
-      background: #FFFFFF;
-    }
   }
 }
 
 .episode {
-  height: 76px;
-  max-height: 76px;
+  height: auto;
+  background: #FFF;
   overflow: hidden;
-  padding: 4px 7px 4px 7px;
-  border: 2px solid transparent;
+  padding: 6px 9px 6px 7px;
+  border-left: 2px solid transparent;
   border-bottom: 1px solid #EEE;
   position: relative;
-
-  transition: max-height 2s ease;
 
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -38,8 +32,8 @@
   &:hover { cursor: default; }
 
   h2 {
-    font-size: 15px;
-    line-height: 15px;
+    font-size: 14px;
+    line-height: 14px;
     margin: 2px 0 6px 0;
 
     > svg {
@@ -50,22 +44,22 @@
   }
 
   p {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 16px;
     margin: 2px 0 4px 0;
-    color: #888;
-    white-space: nowrap;
+    color: #999;
+
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  &-summary {
+    height: 32px;
+  }
+
   &--new {
     background: #EBF4FF;
-    border-bottom: 1px solid #C5DDFF;
-
-    &:first-child {
-      border-top: 1px solid #C5DDFF;
-    }
+    border-left: 2px solid #429AFF;
   }
 
   &--favourite {
@@ -82,7 +76,12 @@
     }
   }
 
+  &:active {
+    background: #EEE;
+  }
+
   &--selected {
+    /*
     border: 2px solid #429AFF;
     height: auto;
     max-height: 400px;
@@ -93,7 +92,7 @@
       white-space: normal;
       overflow: auto;
     }
-    
+    */
     /*
     background: #429AFF;
     p, h2 {
@@ -106,6 +105,18 @@
     right: 0;
     top: 0;
   }
+}
+
+.episode--unplayed {
+  padding-top: 9px;
+}
+
+.unplayed-bar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: #1971EC;
 }
 
 .podcast-detail {
