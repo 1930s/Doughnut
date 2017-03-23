@@ -1,9 +1,7 @@
 <h1 align="center">
-  <br>
   <img src="https://github.com/CD1212/Doughnut/raw/master/src/assets/icon.png" alt="Doughnut" width="200">
   <br>
   Doughnut
-  <br>
   <br>
 </h1>
 

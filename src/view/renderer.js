@@ -1,6 +1,7 @@
-var Elm = require('../elm/Main');
-var CSS = require('../scss/main.scss');
-var Split = require('./split.js');
+var Elm = require('../elm/Main')
+var CSS = require('../scss/main.scss')
+var Split = require('./split.js')
+var jQuery, $ = require('jquery')
 
 const { ipcRenderer, remote } = require('electron')
 var loaded = false
@@ -60,9 +61,21 @@ window.onload = () => {
     app.ports.taskState.send(arg)
   })
 
-
+  // Open any anchor tag links in a browser window, rather than current
+  
   //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
   //ipcRenderer.send('asynchronous-message', 'ping')
 
  // ReactDOM.render( <MainWindow />, document.getElementById('app'));
 }
+
+$(function() {
+  $(document).on('click', 'a', (e) => {
+    e.preventDefault()
+    
+    var href = $(e.currentTarget).attr('href')
+    if (href && href.indexOf('http') !== -1) {
+      ipcRenderer.send('link', href)
+    }
+  })
+})

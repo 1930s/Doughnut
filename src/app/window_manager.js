@@ -153,6 +153,13 @@ class WindowManager {
           shell.showItemInFolder(Library().episodeFilePath(episode.Podcast, episode))
         })
     })
+
+    // Misc
+
+    ipcMain.on('link', (event, arg) => {
+      console.log("Opening link: ", arg)
+      shell.openExternal(arg)
+    })
   }
 
   mainWindow(server) {
