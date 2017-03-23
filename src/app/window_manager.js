@@ -24,6 +24,7 @@ const { ipcMain, dialog, shell } = require('electron')
 import MainWindow from './windows/main_window'
 import Library from './library/manager'
 import Player from './player'
+import Settings from './settings'
 
 class WindowManager {
   constructor() {
@@ -174,7 +175,7 @@ class WindowManager {
 
     const w = new Electron.BrowserWindow({
       width: 500,
-      height: 300,
+      height: 170,
       resizable: false
     })
 
@@ -183,6 +184,12 @@ class WindowManager {
       protocol: 'file:',
       slashes: true
     }))
+
+    if (Settings.isDevelopment()) {
+      w.webContents.openDevTools({
+        mode: 'detach'
+      })
+    }
 
     this._windows.SubscribeWindow = w
     return w

@@ -21,6 +21,7 @@ import url from 'url'
 import path from 'path'
 import {Podcast, Episode} from '../library/models'
 import Library from '../library/manager'
+import Settings from '../settings'
 
 export default class MainWindow {
   constructor(server) {
@@ -32,6 +33,10 @@ export default class MainWindow {
     if (this.window) {
       this.window.webContents.send(message, arg)
     }
+  }
+
+  window() {
+    return this.window
   }
 
   subscribe() {
@@ -74,9 +79,11 @@ export default class MainWindow {
       slashes: true
     }))
 
-    this.window.webContents.openDevTools({
-      mode: 'detach'
-    })
+    if (Settings.isDevelopment()) {
+      this.window.webContents.openDevTools({
+        mode: 'detach'
+      })
+    }
 
     this.window.webContents.on('did-finish-load', () => {
       // Manually show the window now it has received it's initial state

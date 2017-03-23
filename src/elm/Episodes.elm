@@ -106,7 +106,7 @@ unplayedBar played total =
       else
         0
     
-    barWidthPercent = (100 - percent) |> toString
+    barWidthPercent = (100 - (round percent)) |> toString
   in
     div [class "unplayed-bar", style [("width", barWidthPercent ++ "%")]]
     []

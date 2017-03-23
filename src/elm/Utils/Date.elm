@@ -1,10 +1,24 @@
-module Utils.Date exposing (dateFormat)
+module Utils.Date exposing (dateFormat, timeFormat)
 
 import Date exposing (Date, Day(..), Month(..), year, month, day, dayOfWeek)
 
 dateFormat : Date -> String
 dateFormat date =
   leftPadDate (day date) ++ "/" ++ (leftPadDate <| monthToInt <| (month date)) ++ "/" ++ toString (year date)
+
+timeFormat : Int -> String
+timeFormat secs =
+  let
+    hours = (toFloat secs) / 3600 |> floor
+    mins = ((toFloat (rem secs 3600)) / 60) |> floor
+  in
+    if hours < 1 then
+      (toString mins) ++ "m"
+    else if mins < 1 then
+      (toString hours) ++ "h"
+    else
+      (toString hours) ++ "h " ++ (toString  mins) ++ "m"
+
 
 leftPadDate : Int -> String
 leftPadDate d =

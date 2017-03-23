@@ -5,7 +5,9 @@ import Html.Attributes exposing (..)
 import Model exposing (Model, Msg(..), selectedPodcast)
 import Types exposing (..)
 import Utils.Podcast exposing (imageUrl)
+import Utils.Date exposing (dateFormat, timeFormat)
 import Markdown
+import TaskManager exposing (progressBar)
 
 view : Model -> Html Msg
 view model =
@@ -14,7 +16,7 @@ view model =
       Just podcast ->
         case model.selectedEpisode of
           Just episode ->
-            episodeDetail episode
+            episodeDetail episode podcast.podcast
 
           Nothing ->
             podcastDetail podcast
@@ -23,10 +25,27 @@ view model =
         blankView
   ]
 
-episodeDetail : Episode -> Html Msg
-episodeDetail episode =
+episodeDetail : Episode -> Podcast -> Html Msg
+episodeDetail episode podcast =
   div [class "episode-detail"]
-  [ Markdown.toHtml [class "episode-description"] episode.description
+  [ div [class "episode-info"]
+    [ h1 [] [ text episode.title ]
+    , h3 [] [ text podcast.title ]
+    ]
+  , div [class "episode-progress"]
+    [ p []
+      [ span [] [ text (dateFormat episode.pubDate) ]
+      , if episode.duration > 0 then
+          span [] [ text (timeFormat episode.duration) ]
+        else
+          text ""
+      ]
+    , if (episode.playPosition > 0) && (episode.duration > 1) then
+        progressBar episode.playPosition episode.duration
+      else
+        text ""
+    ]
+  , Markdown.toHtml [class "episode-description"] episode.description
   ]
 
 podcastDetail : PodcastWrapped -> Html Msg
