@@ -41,7 +41,13 @@ viewPodcast state pw =
     pod = pw.podcast
     contextMenu = podcastContextMenu pod
   in
-    li [ open (ShowPodcastContextMenu contextMenu), onClick (SelectPodcast pw) ]
+    li
+    [ open (ShowPodcastContextMenu contextMenu)
+    , onClick (SelectPodcast pw)
+    , classList 
+      [ ("podcast--selected", pw.selected)
+      ]
+    ]
     [ div [class "podcast-list-cover"]
       [ img [src (imageUrl pod)] []
       ]

@@ -30,6 +30,15 @@
   -webkit-user-select: none;
 
   &:hover { cursor: default; }
+  &:active {
+    background: #EEE;
+  }
+  &--selected {
+    background: #EEE;
+  }
+  &--selected:focus {
+    background: #429AFF;
+  }
 
   .podcast-list-cover {
     width: 50px;
@@ -44,10 +53,16 @@
   }
 
   .podcast-list-detail {
+    min-width: 0;
+
     h2 {
       font-size: 14px;
       line-height: 16px;
       margin: 2px 0 3px 0;
+      
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     p {
@@ -55,6 +70,10 @@
       line-height: 13px;
       margin: 2px 0;
       color: #777;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -70,10 +89,7 @@
     font-size: 12px;
     font-weight: bolder;
     border-radius: 5px;
-  }
-
-  &:active {
-    background: #EEE;
+    white-space: nowrap;
   }
 }
 

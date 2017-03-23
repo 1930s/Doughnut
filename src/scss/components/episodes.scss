@@ -6,12 +6,6 @@
 
   background: #FAFAFA;
 
-  .podcast-detail {
-    width: 100%;
-    min-height: 200px;
-    padding: 10px;
-  }
-
   ul {
     list-style: none;
   }
@@ -20,8 +14,7 @@
 .episode {
   height: auto;
   background: #FFF;
-  overflow: hidden;
-  padding: 6px 9px 6px 7px;
+  padding: 7px 10px 7px 8px;
   border-left: 2px solid transparent;
   border-bottom: 1px solid #EEE;
   position: relative;
@@ -33,46 +26,43 @@
 
   h2 {
     font-size: 14px;
-    line-height: 14px;
-    margin: 2px 0 6px 0;
-
-    > svg {
-      vertical-align: middle;
-      margin-right: 0.5em;
-      margin-bottom: 3px;
-    }
+    line-height: 17px;
+    padding: 0 .8em 0 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   p {
     font-size: 12px;
     line-height: 16px;
-    margin: 2px 0 4px 0;
     color: #999;
 
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  &-summary {
+  p.episode-summary {
     height: 32px;
+    margin: 2px 0 4px 0;
   }
 
   &--new {
     background: #EBF4FF;
-    border-left: 2px solid #429AFF;
   }
 
   &--favourite {
-    border-left: 2px solid #FED530;
+    border-top: 2px solid #FED530;
     
     .bookmark {
       position: absolute;
-      top: -2px;
-      left: 7px;
+      top: -4px;
+      left: 3px;
     }
 
     h2 {
-      padding-left: 25px;
+      padding-left: 18px;
     }
   }
 
@@ -115,60 +105,6 @@
   position: absolute;
   right: 0;
   top: 0;
-  height: 3px;
+  height: 2px;
   background: #1971EC;
-}
-
-.podcast-detail {
-  display: flex;
-  flex-direction: row;
-  background: white;
-  border-bottom: 1px solid #EEEEEE;
-
-  .podcast-cover {
-    flex-grow: 0;
-    max-width: 168px;
-
-    img {
-      max-width: 168px;
-      max-height: 168px;
-    }
-  }
-
-  .podcast-info {
-    margin: 5px 15px 0 15px;
-    flex-grow: 1;
-  }
-
-  h1 {
-    font-size: 18px;
-    line-height: 18px;
-    margin: 0 0 5px 0;
-  }
-
-  p {
-    font-size: 12px;
-    color: #555;
-    line-height: 17px;
-    margin: 3px 0;
-  }
-
-  table {
-    font-size: 11px;
-    line-height: 16px;
-    margin: 15px 0 10px 0;
-
-    tr td:first-child {
-      white-space: nowrap;
-      text-align: right;
-      font-weight: 500;
-      color: #000;
-    }
-
-    tr td:last-child {
-      text-align: left;
-      padding-left: 6px;
-      color: #4A4A4A;
-    }
-  }
 }

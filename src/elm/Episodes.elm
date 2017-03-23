@@ -7,6 +7,7 @@ import Model exposing (Model, Msg(..), EpisodeContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Utils.Date exposing (dateFormat)
+import Utils.Text exposing (stripHtml)
 import Icons
 
 list : Model -> PodcastWrapped -> Html Msg
@@ -91,7 +92,7 @@ viewEpisode model ep =
       else
         text ""
     , h2 [] [ text ep.title ]
-    , p [class "episode-summary"] [ text ep.description ]
+    , p [class "episode-summary"] [ text (stripHtml ep.description) ]
     , p []
       [ text (dateFormat ep.pubDate)
       ]
