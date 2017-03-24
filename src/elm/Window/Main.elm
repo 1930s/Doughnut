@@ -74,7 +74,7 @@ episodesView model =
         Episodes.list model selected
       
       Nothing ->
-        p [] [text "Please select a podcast"]
+        p [] [text "Select a odcast"]
   ]
 
 podcastView : PodcastWrapped -> Model -> Html Msg

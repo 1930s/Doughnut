@@ -1,12 +1,13 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');  
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const path = require('path')
 
 module.exports = {
   entry: {
     view: './src/view/renderer.js'
   },
   output: {
-    path: './compiled',
+    path: path.resolve(__dirname, './build'),
     filename: '[name].js'
   },
   module: {

@@ -11,11 +11,17 @@
   <a href="https://github.com/CD1212/Doughnut/releases"><img src="https://img.shields.io/github/release/cd1212/doughnut.svg" alt="github release"></a>
 </p>
 
-## Development
+## How to Contribute
 
+### Get the code
 ```
-npm install
-npm run rebuild
-npm run watch
-npm run app
+$ git clone git@github.com:CD1212/Doughnut.git
+$ cd Doughnut
+$ npm install
+```
+
+### Run the app
+```
+$ npm run rebuild
+$ npm start
 ```
