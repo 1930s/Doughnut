@@ -70,9 +70,7 @@ export default class AssetServer {
           })
 
           return {
-            podcast: Object.assign(podcast.viewJson(), {
-              categories: podcast.Categories
-            }),
+            podcast: podcast.viewJson(),
             episodes: episodes,
             loading: false,
             selected: false
