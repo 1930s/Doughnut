@@ -20,7 +20,7 @@ var express = require('express')
 var portfinder = require('portfinder')
 var Promise = require('bluebird')
 
-import { Podcast, Episode } from './library/models'
+import { Podcast, Episode, Category } from './library/models'
 import Player from './player'
 
 export default class AssetServer {
@@ -60,7 +60,7 @@ export default class AssetServer {
     this.app.get('/podcasts', (req, res) => {
       Podcast.findAll({
         attributes: { exclude: ['imageBlob'] },
-        include: [ Episode ],
+        include: [ Episode, Category ],
         order: [[ Episode, 'pubDate', 'DESC' ]]
       })
       .then(podcasts => {
@@ -70,7 +70,9 @@ export default class AssetServer {
           })
 
           return {
-            podcast: podcast.viewJson(),
+            podcast: Object.assign(podcast.viewJson(), {
+              categories: podcast.Categories
+            }),
             episodes: episodes,
             loading: false,
             selected: false

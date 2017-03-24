@@ -17,6 +17,7 @@ type alias Podcast =
   , pubDate : Date
   , language : String
   , copyright : String
+  , categories : List String
   , imageUrl : String
   , lastParsed : Date
   , createdAt : Date

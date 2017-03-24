@@ -24,6 +24,7 @@ import Menu from './menu'
 import Settings from './settings'
 import Library from './library/manager'
 import AssetServer from './asset_server'
+import Player from './player'
 
 const {dialog, app} = require('electron')
 
@@ -86,6 +87,7 @@ Electron.app.on('ready', () => {
 Electron.app.on('quit', () => {
   Logger.debug('Application quit')
   WindowManager.teardown()
+  Player.destroy()
 })
 
 Electron.app.on('window-all-closed', () => {

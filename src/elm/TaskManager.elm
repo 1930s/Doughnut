@@ -8,11 +8,16 @@ import Icons
 
 view : Model -> Html Msg
 view model =
-  if True then
-    div [class "tasks"] 
-      (List.map taskView model.tasks.tasks)
-  else
-    div [] [text ""]
+  let
+    { tasks } = model.tasks
+  in
+    div
+      [ classList 
+        [ ("tasks", True)
+        , ("tasks--empty", List.length(tasks) == 0)
+        ]
+      ] 
+      (List.map taskView tasks)
 
 taskView : LibraryTask -> Html Msg
 taskView task =

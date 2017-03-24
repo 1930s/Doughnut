@@ -15,6 +15,8 @@ describe('Podcast', function() {
     const feed = "http://localhost:3000/feed.xml"
 
     Library().on('podcast:updated', podcast => {
+      expect(podcast.viewJson().categories).to.eql(['Comedy', 'TV & Film'])
+
       Episode.find({
         where: { title: fixture.items[0].title }
       }).then((e) => {
@@ -66,11 +68,63 @@ describe('Podcast', function() {
 
         Library().reload(subscribed)
           .then(() => {
+            expect(Library().downloadQueue.count()).to.eql(0)
             Episode.count().then((c) => {
               expect(c).to.eql(2)
               done()
             })
           })
+      })
+    })
+
+    it('should updated existing episodes by guid', function(done) {
+      Episode.count().then((c) => {
+        expect(c).to.eql(2)
+
+        Episode.updateParsedEpisode(subscribed, {
+          title: "New name!",
+          description: "Use this for the content. It can include html.",
+          url: 'http://example.com/article1?this&that',
+          guid: '1123',
+          categories: ['Category 1','Category 2','Category 3','Category 4'],
+          author: 'Guest Author',
+          date: 'May 27, 2012',
+          enclosure: { url: "http://localhost:3000/enclosure.mp3" }
+        })
+        .then(episode => {
+          Episode.count().then((c) => {
+            expect(c).to.eql(2)
+            expect(episode.title).to.eql("New name!")
+
+            done()
+          })
+        })
+      })
+    })
+
+    it('should prevent duplicate titled episodes', function(done) {
+      Episode.count().then((c) => {
+        expect(c).to.eql(2)
+
+        Episode.updateParsedEpisode(subscribed, {
+          title: "First Item",
+          description: "Use this for the content. It can include html.",
+          url: 'http://example.com/article1?this&that',
+          guid: 'newguid',
+          categories: ['Category 1','Category 2','Category 3','Category 4'],
+          author: 'Guest Author',
+          date: 'May 27, 2012',
+          enclosure: { url: "http://localhost:3000/enclosure.mp3" }
+        })
+        .then(episode => {
+          Episode.count().then((c) => {
+            expect(c).to.eql(2)
+            expect(episode.title).to.eql("First Item")
+            expect(episode.guid).to.eql("newguid")
+
+            done()
+          })
+        })
       })
     })
 
@@ -82,7 +136,7 @@ describe('Podcast', function() {
       .then((p) => {
         Library().reload(p)
           .then(() => {
-            // 2 new episodes should be found and scheduled for download
+            // 2 new episodes should be found and the latest scheduled for download
             expect(Library().downloadQueue.count()).to.eql(1)
 
             Episode.count().then((c) => {

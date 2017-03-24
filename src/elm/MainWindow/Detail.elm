@@ -67,7 +67,7 @@ podcastDetail pw =
           ]
         , tr []
           [ td [] [ text "Categories" ]
-          , td [] [ text "Comedy, TV & Film"]
+          , td [] [ text (String.join ", " podcast.categories)]
           ]
         , tr []
           [ td [] [ text "Owner" ]

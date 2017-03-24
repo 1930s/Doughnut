@@ -18,6 +18,7 @@
 
 import DataType from 'sequelize'
 import Episode from './episode'
+import Category from './category'
 import Model from '../sequelize'
 import Settings from '../../settings'
 
@@ -32,8 +33,8 @@ const Podcast = Model.define('Podcast', {
   id: {
     type: DataType.INTEGER,
     field: 'id',
-    autoIncrement: !0,
-    primaryKey: !0
+    autoIncrement: true,
+    primaryKey: true
   },
   title: { type: DataType.STRING, defaultValue: '' },
   feed: { type: DataType.STRING, defaultValue: '' },
@@ -52,13 +53,23 @@ const Podcast = Model.define('Podcast', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   freezeTableName: true,
+  defaultScope: {
+    include: [ Category ]
+  },
   classMethods: {
     subscribe: function (url) {
       return new Promise(function (resolve, reject) {
+        var parsed = {}
+
         Podcast.parseFeed(url)
-          .then(parsed => {
+          .then(result => {
+            parsed = result
             const meta = Podcast.sanitizeMeta(parsed.meta)
             return Podcast.create(meta)
+          })
+          .then(podcast => {
+            const categoryNames = Podcast.sanitizeCategories(parsed.meta)
+            return podcast.linkCategories(categoryNames)
           })
           .then(function (podcast) {
             return podcast.syncFeed()
@@ -120,6 +131,22 @@ const Podcast = Model.define('Podcast', {
         imageUrl: meta.image.url,
         lastParsed: new Date()
       }
+    },
+
+    sanitizeCategories: function (meta) {
+      var categories = []
+      if (meta['itunes:category']) {
+        for (var i = 0; i < meta['itunes:category'].length; i++) {
+          var at = meta['itunes:category'][i]['@']
+          if (at && at.text) {
+            categories.push(
+              at.text.replace(/&amp;/g, '&')
+            )
+          }
+        }
+      }
+
+      return categories
     }
   },
   instanceMethods: {
@@ -150,38 +177,46 @@ const Podcast = Model.define('Podcast', {
       return new Promise((resolve, reject) => {
         var foundEpisodes = []
 
-        Podcast.parseFeed(podcast.feed)
-          .then(parsed => {
-            const meta = Podcast.sanitizeMeta(parsed.meta)
+        Episode.findAll({
+          attributes: ['id'],
+          where: { podcast_id: podcast.id }
+        })
+        .then(existingEpisodes => {
+          var parsed = {}
 
-            return Promise.map(parsed.items, episode => {
-              return Episode.updateParsedEpisode(podcast, episode)
-            }, {concurrency: 10})
-              .then((episodes) => {
-                foundEpisodes = episodes.filter((e) => { return e !== false })
-                return podcast.update(meta)
-              })
-              .catch(reject)
-          })
-          .then(podcast => {
-            return podcast.reloadImage()
-          })
-          .then(podcast => {
-            resolve({
-              podcast,
-              found: foundEpisodes
+          Podcast.parseFeed(podcast.feed)
+            .then(result => {
+              parsed = result
+              const meta = Podcast.sanitizeMeta(parsed.meta)
+
+              return Promise.map(parsed.items, episode => {
+                return Episode.updateParsedEpisode(podcast, episode)
+              }, {concurrency: 10})
+                .then(episodes => {
+                  foundEpisodes = episodes.filter(e => {
+                    return !existingEpisodes.find(existEp => {
+                      return existEp.id === e.id
+                    })
+                  })
+                  return podcast.update(meta)
+                })
+                .catch(reject)
             })
-          })
-          .catch(reject)
-      })
-    },
-
-    newlyEpisodes: function (created) {
-      return Episode.findAll({
-        where: {
-          podcast_id: this.id,
-          new: true
-        }
+            .then(podcast => {
+              const categoryNames = Podcast.sanitizeCategories(parsed.meta)
+              return podcast.linkCategories(categoryNames)
+            })
+            .then(podcast => {
+              return podcast.reloadImage()
+            })
+            .then(podcast => {
+              resolve({
+                podcast,
+                found: foundEpisodes
+              })
+            })
+            .catch(reject)
+        })
       })
     },
 
@@ -204,7 +239,36 @@ const Podcast = Model.define('Podcast', {
       })
     },
 
+    linkCategories: function (categoryNames) {
+      const podcast = this
+
+      return new Promise(function (resolve, reject) {
+        Promise.map(categoryNames, name => {
+          return Category.findOrCreate({
+            name: name
+          })
+        })
+        .then(categories => {
+          podcast.setCategories(categories)
+            .then(() => {
+              Podcast.findById(podcast.id)
+                .then(resolve)
+                .catch(reject)
+            })
+            .catch(reject)
+        })
+        .catch(reject)
+      })
+    },
+
     viewJson: function () {
+      var categories = []
+      if (this.Categories) {
+        categories = this.Categories.map(c => {
+          return c.name
+        })
+      }
+
       return {
         id: this.id,
         title: this.title,
@@ -215,6 +279,7 @@ const Podcast = Model.define('Podcast', {
         pubDate: this.pubDate || (new Date()),
         language: this.language || 'en',
         copyright: this.copyright || '',
+        categories: categories,
         imageUrl: this.imageUrl,
         lastParsed: this.lastParsed,
         downloadNew: this.downloadNew,
@@ -229,105 +294,7 @@ const Podcast = Model.define('Podcast', {
 Podcast.hasMany(Episode, { foreignKey: 'podcast_id' })
 Episode.belongsTo(Podcast, { foreignKey: 'podcast_id' })
 
-export { Podcast, Episode }
+Category.belongsToMany(Podcast, { through: 'podcast_categories', foreignKey: 'category_id', timestamps: false })
+Podcast.belongsToMany(Category, { through: 'podcast_categories', foreignKey: 'podcast_id', timestamps: false })
 
-/*
-PodcastCategory = Sequelize.define('podcast_category', {})
-
-Podcast.belongsToMany(Category, { through: PodcastCategory })
-
-Podcast.subscribe = (url, loaded) => {
-  const podcast = Podcast.build({
-    feed: url
-  })
-
-  podcast.reload((err) => {
-    loaded(err, podcast)
-  })
-}
-
-Podcast.prototype.reload = (callback) => {
-  const podcast = this
-
-}
-
-Podcast.prototype.reloadImage = (callback) => {
-  const podcast = this
-
-  console.log(this.image_url)
-  request(this.image_url, (err, resp, body) => {
-    if (err) {
-
-    } else {
-      podcast.image_blob = new Buffer(body).toString('base64')
-      callback()
-    }
-  })
-}
-
-Podcast.prototype.parsePodcast = (meta) => {
-  this.meta = Object.assign({}, this.meta, {
-    title: meta.title,
-    description: meta.description,
-    date: meta.date,
-    language: meta.language,
-    copyright: meta.copyright,
-    categories: meta.categories,
-    image: {
-      url: meta.image.url,
-      title: meta.image.title,
-      link: meta.image.link
-    }
-  })
-}
-
-module.exports = Podcast
-/*
-export default class Podcast {
-  constructor(data) {
-    this.title = data.title
-    this.feed = data.feed
-    this.meta = data.meta
-
-    if (data.imageBuffer) {
-      this.imageBuffer = data.imageBuffer
-    } else {
-      this.imageBuffer = new Buffer(0)
-    }
-
-    if (data.episodes) {
-      data.episodes.map((e) => {
-        return new Episode(e)
-      })
-    } else {
-      this.episodes = []
-    }
-  }
-
-  // Return data to store
-  store() {
-    return {
-      title: this.meta.title,
-      feed: this.feed,
-      meta: this.meta,
-      imageBuffer: this.imageBuffer.toString('base64'),
-      episodes: this.episodes.map((e) => {
-        return e.data()
-      })
-    }
-  }
-
-  static subscribe(url, loaded) {
-    const podcast = new Podcast({
-      feed: url
-    })
-
-    podcast.reload((err) => {
-      loaded(err, podcast)
-    })
-  }
-
-  parseEpisode() {
-
-  }
-} */
+export { Podcast, Episode, Category }

@@ -27,13 +27,13 @@ const Episode = Model.define('Episode', {
   id: {
     type: DataType.INTEGER,
     field: 'id',
-    autoIncrement: !0,
-    primaryKey: !0
+    autoIncrement: true,
+    primaryKey: true
   },
   podcast_id: { type: DataType.INTEGER },
   title: { type: DataType.STRING, defaultValue: '' },
   description: { type: DataType.STRING, defaultValue: '' },
-  guid: { type: DataType.STRING, defaultValue: '' },
+  guid: { type: DataType.STRING, defaultValue: '', allowNull: false, unique: true },
   pubDate: { type: DataType.DATE, field: 'pub_date', defaultValue: DataType.NOW },
   link: { type: DataType.STRING, defaultValue: '' },
   enclosureUrl: { type: DataType.STRING, field: 'enclosure_url', defaultValue: '' },
@@ -69,9 +69,19 @@ const Episode = Model.define('Episode', {
             Episode.create(Object.assign({},
               Episode.sanitizeMeta(data), {
                 podcast_id: podcast.id
-              })).then(resolve)
+              })
+            )
+            .then(resolve)
+            .catch(reject)
           } else {
-            resolve(false)
+            // Update existing episode
+            episodes[0].update(Object.assign({},
+              Episode.sanitizeMeta(data), {
+                podcast_id: podcast.id
+              })
+            )
+            .then(resolve)
+            .catch(reject)
           }
         })
         .catch(reject)
@@ -91,7 +101,7 @@ const Episode = Model.define('Episode', {
         pubDate: data.pubDate,
         link: data.link,
         enclosureUrl: enclosure.url,
-        enclosureSize: enclosure.length
+        enclosureSize: enclosure['length']
       }
     }
   },

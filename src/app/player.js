@@ -148,9 +148,12 @@ class Player extends EventEmitter {
   destroy () {
     this.mpv.stop()
 
-    if (this.mpv.mpvPlayer) {
-      console.log('Killing')
-      this.mpv.mpvPlayer.kill('SIGINT')
+    if (this.mpv && this.mpv.mpvPlayer) {
+      try {
+        this.mpv.mpvPlayer.kill('SIGINT')
+      } catch (e) {
+
+      }
     }
   }
 

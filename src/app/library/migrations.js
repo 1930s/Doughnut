@@ -56,7 +56,16 @@ const MIGRATIONS = [
     created_at DATE,
     updated_at DATE
   )
-  `
+  `,
+  `CREATE TABLE categories (
+    id INTEGER PRIMARY KEY,
+    name TEXT
+  )`,
+  `CREATE TABLE podcast_categories (
+    id INTEGER PRIMARY KEY,
+    podcast_id INTEGER,
+    category_id INTEGER
+  )`
 ]
 
 export default class Migrations {

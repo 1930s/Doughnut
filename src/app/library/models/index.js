@@ -17,6 +17,6 @@
  */
 
 import '../sequelize'
-import { Podcast, Episode } from './podcast'
+import { Podcast, Episode, Category } from './podcast'
 
-export { Podcast, Episode }
+export { Podcast, Episode, Category }

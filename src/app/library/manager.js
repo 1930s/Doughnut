@@ -224,9 +224,8 @@ export class LibraryManager extends EventEmitter {
           library.emit('podcast:updated', result.podcast)
 
           if (result.found.length > 0 && result.podcast.downloadNew) {
-            result.found.forEach(e => {
-              library.downloadEpisode(e)
-            })
+            const latest = result.found.sort((a, b) => { return new Date(b.pubDate) - new Date(a.pubDate) })[0]
+            library.downloadEpisode(latest)
           }
           return result.podcast
         })

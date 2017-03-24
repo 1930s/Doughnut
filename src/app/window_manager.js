@@ -48,7 +48,6 @@ class WindowManager {
   }
 
   teardown () {
-    Player.destroy()
   }
 
   setup () {

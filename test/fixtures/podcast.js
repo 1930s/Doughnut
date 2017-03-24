@@ -6,7 +6,20 @@ module.exports = {
     language: "en",
     copyright: "Test Co.",
     description: "Lorem ipsum sit amet dolor.",
-    image_url: "http://localhost:3000/image.jpg"
+    image_url: "http://localhost:3000/image.jpg",
+    categories: ['Comedy', 'TV &amp; Film'],
+    custom_elements: [
+      {'itunes:category': [
+        {_attr: {
+          text: 'Comedy'
+        }},
+      ]},
+      {'itunes:category': [
+        {_attr: {
+          text: 'TV &amp; Film'
+        }}
+      ]}
+    ]
   },
   items: [
     {
