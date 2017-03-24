@@ -2,10 +2,14 @@ language: node_js
 node_js:
 - '7.5'
 
+env:
+  - CXX=g++-5.4
+
 addons:
   apt:
     packages:
       - xvfb
+      - g++-5.4
 
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
