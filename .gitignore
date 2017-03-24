@@ -1,7 +1,6 @@
 node_modules
-build/*
-!build/icon.icns
-!build/icon.ico
+build
+!src/assets/build
 compiled
 elm-stuff
 test.mp3

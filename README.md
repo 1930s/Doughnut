@@ -27,3 +27,8 @@ $ npm install
 $ npm run rebuild
 $ npm start
 ```
+
+### Compile a release build
+```
+$ npm run package
+```
