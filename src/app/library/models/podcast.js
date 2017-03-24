@@ -244,9 +244,7 @@ const Podcast = Model.define('Podcast', {
 
       return new Promise(function (resolve, reject) {
         Promise.map(categoryNames, name => {
-          return Category.findOrCreate({
-            name: name
-          })
+          return Category.findOrCreateWithName(name)
         })
         .then(categories => {
           podcast.setCategories(categories)

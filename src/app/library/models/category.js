@@ -19,6 +19,8 @@
 import DataType from 'sequelize'
 import Model from '../sequelize'
 
+const Promise = require('bluebird')
+
 const Category = Model.define('Category', {
   id: {
     type: DataType.INTEGER,
@@ -30,7 +32,24 @@ const Category = Model.define('Category', {
 }, {
   tableName: 'categories',
   timestamps: false,
-  freezeTableName: true
+  freezeTableName: true,
+  classMethods: {
+    findOrCreateWithName: function (name) {
+      return new Promise(function (resolve, reject) {
+        Category.find({ where: { name: name } })
+          .then(category => {
+            if (category != null) {
+              resolve(category)
+            } else {
+              Category.create({ name: name })
+                .then(resolve)
+                .catch(reject)
+            }
+          })
+          .catch(reject)
+      })
+    }
+  }
 })
 
 export default Category

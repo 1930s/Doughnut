@@ -84,8 +84,8 @@ Electron.app.on('ready', () => {
   main.onReady()
 })
 
-Electron.app.on('quit', () => {
-  Logger.debug('Application quit')
+Electron.app.on('will-quit', () => {
+  Logger.debug('Application will quit')
   WindowManager.teardown()
   Player.destroy()
 })
