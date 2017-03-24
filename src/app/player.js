@@ -1,22 +1,22 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const mpvLink = require('node-mpv')
+const MPV = require('node-mpv')
 const path = require('path')
 const EventEmitter = require('events')
 
@@ -25,21 +25,25 @@ import { Podcast } from './library/models'
 import Settings from './settings'
 
 class Player extends EventEmitter {
-  constructor() {
+  constructor () {
     super()
 
-    if (Settings.isProduction()) {
-      var binary = path.join(__dirname, "../mac/mpv")
-    } else {
-      var binary = path.join(__dirname, "mac/mpv")
+    if (process.env.NODE_ENV === 'test') {
+      return
     }
 
-    this.mpv = new mpvLink({
-      "audio_only": true,
+    var binary = path.join(__dirname, 'mac/mpv')
+
+    if (Settings.isProduction()) {
+      binary = path.join(__dirname, '../mac/mpv')
+    }
+
+    this.mpv = new MPV({
+      'audio_only': true,
       binary: binary
     }, [
-      "--cache=auto",
-      "--cache-default=2048"
+      '--cache=auto',
+      '--cache-default=2048'
     ])
 
     const player = this
@@ -48,8 +52,10 @@ class Player extends EventEmitter {
       pause: false,
       volume: Settings.get('player', { volume: 60 }).volume,
       duration: 0,
-      title: "",
-      position: 0
+      title: '',
+      position: 0,
+      ready: false,
+      episodeId: 0
     }
     this.episode = null
 
@@ -65,6 +71,14 @@ class Player extends EventEmitter {
       player.saveEpisodeState()
     })
 
+    this.mpv.on('stopped', mpvStatus => {
+      player.episode = null
+      player.state = Object.assign(player.state, {
+        ready: false,
+        episodeId: 0
+      })
+    })
+
     this.mpv.on('statuschange', mpvStatus => {
       player.state = Object.assign(player.state, {
         pause: mpvStatus.pause,
@@ -78,7 +92,7 @@ class Player extends EventEmitter {
 
     // Slightly crude rate limiting solution, so playPosition is only saved every 20 seconds when normally playing
     var saveNeeded = false
-    setInterval(() => { saveNeeded = true}, 20000)
+    setInterval(() => { saveNeeded = true }, 20000)
 
     this.mpv.on('timeposition', seconds => {
       player.state = Object.assign(player.state, {
@@ -94,31 +108,35 @@ class Player extends EventEmitter {
     })
   }
 
-  saveEpisodeState() {
+  ready () {
+    return this.episode != null
+  }
+
+  saveEpisodeState () {
     if (this.episode) {
       var updatesNeeded = {}
 
       if (this.episode.duration < 1) {
         updatesNeeded.duration = Math.round(this.state.duration)
-      } 
+      }
 
       const playPosition = Math.round(this.state.position)
       if (this.state.position > 0 &&
-          this.episode.playPosition != playPosition) {
+          this.episode.playPosition !== playPosition) {
         updatesNeeded.playPosition = playPosition
       }
 
       // Mark as played once over 90% played
       if (this.state.duration > 0) {
         const percentPlayed = (this.state.position / this.state.duration) * 100
-        if (this.episode.played == false && percentPlayed >= 90) {
+        if (this.episode.played === false && percentPlayed >= 90) {
           updatesNeeded.played = true
         }
       }
 
       if (Object.keys(updatesNeeded).length >= 1) {
         const player = this
-        console.log("Saving: ", updatesNeeded)
+        console.log('Saving: ', updatesNeeded)
         Library().updateEpisode(player.episode, updatesNeeded)
           .then(episode => {
             player.episode = episode
@@ -127,16 +145,16 @@ class Player extends EventEmitter {
     }
   }
 
-  destroy() {
+  destroy () {
     this.mpv.stop()
 
     if (this.mpv.mpvPlayer) {
-      console.log("Killing")
+      console.log('Killing')
       this.mpv.mpvPlayer.kill('SIGINT')
     }
   }
 
-  play(episode) {
+  play (episode) {
     if (!this.state.pause) {
       this.mpv.stop()
     }
@@ -146,56 +164,61 @@ class Player extends EventEmitter {
     if (episode.downloaded) {
       Podcast.findById(episode.podcast_id)
         .then(podcast => {
-          this.mpv.loadFile(Library().episodeFilePath(podcast, episode))
+          this.mpv.loadFile(podcast.fileName(episode))
         })
     } else {
-      console.log("Playing: ", episode.enclosureUrl)
+      console.log('Playing: ', episode.enclosureUrl)
       this.mpv.loadStream(episode.enclosureUrl)
     }
 
     if (this.episode.playPosition > 0) {
       this.onStarted = () => {
-        console.log("Resuming at: ", this.episode.playPosition)
+        console.log('Resuming at: ', this.episode.playPosition)
         this.seekTo(this.episode.playPosition)
       }
     }
 
-    this.state.title = episode.title
+    this.state = Object.assign(this.state, {
+      title: episode.title,
+      episodeId: episode.id,
+      ready: true
+    })
+
     this.mpv.play()
   }
 
-  pause() {
+  pause () {
     this.mpv.pause()
   }
 
-  toggle() {
+  toggle () {
     this.mpv.togglePause()
   }
 
-  seekTo(position) {
+  seekTo (position) {
     this.mpv.goToPosition(position)
   }
 
-  skipForward() {
-
+  skipForward () {
+    this.seekTo(this.state.position + 30.0)
   }
 
-  skipBack() {
-
+  skipBack () {
+    this.seekTo(this.state.position - 30.0)
   }
 
-  setVolume(volume) {
+  setVolume (volume) {
     const clamped = Math.max(0, Math.min(100, volume))
 
     this.mpv.volume(clamped)
     Settings.set('player', { volume: clamped })
   }
 
-  volumeUp() {
+  volumeUp () {
     this.setVolume(this.state.volume + 10)
   }
 
-  volumeDown() {
+  volumeDown () {
     this.setVolume(this.state.volume - 10)
   }
 }

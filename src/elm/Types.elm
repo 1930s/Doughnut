@@ -60,6 +60,7 @@ type alias PlayerModel =
   , seeking : Bool
   , seekingPosition : Float
   , adjustingVolume : Int
+  , showSeekDetail : Bool
   }
 
 type alias PlayerState =
@@ -68,6 +69,8 @@ type alias PlayerState =
   , duration : Float
   , position : Float
   , title : String
+  , ready : Bool
+  , episodeId : Int
   }
 
 type alias PodcastLoadingIpc =

@@ -9,6 +9,7 @@
 
 <p align="center">
   <a href="https://github.com/CD1212/Doughnut/releases"><img src="https://img.shields.io/github/release/cd1212/doughnut.svg" alt="github release"></a>
+  <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
 ## How to Contribute

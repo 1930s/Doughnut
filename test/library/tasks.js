@@ -34,7 +34,8 @@ describe('Task', function() {
 
       Library().on('episode:updated', ep => {
         if (ep.id == episode.id && ep.downloaded) {
-          const exists = path.join(Library().path(), subscribed.fileName(ep))
+          const exists = subscribed.fileName(ep)
+          console.log(exists)
           expect(fs.existsSync(exists)).to.eql(true)
           expect(md5File.sync(exists)).to.eql("4d35f4941a353af50665e2f5c8a8656c")
 
@@ -46,7 +47,7 @@ describe('Task', function() {
       })
 
       // Assert correct file path is created
-      expect(subscribed.fileName(episode)).to.eql("Test Podcast/First Item.mp3")
+      expect(subscribed.fileName(episode)).to.contain("Test Podcast/First Item.mp3")
       Library().downloadEpisode(episode)
     })
   })

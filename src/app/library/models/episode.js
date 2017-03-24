@@ -1,17 +1,17 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,16 +20,14 @@ import DataType from 'sequelize'
 import Model from '../sequelize'
 
 var Promise = require('bluebird')
-var FeedParser = require('feedparser')
-var request = require('request')
 var path = require('path')
-var sanitize = require("sanitize-filename")
+var sanitize = require('sanitize-filename')
 
 const Episode = Model.define('Episode', {
   id: {
-    type: DataType.INTEGER, 
-    field: "id",             
-    autoIncrement: !0,       
+    type: DataType.INTEGER,
+    field: 'id',
+    autoIncrement: !0,
     primaryKey: !0
   },
   podcast_id: { type: DataType.INTEGER },
@@ -54,8 +52,8 @@ const Episode = Model.define('Episode', {
     /*
     ** Find an existing episode or create a new one
     */
-    updateParsedEpisode: function(podcast, data) {
-      return new Promise(function(resolve, reject) {
+    updateParsedEpisode: function (podcast, data) {
+      return new Promise(function (resolve, reject) {
         Episode.findAll({
           where: {
             podcast_id: podcast.id,
@@ -66,12 +64,12 @@ const Episode = Model.define('Episode', {
           }
         })
         .then((episodes) => {
-          if (!episodes || episodes.length == 0) {
+          if (!episodes || episodes.length === 0) {
             // Episode is new, create it
-            Episode.create(Object.assign({}, 
+            Episode.create(Object.assign({},
               Episode.sanitizeMeta(data), {
-              podcast_id: podcast.id,
-            })).then(resolve)
+                podcast_id: podcast.id
+              })).then(resolve)
           } else {
             resolve(false)
           }
@@ -80,7 +78,7 @@ const Episode = Model.define('Episode', {
       })
     },
 
-    sanitizeMeta: function(data) {
+    sanitizeMeta: function (data) {
       var enclosure = {}
       if (data.enclosures && data.enclosures.length > 0) {
         enclosure = data.enclosures[0]
@@ -98,7 +96,7 @@ const Episode = Model.define('Episode', {
     }
   },
   instanceMethods: {
-    viewJson: function() {
+    viewJson: function () {
       return {
         id: this.id,
         podcast_id: this.podcast_id,
@@ -119,7 +117,7 @@ const Episode = Model.define('Episode', {
       }
     },
 
-    fileName: function() {
+    fileName: function () {
       const ext = path.extname(this.enclosureUrl)
       return `${sanitize(this.title)}${ext}`
     }

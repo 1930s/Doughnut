@@ -1,25 +1,21 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Umzug = require('umzug')
-var path = require('path')
-var fs = require('fs')
-const { dialog } = require('electron')
 const Promise = require('bluebird')
 const EventEmitter = require('events')
 
@@ -32,7 +28,7 @@ import Task from './tasks/task'
 import DownloadTask from './tasks/download'
 
 export class LibraryManager extends EventEmitter {
-  constructor() {
+  constructor () {
     super()
 
     this.loaded = false
@@ -44,7 +40,7 @@ export class LibraryManager extends EventEmitter {
     this.scheduleReload()
   }
 
-  load(loaded) {
+  load (loaded) {
     const library = this
 
     // Run migrations
@@ -54,42 +50,45 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  path() {
+  path () {
     return Settings.get('libraryPath')
   }
 
-  scheduleReload() {
+  scheduleReload () {
     if (this.reloadSchedule) {
       clearInterval(this.reloadSchedule)
     }
 
     // Delay 2.5s before initial reload
     const library = this
+    var reloadDelay = 2500
+    if (Settings.isDevelopment()) { reloadDelay = 20000 }
+
     setTimeout(() => {
       library.reloadAll()
 
       setInterval(() => {
         library.reloadAll()
       }, Settings.get('library', { refreshInterval: 30 * 60 }).refreshInterval * 1000)
-    }, 2500)
+    }, reloadDelay)
   }
 
   /*
   * Task tracking
   */
 
-  registerTask(task) {
+  registerTask (task) {
     this.tasks.push(task)
     this.emitTaskState()
     return task
   }
 
-  completeTask(task) {
+  completeTask (task) {
     this.tasks = this.tasks.filter(t => { return t.id !== task.id })
     this.emitTaskState()
   }
 
-  emitTaskState() {
+  emitTaskState () {
     const progressTasks = this.downloadQueue.state()
 
     this.emit('tasks', {
@@ -101,11 +100,11 @@ export class LibraryManager extends EventEmitter {
   /*
   * Subscribe to podcast at feed url
   */
-  subscribe(url) {
-    if (!this.loaded) { throw 'Library not loaded' }
+  subscribe (url) {
+    if (!this.loaded) { throw new Error('Library not loaded') }
     const library = this
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       const task = library.registerTask(new Task())
 
       Podcast.subscribe(url)
@@ -114,7 +113,7 @@ export class LibraryManager extends EventEmitter {
           if (result && result.podcast) {
             library.emit('podcast:updated', result.podcast)
           }
-          
+
           library.completeTask(task)
           return result.podcast
         })
@@ -123,7 +122,7 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  unsubscribe(podcast, opts) {
+  unsubscribe (podcast, opts) {
     const library = this
     const options = Object.assign({
       permanent: false
@@ -136,13 +135,18 @@ export class LibraryManager extends EventEmitter {
         })
         .then(() => {
           library.emit('podcast:unsubscribed', { id: podcast.id })
+
+          if (options.permanent) {
+            console.log('Removing podcast folder')
+          }
+
           resolve(true)
         })
         .catch(reject)
     })
   }
 
-  loadPodcast(id) {
+  loadPodcast (id) {
     return new Promise((resolve, reject) => {
       Podcast.findById(id)
       .then(resolve)
@@ -150,7 +154,7 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  loadEpisode(id) {
+  loadEpisode (id) {
     return new Promise((resolve, reject) => {
       Episode.find({ where: { id: id }, include: [Podcast] })
       .then(resolve)
@@ -158,11 +162,7 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  episodeFilePath(podcast, episode) {
-    return path.join(this.path(), podcast.fileName(episode))
-  }
-
-  markEpisodePlayed(episodeId, played = true) {
+  markEpisodePlayed (episodeId, played = true) {
     const library = this
 
     Episode.findById(episodeId)
@@ -174,7 +174,7 @@ export class LibraryManager extends EventEmitter {
       })
   }
 
-  markEpisodeFavourite(episodeId, favourite = true) {
+  markEpisodeFavourite (episodeId, favourite = true) {
     const library = this
 
     Episode.findById(episodeId)
@@ -186,21 +186,21 @@ export class LibraryManager extends EventEmitter {
       })
   }
 
-  markPodcastAllPlayed(podcastId, played = true) {
+  markPodcastAllPlayed (podcastId, played = true) {
     const library = this
 
     Podcast.findById(podcastId)
       .then(podcast => {
         Episode.update(
           { played: played },
-          { where: { podcast_id: podcast.id }}
+          { where: { podcast_id: podcast.id } }
         ).then((count, rows) => {
           library.emit('podcast:updated', podcast)
         })
       })
   }
 
-  updateEpisode(episode, args) {
+  updateEpisode (episode, args) {
     const library = this
     return episode.update(args)
       .then(updated => {
@@ -209,11 +209,10 @@ export class LibraryManager extends EventEmitter {
       })
   }
 
-  reload(podcast) {
+  reload (podcast) {
     const library = this
 
     return new Promise((resolve, reject) => {
-      var preReload = new Date()
       library.emit('podcast:loading', { id: podcast.id, loading: true })
 
       Podcast.findById(podcast.id)
@@ -236,33 +235,33 @@ export class LibraryManager extends EventEmitter {
     })
   }
 
-  reloadAll() {
+  reloadAll () {
     const library = this
 
     return new Promise((resolve, reject) => {
       Podcast.findAll()
         .then(podcasts => {
           return Promise.map(podcasts, podcast => {
-            return library.reload(podcast) 
+            return library.reload(podcast)
           }, { concurrency: 1 })
         })
         .catch(err => {
-          console.log("Failed to reload all podcasts: ", err)
+          console.log('Failed to reload all podcasts: ', err)
         })
     })
   }
 
-  downloadEpisode(episode) {
+  downloadEpisode (episode) {
     var task = new DownloadTask({ episode: episode })
     this.downloadQueue.push(task)
     this.downloadQueue.start()
   }
 }
 
-export default function library() {
+export default function library () {
   if (!global._library) {
     global._library = new LibraryManager()
   }
-  
-  return global._library;
+
+  return global._library
 }

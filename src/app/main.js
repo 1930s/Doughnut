@@ -1,17 +1,17 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,17 +28,14 @@ import AssetServer from './asset_server'
 const {dialog, app} = require('electron')
 
 export default class Main {
-  constructor() {
-    global.DEBUG = true;
-    if( DEBUG ) { Logger.log( 'Initialize Application' ); }
-
-    console.log("DEBUG", process.env.DEBUG)
-
-    this.ipc = require( 'electron' ).ipcMain;
+  constructor () {
+    this.ipc = require('electron').ipcMain
   }
 
-  onReady() {
+  onReady () {
     const main = this
+
+    Logger.info(`Settings file: ${Settings.settingsFile()}`)
 
     AssetServer.setup()
       .then((server) => {
@@ -47,13 +44,13 @@ export default class Main {
         Library().load((err) => {
           if (err) {
             dialog.showMessageBox({
-              title: "An error occured whilst loading your Doughnut library database"
+              title: 'An error occured whilst loading your Doughnut library database'
             })
           }
 
           WindowManager.setup()
 
-          Menu.createMenu()
+          Menu.init()
 
           main.launchMainWindow()
         })
@@ -64,37 +61,34 @@ export default class Main {
       })
   }
 
-  launchMainWindow() {
+  launchMainWindow () {
     const mainWindow = WindowManager.mainWindow(this.server)
     mainWindow.show()
   }
 
-  launchWelcomeWindow() {
+  launchWelcomeWindow () {
     WindowManager.welcomeWindow()
   }
 
-  onWindowAllClosed() {
-    if( DEBUG ) { Logger.log( 'Quit' ); }
-
-    Electron.app.quit();
+  onWindowAllClosed () {
+    Logger.debug('Quit')
+    Electron.app.quit()
   }
 }
 
-const main = new Main();
+const main = new Main()
 
-Electron.app.on( 'ready', () => {
-  if( DEBUG ) { Logger.log( 'Application is ready' ); }
-  main.onReady();
-} );
+Electron.app.on('ready', () => {
+  Logger.debug('Application is ready')
+  main.onReady()
+})
 
-Electron.app.on( 'quit', () => {
-  if( DEBUG ) { Logger.log( 'Application is quit' ); }
-
+Electron.app.on('quit', () => {
+  Logger.debug('Application quit')
   WindowManager.teardown()
-} );
+})
 
-Electron.app.on( 'window-all-closed', () => {
-  if( DEBUG ) { Logger.log( 'All of the window was closed.' ); }
-
-  main.onWindowAllClosed();
-} );
+Electron.app.on('window-all-closed', () => {
+  Logger.debug('All windows closed')
+  main.onWindowAllClosed()
+})

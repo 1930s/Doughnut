@@ -1,6 +1,7 @@
 var expect = require('expect.js')
 var sinon = require('sinon')
 var fixture = require('../fixtures/podcast.js');
+var fs = require('fs')
 
 import Library, { LibraryManager } from '../../src/app/library/manager.js'
 import { Podcast, Episode } from '../../src/app/library/models'
@@ -29,7 +30,7 @@ describe('Podcast', function() {
           where: { feed: feed }
         }).then((p) => {
           expect(p.title).to.eql(fixture.feed.title)
-          expect(p.imageBlob.length).to.be.greaterThan(100)
+          expect(fs.existsSync(p.artworkFile())).to.eql(true)
         })
       })
   })

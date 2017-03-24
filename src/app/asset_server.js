@@ -1,17 +1,17 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,20 +21,21 @@ var portfinder = require('portfinder')
 var Promise = require('bluebird')
 
 import { Podcast, Episode } from './library/models'
+import Player from './player'
 
 export default class AssetServer {
-  constructor() {
+  constructor () {
     this.app = express()
     this.port = 14857
 
     this.initRoutes()
 
     this.server = this.app.listen(this.port, () => {
-      //console.log("Listening on port " + port)
+      // console.log("Listening on port " + port)
     })
   }
 
-  static setup(cb) {
+  static setup (cb) {
     return new Promise((resolve, reject) => {
       portfinder.getPortPromise()
         .then((port) => {
@@ -45,21 +46,21 @@ export default class AssetServer {
     })
   }
 
-  close() {
+  close () {
     if (this.server) {
       this.server.close()
     }
   }
 
-  port() {
-    return this.port;
+  port () {
+    return this.port
   }
 
-  initRoutes() {
+  initRoutes () {
     this.app.get('/podcasts', (req, res) => {
       Podcast.findAll({
-        attributes: { exclude: ['imageBlob']},
-        include: [ Episode ], 
+        attributes: { exclude: ['imageBlob'] },
+        include: [ Episode ],
         order: [[ Episode, 'pubDate', 'DESC' ]]
       })
       .then(podcasts => {
@@ -74,8 +75,8 @@ export default class AssetServer {
             loading: false,
             selected: false
           }
-        }) 
-        
+        })
+
         res.json(response)
       })
       .catch(err => {
@@ -104,9 +105,18 @@ export default class AssetServer {
 
     this.app.get('/podcasts/image/:id', (req, res) => {
       Podcast.findById(req.params.id)
-      .then((pod) => {
-        res.send(new Buffer(pod.imageBlob, 'binary'))
+      .then(podcast => {
+        res.sendFile(podcast.artworkFile())
       })
+    })
+
+    this.app.get('/player/image', (req, res) => {
+      if (Player.episode) {
+        Podcast.findById(Player.episode.podcast_id)
+        .then(podcast => {
+          res.sendFile(podcast.artworkFile())
+        })
+      }
     })
   }
 }

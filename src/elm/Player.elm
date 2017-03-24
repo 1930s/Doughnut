@@ -1,11 +1,12 @@
 module Player exposing (Msg(..), init, update, view, volumeControl)
 
-import Types exposing (PlayerState, PlayerModel)
+import Types exposing (..)
 import Html exposing (..)
 import Html.Attributes as H exposing (..)
 import Html.Events exposing (..)
 import Ipc
 import Icons
+import MD5
 
 type Msg
   = State PlayerState
@@ -17,13 +18,14 @@ type Msg
   | FinishSeeking
   | SlideVolume String
   | AdjustVolume
+  | ShowSeekDetail Bool
 
 init : PlayerModel
 init = 
   let
-    state = PlayerState True 50 0.0 0.0 ""
+    state = PlayerState True 50 0.0 0.0 "" False 0
   in
-    PlayerModel state False 0.0 0
+    PlayerModel state False 0.0 0 False
 
 update : Msg -> PlayerModel -> (PlayerModel, Cmd Msg)
 update msg model =
@@ -32,7 +34,10 @@ update msg model =
   in
     case msg of
       State newState ->
-        { model | state = newState } ! []
+        { model | state = newState, adjustingVolume = newState.volume } ! []
+      
+      ShowSeekDetail toggle ->
+        { model | showSeekDetail = toggle } ! []
       
       StartSeeking ->
         { model | seeking = True } ! []
@@ -89,6 +94,10 @@ timestamp total =
   in
     (toString hours) ++ ":" ++ (String.padLeft 2 '0' (toString mins)) ++ ":" ++ (String.padLeft 2 '0' (toString secs))
 
+coverImageUrl : PlayerModel -> String
+coverImageUrl model =
+  "http://localhost:" ++ (toString serverPort) ++ "/player/image?" ++ (MD5.hex model.state.title)
+
 view : PlayerModel -> Html Msg
 view model =
   let
@@ -115,11 +124,31 @@ view model =
           Icons.pauseIcon
       ]
     , button [class "player-control", onClick SkipForward] [ Icons.skipForwardIcon ]
-    , div [class "seek-bar"]
-      [ span [] [text positionStr]
+    , if state.ready then
+        div [class "player-minicover"]
+        [ img [src (coverImageUrl model)] []
+        ]
+      else
+        text ""
+    , div
+      [ class "seek-bar"
+      , onMouseOver (ShowSeekDetail True)
+      , onMouseLeave (ShowSeekDetail False)
+      ]
+      [ if state.ready then
+          div []
+          [ span []
+            [ if model.showSeekDetail then
+                text positionStr
+              else
+                text state.title
+            ]
+          , span [] [text ("- " ++ remainingStr)]
+          ]
+        else
+          text ""
       , div []
-        [ span [] [text state.title]
-        , input
+        [ input
           [ type_ "range"
           , H.min "0"
           , H.max (toString state.duration)
@@ -129,19 +158,22 @@ view model =
           , onMouseUp FinishSeeking
           ] []
         ]
-      , span [] [text remainingStr]
       ]
     ]
 
 volumeControl : PlayerModel -> Html Msg
 volumeControl model =
-  div []
-  [ input
-    [ type_ "range"
-    , class "volume-slider"
-    , H.min "0"
-    , H.max "100"
-    , onInput SlideVolume
-    , onMouseUp AdjustVolume
-    ] []
-  ]
+  let
+    { volume } = model.state
+  in
+    div [class "volume-slider"]
+    [ Icons.volumeIcon
+    , input
+      [ type_ "range"
+      , H.min "0"
+      , H.max "100"
+      , value (toString model.adjustingVolume)
+      , onInput SlideVolume
+      , onMouseUp AdjustVolume
+      ] []
+    ]

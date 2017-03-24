@@ -1,17 +1,17 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,19 +19,20 @@
 import DataType from 'sequelize'
 import Episode from './episode'
 import Model from '../sequelize'
+import Settings from '../../settings'
 
-const moment = require('moment')
 var FeedParser = require('feedparser')
 var request = require('request')
 var Promise = require('bluebird')
 var path = require('path')
-var sanitize = require("sanitize-filename")
+var sanitize = require('sanitize-filename')
+var fs = require('fs')
 
 const Podcast = Model.define('Podcast', {
   id: {
-    type: DataType.INTEGER, 
-    field: "id",             
-    autoIncrement: !0,       
+    type: DataType.INTEGER,
+    field: 'id',
+    autoIncrement: !0,
     primaryKey: !0
   },
   title: { type: DataType.STRING, defaultValue: '' },
@@ -43,7 +44,6 @@ const Podcast = Model.define('Podcast', {
   language: { type: DataType.STRING, defaultValue: '' },
   copyright: { type: DataType.STRING, defaultValue: '' },
   imageUrl: { type: DataType.STRING, field: 'image_url', defaultValue: '' },
-  imageBlob: { type: DataType.BLOB, field: 'image_blob', defaultValue: '' },
   lastParsed: { type: DataType.DATE, field: 'last_parsed', defaultValue: DataType.NOW },
   downloadNew: { type: DataType.BOOLEAN, field: 'download_new', defaultValue: true },
   deletePlayed: { type: DataType.BOOLEAN, field: 'delete_played', defaultValue: true }
@@ -53,14 +53,14 @@ const Podcast = Model.define('Podcast', {
   updatedAt: 'updated_at',
   freezeTableName: true,
   classMethods: {
-    subscribe: function(url) {
-      return new Promise(function(resolve, reject) {
+    subscribe: function (url) {
+      return new Promise(function (resolve, reject) {
         Podcast.parseFeed(url)
           .then(parsed => {
             const meta = Podcast.sanitizeMeta(parsed.meta)
             return Podcast.create(meta)
           })
-          .then(function(podcast) {
+          .then(function (podcast) {
             return podcast.syncFeed()
           })
           .then(resolve)
@@ -68,8 +68,8 @@ const Podcast = Model.define('Podcast', {
       })
     },
 
-    parseFeed: function(feed) {
-      return new Promise( (resolve, reject) => {
+    parseFeed: function (feed) {
+      return new Promise((resolve, reject) => {
         var meta = {}
         const items = []
         const feedparser = new FeedParser()
@@ -83,25 +83,26 @@ const Podcast = Model.define('Podcast', {
         })
 
         feedparser.on('readable', () => {
-          let item
-          while(item = feedparser.read()) { items.push(item); }
+          for (var item = feedparser.read(); item != null; item = feedparser.read()) {
+            items.push(item)
+          }
           return items
         })
 
         request.get(feed)
-          .on('error', (err) => { reject(err); })
+          .on('error', (err) => { reject(err) })
           .pipe(feedparser)
           .on('end', () => {
             return resolve({
               meta: Object.assign({}, meta, { feed: feed }),
               items: items
-            });
+            })
           })
       })
     },
 
     // Take raw feed meta and return podcast attributes
-    sanitizeMeta: function(meta) {
+    sanitizeMeta: function (meta) {
       var author = meta['author']
       if (meta['itunes:author'] && meta['itunes:author']['#']) {
         author = meta['itunes:author']['#']
@@ -122,18 +123,28 @@ const Podcast = Model.define('Podcast', {
     }
   },
   instanceMethods: {
-    storagePath: function() {
-      return sanitize(this.title)
+    storagePath: function () {
+      const podcastPath = path.join(Settings.get('libraryPath'), sanitize(this.title))
+      if (!fs.existsSync(podcastPath)) {
+        fs.mkdirSync(podcastPath)
+      }
+
+      return podcastPath
     },
 
-    fileName: function(episode) {
+    fileName: function (episode) {
       return path.join(this.storagePath(), episode.fileName())
+    },
+
+    artworkFile: function () {
+      var imageExtension = path.extname(this.imageUrl)
+      return path.join(this.storagePath(), `Artwork${imageExtension}`)
     },
 
     /*
     ** Fetches latest version of the feed, stores podcast changes then resolve({podcast, newEpisodes})
     */
-    syncFeed: function(cb = () => {}) {
+    syncFeed: function (cb = () => {}) {
       const podcast = this
 
       return new Promise((resolve, reject) => {
@@ -142,12 +153,12 @@ const Podcast = Model.define('Podcast', {
         Podcast.parseFeed(podcast.feed)
           .then(parsed => {
             const meta = Podcast.sanitizeMeta(parsed.meta)
-            
+
             return Promise.map(parsed.items, episode => {
-              return Episode.updateParsedEpisode(podcast, episode) 
+              return Episode.updateParsedEpisode(podcast, episode)
             }, {concurrency: 10})
               .then((episodes) => {
-                foundEpisodes = episodes.filter((e) => { return e != false; })
+                foundEpisodes = episodes.filter((e) => { return e !== false })
                 return podcast.update(meta)
               })
               .catch(reject)
@@ -165,7 +176,7 @@ const Podcast = Model.define('Podcast', {
       })
     },
 
-    newlyEpisodes: function(created) {
+    newlyEpisodes: function (created) {
       return Episode.findAll({
         where: {
           podcast_id: this.id,
@@ -174,39 +185,36 @@ const Podcast = Model.define('Podcast', {
       })
     },
 
-    reloadImage: function() {
+    reloadImage: function () {
       const podcast = this
 
-      return new Promise(function(resolve, reject) {
-        request({
+      return new Promise(function (resolve, reject) {
+        var stream = request({
           url: podcast.imageUrl,
           encoding: null
-        }, (err, resp, body) => {
-          if (err) {
-            console.log("Error: ", err)
-            reject(err)
-          } else {
-            podcast.update({
-              imageBlob: body
-            })
-            .then(resolve)
-            .catch(reject)
-          }
+        })
+        .on('error', err => {
+          reject(err)
+        })
+        .pipe(fs.createWriteStream(podcast.artworkFile()))
+
+        stream.on('finish', () => {
+          resolve(podcast)
         })
       })
     },
 
-    viewJson: function() {
+    viewJson: function () {
       return {
         id: this.id,
         title: this.title,
         feed: this.feed,
         description: this.description,
         link: this.link,
-        author: this.author || "",
+        author: this.author || '',
         pubDate: this.pubDate || (new Date()),
-        language: this.language || "en",
-        copyright: this.copyright || "",
+        language: this.language || 'en',
+        copyright: this.copyright || '',
         imageUrl: this.imageUrl,
         lastParsed: this.lastParsed,
         downloadNew: this.downloadNew,
@@ -240,7 +248,7 @@ Podcast.subscribe = (url, loaded) => {
 
 Podcast.prototype.reload = (callback) => {
   const podcast = this
-  
+
 }
 
 Podcast.prototype.reloadImage = (callback) => {
@@ -319,11 +327,7 @@ export default class Podcast {
     })
   }
 
-  
-
-  
-
   parseEpisode() {
-    
+
   }
-}*/
+} */

@@ -17,11 +17,11 @@ window.onload = () => {
       snapOffset: 10
     })
 
-    splitter.setSizes([28, 32, 40])
+    //splitter.setSizes([28, 32, 40])
   })
 
   app.ports.errorDialog.subscribe((message) => {
-    remote.dialog.showErrorBox("View Error", message)
+    remote.dialog.showErrorBox('View Error', message)
   })
 
   app.ports.objectAction.subscribe((action) => {
@@ -62,17 +62,17 @@ window.onload = () => {
   })
 
   // Open any anchor tag links in a browser window, rather than current
-  
-  //console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
-  //ipcRenderer.send('asynchronous-message', 'ping')
+
+  // console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
+  // ipcRenderer.send('asynchronous-message', 'ping')
 
  // ReactDOM.render( <MainWindow />, document.getElementById('app'));
 }
 
-$(function() {
+$(function () {
   $(document).on('click', 'a', (e) => {
     e.preventDefault()
-    
+
     var href = $(e.currentTarget).attr('href')
     if (href && href.indexOf('http') !== -1) {
       ipcRenderer.send('link', href)

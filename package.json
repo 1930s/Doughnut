@@ -7,7 +7,7 @@
     "start": "npm run build && electron .",
     "clean": "node ./bin/clean.js",
     "package": "node ./bin/package.js",
-    "test": "standard \"src/**/*.js\" \"test/**/*.js\" && NODE_ENV=test electron-mocha test/test.js --require babel-core/register",
+    "test": "standard --fix \"src/app/**/*.js\" && NODE_ENV=test electron-mocha test/test.js --require babel-core/register",
     "rebuild": "electron-rebuild",
     "build:main": "browserify -t [ babelify ] ./src/app/main.js --exclude electron --im --no-detect-globals --node -o ./build/main.js",
     "build:renderer": "webpack",
@@ -78,7 +78,6 @@
     "sequelize": "^3.30.2",
     "split.js": "^1.2.0",
     "sqlite3": "^3.1.8",
-    "umzug": "^1.11.0",
     "uuid": "^3.0.1"
   }
 }

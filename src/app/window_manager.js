@@ -1,17 +1,17 @@
 /*
  * Doughnut Podcast Client
  * Copyright (C) 2017 Chris Dyer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -27,7 +27,7 @@ import Player from './player'
 import Settings from './settings'
 
 class WindowManager {
-  constructor() {
+  constructor () {
     const wm = this
 
     this._windows = {
@@ -43,15 +43,15 @@ class WindowManager {
     })
   }
 
-  main() {
+  main () {
     return this.main
   }
 
-  teardown() {
+  teardown () {
     Player.destroy()
   }
 
-  setup() {
+  setup () {
     const wm = this
 
     // Podcast Action
@@ -60,7 +60,7 @@ class WindowManager {
 
       Library().subscribe(arg)
       .catch((err) => {
-        dialog.showErrorBox('Invalid Feed', "Doughnut was unable to parse the feed at: " + url)
+        dialog.showErrorBox('Invalid Feed', 'Doughnut was unable to parse the feed at: ' + url + '\n' + err)
         return null
       })
 
@@ -76,11 +76,11 @@ class WindowManager {
 
     ipcMain.on('podcast:unsubscribe', (event, arg) => {
       Library().loadPodcast(arg.id)
-        .then(function(podcast) {
+        .then(function (podcast) {
           dialog.showMessageBox({
             buttons: ['Leave Files', 'Delete Files'],
             message: 'Delete Episodes?',
-            detail: `Would you like to permanently delete all downloaded episodes of ${podcast.title}`,
+            detail: `Would you like to permanently delete all downloaded episodes of ${podcast.title}`
           }, deleteFiles => {
             if (deleteFiles) {
               Library().unsubscribe(podcast, { permanent: true })
@@ -151,26 +151,26 @@ class WindowManager {
     ipcMain.on('episode:reveal', (event, arg) => {
       Library().loadEpisode(arg.id)
         .then(episode => {
-          shell.showItemInFolder(Library().episodeFilePath(episode.Podcast, episode))
+          shell.showItemInFolder(episode.Podcast.fileName(episode))
         })
     })
 
     // Misc
 
     ipcMain.on('link', (event, arg) => {
-      console.log("Opening link: ", arg)
+      console.log('Opening link: ', arg)
       shell.openExternal(arg)
     })
   }
 
-  mainWindow(server) {
+  mainWindow (server) {
     if (this._windows.MainWindow) { return this._windows.MainWindow }
 
-    this._windows.MainWindow = new MainWindow(server);
+    this._windows.MainWindow = new MainWindow(server)
     return this._windows.MainWindow
   }
 
-  subscribeWindow() {
+  subscribeWindow () {
     if (this._windows.SubscribeWindow) { return this._windows.SubscribeWindow }
 
     const w = new Electron.BrowserWindow({
@@ -195,7 +195,7 @@ class WindowManager {
     return w
   }
 
-  welcomeWindow() {
+  welcomeWindow () {
     if (this._windows.WelcomeWindow) { return this._windows.WelcomeWindow }
 
     const w = new Electron.BrowserWindow({
