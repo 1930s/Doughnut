@@ -66,3 +66,27 @@
 .split, .gutter.gutter-horizontal {
   float: left;
 }
+
+.title-bar {
+  height: 56px;
+  background: #FFF;
+  border-bottom: 1px solid #EEE;
+
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+
+  button, input {
+    -webkit-app-region: no-drag;
+  }
+
+  .misc-controls {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}

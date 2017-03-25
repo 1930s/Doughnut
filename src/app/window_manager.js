@@ -22,6 +22,7 @@ import path from 'path'
 const { ipcMain, dialog, shell } = require('electron')
 
 import MainWindow from './windows/main_window'
+import PreferencesWindow from './windows/preferences'
 import Library from './library/manager'
 import Player from './player'
 import Settings from './settings'
@@ -33,7 +34,7 @@ class WindowManager {
     this._windows = {
       MainWindow: false,
       WelcomeWindow: false,
-      SubscribeWindow: false
+      PreferencesWindow: false
     }
 
     Player.on('state', state => {
@@ -169,9 +170,14 @@ class WindowManager {
     return this._windows.MainWindow
   }
 
-  subscribeWindow () {
-    if (this._windows.SubscribeWindow) { return this._windows.SubscribeWindow }
+  preferencesWindow () {
+    if (this._windows.PreferencesWindow) { return this._windows.PreferencesWindow }
 
+    this._windows.PreferencesWindow = new PreferencesWindow()
+    return this._windows.PreferencesWindow
+  }
+
+  subscribeWindow () {
     const w = new Electron.BrowserWindow({
       width: 500,
       height: 170,
@@ -190,7 +196,6 @@ class WindowManager {
       })
     }
 
-    this._windows.SubscribeWindow = w
     return w
   }
 

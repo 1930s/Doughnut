@@ -8,18 +8,22 @@ import Utils.Podcast exposing (imageUrl)
 import Utils.Date exposing (dateFormat, timeFormat)
 import Markdown
 import TaskManager exposing (progressBar)
+import MainWindow.PodcastSettings as PodcastSettings
 
 view : Model -> Html Msg
 view model =
   div [class "detail"]
   [ case selectedPodcast model of
       Just podcast ->
-        case model.selectedEpisode of
-          Just episode ->
-            episodeDetail episode podcast.podcast
+        if model.showPodcastSettings then
+          PodcastSettings.view podcast.podcast
+        else
+          case model.selectedEpisode of
+            Just episode ->
+              episodeDetail episode podcast.podcast
 
-          Nothing ->
-            podcastDetail model.state podcast
+            Nothing ->
+              podcastDetail model.state podcast
 
       Nothing ->
         blankView

@@ -26,7 +26,7 @@ import Library from './library/manager'
 import AssetServer from './asset_server'
 import Player from './player'
 
-const {dialog, app} = require('electron')
+const {dialog, app, globalShortcut} = require('electron')
 
 export default class Main {
   constructor () {
@@ -54,12 +54,28 @@ export default class Main {
           Menu.init()
 
           main.launchMainWindow()
+
+          this.registerGlobalShortcuts()
         })
       })
       .catch((err) => {
         console.log(err)
         app.quit()
       })
+  }
+
+  registerGlobalShortcuts () {
+    globalShortcut.register('MediaPlayPause', () => {
+      Player.toggle()
+    })
+
+    globalShortcut.register('MediaNextTrack', () => {
+      Player.skipForward()
+    })
+
+    globalShortcut.register('MediaPreviousTrack', () => {
+      Player.skipBack()
+    })
   }
 
   launchMainWindow () {
@@ -86,6 +102,8 @@ Electron.app.on('ready', () => {
 
 Electron.app.on('will-quit', () => {
   Logger.debug('Application will quit')
+
+  globalShortcut.unregisterAll()
   WindowManager.teardown()
   Player.destroy()
 })

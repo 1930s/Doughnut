@@ -11,6 +11,7 @@ import Http
 type alias Model =
   { state : GlobalState
   , podcasts : List PodcastWrapped
+  , showPodcastSettings : Bool
   , player : PlayerModel
   , tasks : TaskState
   , selectedEpisode : Maybe Episode
@@ -49,6 +50,7 @@ type Msg
   | ShowEpisodeContextMenu (Menu EpisodeContextMenu)
   | HandlePodcastContextMenu MenuCallback
   | HandleEpisodeContextMenu MenuCallback
+  | ToggleShowPodcastSettings
   | PodcastLoading Json.Encode.Value
   | PodcastUpdated Json.Encode.Value
   | EpisodeUpdated Json.Encode.Value

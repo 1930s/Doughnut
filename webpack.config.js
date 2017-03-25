@@ -4,7 +4,8 @@ const path = require('path')
 
 module.exports = {
   entry: {
-    view: './src/view/renderer.js'
+    view: './src/view/renderer.js',
+    preferences: './src/view/preferences.js'
   },
   output: {
     path: path.resolve(__dirname, './build'),

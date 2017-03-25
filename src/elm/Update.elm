@@ -18,6 +18,7 @@ init state =
     model =
     { state = state
     , podcasts = []
+    , showPodcastSettings = False
     , player = Player.init
     , tasks = Types.TaskState False []
     , selectedEpisode = Nothing
@@ -132,7 +133,7 @@ update msg model =
           else
             { pw | selected = False }
       in
-        { model | podcasts = List.map selectPodcast model.podcasts } ! []
+        { model | showPodcastSettings = False, podcasts = List.map selectPodcast model.podcasts } ! []
     
     SelectEpisode ep ->
       case model.selectedEpisode of
@@ -157,6 +158,17 @@ update msg model =
       case model.episodeContextMenu of
         Just menu -> episodeContextMenuUpdate menu r model
         Nothing -> model ! []
+
+    ToggleShowPodcastSettings ->
+      if model.showPodcastSettings == False then
+        case selectedPodcast model of
+          Just _ ->
+            { model | showPodcastSettings = True } ! []
+
+          Nothing ->
+            model ! [errorDialog "Please select a podcast to view its settings"]
+      else
+        { model | showPodcastSettings = False } ! []
 
     SplitterMsg paneMsg ->
       { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []

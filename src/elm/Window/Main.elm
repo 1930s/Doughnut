@@ -52,7 +52,7 @@ podcastsView model =
 libraryControlView : Model -> Html Msg
 libraryControlView model =
   div [class "library-controls"]
-  [ button [class "library-settings"]
+  [ button [class "library-settings", onClick ToggleShowPodcastSettings]
     [ Icons.cogIcon
     ]
   , if model.tasks.processing then

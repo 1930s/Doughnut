@@ -203,11 +203,13 @@ class Player extends EventEmitter {
   }
 
   skipForward () {
-    this.seekTo(this.state.position + 30.0)
+    this.state.position += 30.0
+    this.seekTo(this.state.position)
   }
 
   skipBack () {
-    this.seekTo(this.state.position - 30.0)
+    this.state.position -= 30.0
+    this.seekTo(this.state.position)
   }
 
   setVolume (volume) {

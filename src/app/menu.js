@@ -50,7 +50,7 @@ function menuTemplate () {
         {
           label: 'Subscribe',
           click () {
-            WindowManager.subscribeWindow()
+            WindowManager.subscribeWindow().show()
           }
         }
       ]
@@ -232,6 +232,15 @@ function menuTemplate () {
       submenu: [
         {
           role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Preferences...',
+          click () {
+            WindowManager.preferencesWindow().show()
+          }
         },
         {
           type: 'separator'
