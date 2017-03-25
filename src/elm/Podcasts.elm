@@ -32,7 +32,7 @@ podcastContextMenu podcast =
     Menu "Podcast" items
 
 viewPodcast : GlobalState -> PodcastWrapped -> Html Msg
-viewPodcast state pw =
+viewPodcast globalState pw =
   let
     epCount = List.length pw.episodes
     unplayedEpCount = List.filter (\e -> not (e.played || e.playPosition > 0)) pw.episodes
@@ -49,7 +49,7 @@ viewPodcast state pw =
       ]
     ]
     [ div [class "podcast-list-cover"]
-      [ img [src (imageUrl pod)] []
+      [ img [src (imageUrl globalState pod)] []
       ]
     , div [class "podcast-list-detail"]
       [ h2 [] [ text pod.title ]

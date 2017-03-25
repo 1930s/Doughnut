@@ -2,9 +2,6 @@ module Types exposing (..)
 
 import Date exposing (Date)
 
-serverPort : Int
-serverPort = 14857
-
 type alias PodcastId = Int
 
 type alias Podcast =
@@ -53,8 +50,12 @@ type alias PodcastWrapped =
   }
 
 type alias GlobalState =
-  {
+  { serverPort : Int
   }
+
+assetServerUrl : GlobalState -> String
+assetServerUrl config =
+  "http://localhost:" ++ (toString config.serverPort)
 
 type alias PlayerModel =
   { state : PlayerState

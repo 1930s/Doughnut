@@ -26,7 +26,7 @@ view : Model -> Html Msg
 view model =
   div [class "main-window"]
   [ div [class "title-bar"]
-    [ Html.map PlayerMsg (Player.view model.player)
+    [ Html.map PlayerMsg (Player.view model.state model.player)
     , div [class "misc-controls"]
       [ Html.map PlayerMsg (Player.volumeControl model.player)
       ]
@@ -77,42 +77,6 @@ episodesView model =
         p [] [text "Select a odcast"]
   ]
 
-podcastView : PodcastWrapped -> Model -> Html Msg
-podcastView pw model =
-  let
-    podcast = pw.podcast
-  in
-    div []
-    [ div [class "podcast-detail"]
-      [ div [class "podcast-cover"]
-        [ img [src (imageUrl podcast)] []
-        ]
-      , div [class "podcast-info"]
-        [ h1 [] [ text podcast.title ]
-        , p [] [ text podcast.description ]
-        , table []
-          [ tr []
-            [ td [] [ text "Last Update" ]
-            , td [] [ text "27th February at 02:02"]
-            ]
-          , tr []
-            [ td [] [ text "Categories" ]
-            , td [] [ text "Comedy, TV & Film"]
-            ]
-          , tr []
-            [ td [] [ text "Owner" ]
-            , td [] [ text podcast.copyright]
-            ]
-          , tr []
-            [ td [] [ text "Website" ]
-            , td [] [ a [ href podcast.link ] [ text podcast.link ]]
-            ]
-          ]
-        ]
-      ]
-    , Episodes.list model pw
-    ]
-  
 detailView : Model -> Html Msg
 detailView model =
   div [class "detail"] [text "detail"]

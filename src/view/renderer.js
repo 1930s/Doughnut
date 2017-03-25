@@ -7,8 +7,29 @@ const { ipcRenderer, remote } = require('electron')
 var loaded = false
 var app = null
 
+import port from '../app/port'
+
+function isRelease() {
+  const process = remote.process
+  if (!process.versions.electron) {
+    // Node.js process
+    return false
+  }
+  if (process.platform === 'darwin') {
+    return !/\/Electron\.app\//.test(process.execPath)
+  }
+  if (process.platform === 'win32') {
+    return !/\\electron\.exe$/.test(process.execPath)
+  }
+  if (process.platform === 'linux') {
+    return !/\/electron$/.test(process.execPath)
+  }
+}
+
 window.onload = () => {
-  app = Elm.Main.embed(document.getElementById('app'), {})
+  app = Elm.Main.embed(document.getElementById('app'), {
+    serverPort: port(isRelease())
+  })
 
   app.ports.loaded.subscribe(() => {
     var splitter = Split(['.podcasts', '.episodes', '.detail'], {

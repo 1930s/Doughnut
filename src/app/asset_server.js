@@ -22,16 +22,19 @@ var Promise = require('bluebird')
 
 import { Podcast, Episode, Category } from './library/models'
 import Player from './player'
+import Settings from './settings'
+import Port from './port'
+import Logger from './logger'
 
 export default class AssetServer {
   constructor () {
     this.app = express()
-    this.port = 14857
+    this.port = Port(Settings.isRelease())
 
     this.initRoutes()
 
     this.server = this.app.listen(this.port, () => {
-      // console.log("Listening on port " + port)
+      Logger.info('Asset Server listening on port ' + this.port)
     })
   }
 

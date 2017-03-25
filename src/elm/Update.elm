@@ -29,7 +29,7 @@ init state =
     }
   in
     (model, Cmd.batch
-    [ loadAllPodcasts
+    [ loadAllPodcasts state
     , Ports.loaded True
     ])
 
@@ -91,7 +91,7 @@ update msg model =
               Nothing ->
                 { model | podcasts = model.podcasts ++ [PodcastWrapped podcast [] False False] }
           in
-            state ! [loadEpisodes podcast.id]
+            state ! [loadEpisodes model.state podcast.id]
 
         Err err ->
           model ! [errorDialog (toString err)]
@@ -233,18 +233,18 @@ episodeContextMenuUpdate menu r model =
     _ ->
       model ! []
 
-loadAllPodcasts : Cmd Msg
-loadAllPodcasts =
+loadAllPodcasts : GlobalState -> Cmd Msg
+loadAllPodcasts globalState =
   let
-    url = "http://localhost:" ++ (toString serverPort) ++ "/podcasts"
+    url = (assetServerUrl globalState) ++ "/podcasts"
     request = Http.get url podcastsStateDecoder
   in
     Http.send PodcastsLoaded request
 
-loadEpisodes : Int -> Cmd Msg
-loadEpisodes id =
+loadEpisodes : GlobalState -> Int -> Cmd Msg
+loadEpisodes globalState id =
   let
-    url = "http://localhost:" ++ (toString serverPort) ++ "/podcasts/" ++ (toString id) ++ "/episodes"
+    url = (assetServerUrl globalState) ++ "/podcasts/" ++ (toString id) ++ "/episodes"
     request = Http.get url episodeListDecoder
   in
     Http.send EpisodesLoaded request

@@ -94,12 +94,12 @@ timestamp total =
   in
     (toString hours) ++ ":" ++ (String.padLeft 2 '0' (toString mins)) ++ ":" ++ (String.padLeft 2 '0' (toString secs))
 
-coverImageUrl : PlayerModel -> String
-coverImageUrl model =
-  "http://localhost:" ++ (toString serverPort) ++ "/player/image?" ++ (MD5.hex model.state.title)
+coverImageUrl : GlobalState -> PlayerModel -> String
+coverImageUrl state model =
+  (assetServerUrl state) ++ "/player/image?" ++ (MD5.hex model.state.title)
 
-view : PlayerModel -> Html Msg
-view model =
+view : GlobalState -> PlayerModel -> Html Msg
+view globalState model =
   let
     { state } = model
 
@@ -126,7 +126,7 @@ view model =
     , button [class "player-control", onClick SkipForward] [ Icons.skipForwardIcon ]
     , if state.ready then
         div [class "player-minicover"]
-        [ img [src (coverImageUrl model)] []
+        [ img [src (coverImageUrl globalState model)] []
         ]
       else
         text ""

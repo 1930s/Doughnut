@@ -19,7 +19,7 @@ view model =
             episodeDetail episode podcast.podcast
 
           Nothing ->
-            podcastDetail podcast
+            podcastDetail model.state podcast
 
       Nothing ->
         blankView
@@ -48,14 +48,14 @@ episodeDetail episode podcast =
   , Markdown.toHtml [class "episode-description"] episode.description
   ]
 
-podcastDetail : PodcastWrapped -> Html Msg
-podcastDetail pw =
+podcastDetail : GlobalState -> PodcastWrapped -> Html Msg
+podcastDetail globalState pw =
   let
     podcast = pw.podcast
   in
     div [class "podcast-detail"]
     [ div [class "podcast-cover"]
-      [ img [src (imageUrl podcast)] []
+      [ img [src (imageUrl globalState podcast)] []
       ]
     , div [class "podcast-info"]
       [ h1 [] [ text podcast.title ]

@@ -29,7 +29,7 @@ class Settings {
       firstLaunch: true
     }
 
-    if (this.isProduction()) {
+    if (this.isRelease()) {
       this.defaults.libraryPath = path.join(electron.app.getPath('music'), 'Doughnut')
     } else if (process.env.NODE_ENV === 'test') {
       this.defaults.libraryPath = path.join(os.tmpdir(), 'Doughnut')
@@ -41,7 +41,7 @@ class Settings {
   }
 
   settingsPath () {
-    if (this.isProduction()) {
+    if (this.isRelease()) {
       return electron.app.getPath('userData')
     } else {
       return __dirname
@@ -49,10 +49,10 @@ class Settings {
   }
 
   isDevelopment () {
-    return !this.isProduction()
+    return !this.isRelease()
   }
 
-  isProduction () {
+  isRelease () {
     if (!process.versions.electron) {
       // Node.js process
       return false
@@ -71,7 +71,7 @@ class Settings {
   settingsFile () {
     if (process.env.NODE_ENV === 'test') {
       return path.join(os.tmpdir(), 'Doughnut.json')
-    } else if (this.isProduction()) {
+    } else if (this.isRelease()) {
       return path.join(this.settingsPath(), 'Doughnut.json')
     } else {
       return path.join(this.settingsPath(), `Doughnut.json`)

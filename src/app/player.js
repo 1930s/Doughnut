@@ -34,7 +34,7 @@ class Player extends EventEmitter {
 
     var binary = path.join(__dirname, 'mac/mpv')
 
-    if (Settings.isProduction()) {
+    if (Settings.isRelease()) {
       binary = path.join(__dirname, '../mac/mpv')
     }
 
