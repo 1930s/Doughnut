@@ -99,7 +99,8 @@ libraryView model =
       , div [class "form-control-pair"]
         [ div [] [ span [] [text settings.libraryPath] ]
         , div [] [ button
-            [ onClick BrowseLibraryPath
+            [ class "small"
+            , onClick BrowseLibraryPath
             ] [text "Change Location"]
           ]
         ]

@@ -35,6 +35,7 @@
 .form-control-pair {
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 100%;
 
   > div:first-child {
@@ -72,5 +73,24 @@ input[type=submit] {
 
   &:active {
     background-image: linear-gradient(-180deg, #FF8DBF 4%, #E44B8E 99%);
+  }
+}
+
+button {
+  outline: none;
+}
+
+button.small {
+  background-image: linear-gradient(-180deg, #F9F9F9 4%, #EAEAEA 99%);
+  border: 1px solid #C0C0C0;
+  border-radius: 3px;
+  font-family: HelveticaNeue-Medium;
+  font-size: 12px;
+  color: #323232;
+  line-height: 16px;
+  padding: 4px 10px;
+
+  &:active {
+    background-image: linear-gradient(-180deg, #EAEAEA 4%, #EAEAEA 99%);
   }
 }
