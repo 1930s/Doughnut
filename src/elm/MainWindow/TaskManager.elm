@@ -1,8 +1,8 @@
-module TaskManager exposing (..)
+module MainWindow.TaskManager exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model exposing (..)
+import MainWindow.Model exposing (..)
 import Types exposing (..)
 import Icons
 

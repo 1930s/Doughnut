@@ -1,4 +1,4 @@
-module Player exposing (Msg(..), init, update, view, volumeControl)
+module MainWindow.Player exposing (Msg(..), init, update, view, volumeControl)
 
 import Types exposing (..)
 import Html exposing (..)

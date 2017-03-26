@@ -1,4 +1,4 @@
-var Elm = require('../elm/Preferences/Preferences')
+var Elm = require('../elm/Preferences')
 const { ipcRenderer, remote } = require('electron')
 
 window.onload = () => {

@@ -1,26 +1,18 @@
-module Window.Main exposing (view)
+module MainWindow.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 import Types exposing (..)
-import Model exposing (..)
-import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
-import Podcasts
-import Episodes
-import Player
+import MainWindow.Model exposing (..)
+import MainWindow.Podcasts as Podcasts
+import MainWindow.Episodes as Episodes
+import MainWindow.Player as Player
 import Utils.Podcast exposing (imageUrl)
-import TaskManager
+import MainWindow.TaskManager as TaskManager
 import Icons
-import MainWindow.Detail
-
-splitterConfig : ViewConfig Msg
-splitterConfig =
-  createViewConfig
-    { toMsg = SplitterMsg
-    , customSplitter = Nothing
-    }
+import MainWindow.Detail as Detail
 
 view : Model -> Html Msg
 view model =
@@ -37,7 +29,7 @@ view model =
     , div [id "gutter-1", class "gutter gutter-horizontal"] []
     , episodesView model
     , div [id "gutter-2", class "gutter gutter-horizontal"] []
-    , MainWindow.Detail.view model
+    , Detail.view model
     ]
   ]
 

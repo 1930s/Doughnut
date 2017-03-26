@@ -1,4 +1,4 @@
-module Decoders exposing (..)
+module MainWindow.Decoders exposing (..)
 
 import Types exposing (..)
 import Json.Decode.Extra exposing ((|:), date)

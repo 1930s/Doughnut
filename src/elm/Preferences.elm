@@ -3,7 +3,8 @@ module Preferences exposing (main)
 import Html as App exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Preferences.Icons as Icons
+import Icons as Icons
+import Dialog
 
 type PreferenceView
   = Library
@@ -11,6 +12,8 @@ type PreferenceView
 
 type Msg
   = ChangeView PreferenceView
+  | BrowseLibraryPath
+  | ChangeLibraryPath String
 
 type alias Settings =
   { libraryPath : String
@@ -19,6 +22,7 @@ type alias Settings =
 type alias Model =
   { view : PreferenceView
   , settings : Settings
+  , restartNeeded : Bool
   }
 
 main : Program Settings Model Msg
@@ -36,6 +40,7 @@ init settings =
     model =
     { view = Library
     , settings = settings
+    , restartNeeded = False
     }
   in
     model ! []
@@ -46,9 +51,21 @@ subscriptions model =
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    ChangeView newView ->
-      { model | view = newView } ! []
+  let
+    { settings } = model
+  in
+    case msg of
+      ChangeView newView ->
+        { model | view = newView } ! []
+      
+      BrowseLibraryPath ->
+        model ! [Dialog.chooseFolder ChangeLibraryPath model.settings.libraryPath]
+
+      ChangeLibraryPath newPath ->
+        if String.length newPath > 1 then
+          { model | restartNeeded = True, settings = { settings | libraryPath = newPath }} ! []
+        else
+          model ! []
 
 view : Model -> Html Msg
 view model =
@@ -73,9 +90,21 @@ view model =
 
 libraryView : Model -> Html Msg
 libraryView model =
-  div []
-  [ h1 [] [text "Library"]
-  ]
+  let
+    { settings } = model
+  in
+    div []
+    [ div [class "form-row"]
+      [ label [] [text "Library Path"]
+      , div [class "form-control-pair"]
+        [ div [] [ span [] [text settings.libraryPath] ]
+        , div [] [ button
+            [ onClick BrowseLibraryPath
+            ] [text "Change Location"]
+          ]
+        ]
+      ]
+    ]
 
 playbackView : Model -> Html Msg
 playbackView model =

@@ -1,15 +1,13 @@
-module Update exposing (init, update, subscriptions)
+module MainWindow.Update exposing (init, update, subscriptions)
 
 import Types exposing (..)
-import Model exposing (..)
+import MainWindow.Model as Model exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..), MenuCallback)
-import SplitPane.SplitPane as SplitPane exposing (Orientation(..), ViewConfig, createViewConfig, withSplitterAt, withResizeLimits, percentage)
-import SplitPane.Bound exposing (createBound)
 import Ports exposing (podcastLoading, podcastUpdated, episodeUpdated, playerState, errorDialog, taskState)
-import Decoders exposing (podcastLoadingDecoder, podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder, episodeListDecoder, podcastsStateDecoder, taskStateDecoder)
+import MainWindow.Decoders exposing (podcastLoadingDecoder, podcastDecoder, podcastListDecoder, playerStateDecoder, episodeDecoder, episodeListDecoder, podcastsStateDecoder, taskStateDecoder)
 import Json.Decode
 import Ipc
-import Player
+import MainWindow.Player as Player
 import Http
 
 init : GlobalState -> (Model, Cmd Msg)
@@ -22,9 +20,6 @@ init state =
     , player = Player.init
     , tasks = Types.TaskState False []
     , selectedEpisode = Nothing
-    , splitPane = SplitPane.init Horizontal
-      |> withResizeLimits (createBound (percentage 0.25) (percentage 0.6))
-      |> withSplitterAt (percentage 0.34)
     , podcastContextMenu = Nothing
     , episodeContextMenu = Nothing
     }
@@ -169,9 +164,6 @@ update msg model =
             model ! [errorDialog "Please select a podcast to view its settings"]
       else
         { model | showPodcastSettings = False } ! []
-
-    SplitterMsg paneMsg ->
-      { model | splitPane = SplitPane.update paneMsg model.splitPane } ! []
     
     TaskState json ->
       case Json.Decode.decodeValue taskStateDecoder json of
@@ -264,8 +256,7 @@ loadEpisodes globalState id =
 subscriptions: Model -> Sub Msg
 subscriptions model =
   Sub.batch
-  [ Sub.map SplitterMsg <| SplitPane.subscriptions model.splitPane
-  , podcastLoading PodcastLoading
+  [ podcastLoading PodcastLoading
   , podcastUpdated PodcastUpdated
   , episodeUpdated EpisodeUpdated
   , playerState Model.PlayerState

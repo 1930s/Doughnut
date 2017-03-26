@@ -2,7 +2,7 @@ module MainWindow.PodcastSettings exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model exposing (Model, Msg(..), selectedPodcast)
+import MainWindow.Model exposing (Model, Msg(..), selectedPodcast)
 import Types exposing (..)
 
 view : Podcast -> Html Msg

@@ -1,9 +1,9 @@
-module Episodes exposing (list)
+module MainWindow.Episodes exposing (list)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Model exposing (Model, Msg(..), EpisodeContextMenu(..))
+import MainWindow.Model exposing (Model, Msg(..), EpisodeContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Utils.Date exposing (dateFormat)

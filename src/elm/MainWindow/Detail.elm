@@ -2,12 +2,12 @@ module MainWindow.Detail exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model exposing (Model, Msg(..), selectedPodcast)
+import MainWindow.Model exposing (Model, Msg(..), selectedPodcast)
 import Types exposing (..)
 import Utils.Podcast exposing (imageUrl)
 import Utils.Date exposing (dateFormat, timeFormat)
 import Markdown
-import TaskManager exposing (progressBar)
+import MainWindow.TaskManager exposing (progressBar)
 import MainWindow.PodcastSettings as PodcastSettings
 
 view : Model -> Html Msg

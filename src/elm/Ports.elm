@@ -31,3 +31,5 @@ port episodeUpdated : (Json.Encode.Value -> msg) -> Sub msg
 
 port playerState : (Json.Encode.Value -> msg) -> Sub msg
 port taskState : (Json.Encode.Value -> msg) -> Sub msg
+
+-- Preferences Window

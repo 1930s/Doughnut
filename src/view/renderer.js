@@ -1,4 +1,4 @@
-var Elm = require('../elm/Main')
+var Elm = require('../elm/MainWindow')
 var CSS = require('../scss/main.scss')
 var Split = require('./split.js')
 var jQuery, $ = require('jquery')

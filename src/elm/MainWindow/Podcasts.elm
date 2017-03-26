@@ -1,9 +1,9 @@
-module Podcasts exposing (list)
+module MainWindow.Podcasts exposing (list)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Model exposing (Model, Msg(..), PodcastContextMenu(..))
+import MainWindow.Model exposing (Model, Msg(..), PodcastContextMenu(..))
 import Types exposing (..)
 import ContextMenu exposing (open, Menu, MenuItem, MenuItemType(..))
 import Utils.Podcast exposing (imageUrl)

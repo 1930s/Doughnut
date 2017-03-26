@@ -1,11 +1,10 @@
-module Model exposing (..)
+module MainWindow.Model exposing (..)
 
 import Mouse exposing (Position)
 import ContextMenu exposing (Menu, MenuCallback)
-import SplitPane.SplitPane as SplitPane
 import Types exposing (..)
 import Json.Encode
-import Player
+import MainWindow.Player
 import Http
 
 type alias Model =
@@ -15,7 +14,6 @@ type alias Model =
   , player : PlayerModel
   , tasks : TaskState
   , selectedEpisode : Maybe Episode
-  , splitPane : SplitPane.State
   , podcastContextMenu : Maybe (Menu PodcastContextMenu)
   , episodeContextMenu : Maybe (Menu EpisodeContextMenu)
   }
@@ -40,10 +38,7 @@ type EpisodeContextMenu
   | M_MarkAllUnplayed PodcastId
 
 type Msg
-  = --OpenContextMenu (Menu ButtonMenuItem)
-  --| MenuAction String
-  SplitterMsg SplitPane.Msg
-  | SelectPodcast PodcastWrapped
+  = SelectPodcast PodcastWrapped
   | SelectEpisode Episode
   | PlayEpisode Episode
   | ShowPodcastContextMenu (Menu PodcastContextMenu)
@@ -58,7 +53,7 @@ type Msg
   | TaskState Json.Encode.Value
   | PodcastsLoaded (Result Http.Error (List PodcastWrapped))
   | EpisodesLoaded (Result Http.Error (List Episode))
-  | PlayerMsg Player.Msg
+  | PlayerMsg MainWindow.Player.Msg
 
 selectedPodcast : Model -> Maybe PodcastWrapped
 selectedPodcast model =

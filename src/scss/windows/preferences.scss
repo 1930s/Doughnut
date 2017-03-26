@@ -44,6 +44,9 @@
 .preference-view {
   background: #F5F7F8;
   flex-grow: 10;
+  padding: 10px 30px;
+  -webkit-user-select: initial;
+  font-size: 13px;
 }
 
 .preference-gutter {

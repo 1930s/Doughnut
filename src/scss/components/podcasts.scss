@@ -75,6 +75,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    p:last-child {
+      margin-top: 3px;
+    }
   }
 
   .podcast-list-loading {
