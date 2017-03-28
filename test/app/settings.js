@@ -11,6 +11,17 @@ describe('Settings', function() {
     expect(Settings.get('unknown', { a: 1, b: 2 })).to.eql({ a: 1, b: 2 })
   })
 
+  it('should store setting', function(done) {
+    Settings.set('ping', 'pong')
+
+    setTimeout(() => {
+      Settings.loaded = false
+      var ping = Settings.get('ping')
+      expect(ping).to.eql('pong')
+      done()
+    }, 100)
+  })
+
   it('should merge store setting', function(done) {
     Settings.set('player', { a: 1, b: 2, c: 3 })
 

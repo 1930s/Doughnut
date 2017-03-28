@@ -1,7 +1,11 @@
 module Ipc exposing (..)
 
 import Types exposing (..)
-import Ports exposing (ObjAction, FloatAction, objectAction, globalAction, floatAction)
+import Ports exposing (ObjAction, FloatAction, StringAction, objectAction, globalAction, floatAction, stringAction, saveSettings)
+
+clipboardSet : String -> Cmd msg
+clipboardSet str =
+  stringAction (StringAction "clipboard:set" str)
 
 play : Cmd msg
 play =
@@ -26,6 +30,10 @@ setVolume volume =
 reloadPodcast : PodcastId -> Cmd msg
 reloadPodcast id =
   objectAction (ObjAction "podcast:reload" id)
+
+podcastSubscribe : Cmd msg
+podcastSubscribe =
+  globalAction "podcast:subscribe:new"
 
 unsubscribePodcast : PodcastId -> Cmd msg
 unsubscribePodcast id =
@@ -67,3 +75,6 @@ revealEpisode : EpisodeId -> Cmd msg
 revealEpisode id =
   objectAction (ObjAction "episode:reveal" id)
 
+settingsSave : Settings -> Cmd msg
+settingsSave settings =
+  saveSettings settings

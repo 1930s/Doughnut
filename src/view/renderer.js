@@ -41,19 +41,23 @@ window.onload = () => {
     //splitter.setSizes([28, 32, 40])
   })
 
-  app.ports.errorDialog.subscribe((message) => {
+  app.ports.errorDialog.subscribe(message => {
     remote.dialog.showErrorBox('View Error', message)
   })
 
-  app.ports.objectAction.subscribe((action) => {
+  app.ports.objectAction.subscribe(action => {
     ipcRenderer.send(action.action, { id: action.id })
   })
 
-  app.ports.globalAction.subscribe((action) => {
+  app.ports.globalAction.subscribe(action => {
     ipcRenderer.send(action, {})
   })
 
-  app.ports.floatAction.subscribe((action) => {
+  app.ports.floatAction.subscribe(action => {
+    ipcRenderer.send(action.action, action.arg)
+  })
+
+  app.ports.stringAction.subscribe(action => {
     ipcRenderer.send(action.action, action.arg)
   })
 

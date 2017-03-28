@@ -131,6 +131,20 @@ export class LibraryManager extends EventEmitter {
     return new Promise((resolve, reject) => {
       Podcast.findById(podcast.id)
         .then(podcast => {
+          // Remove associated categories and episodes
+          return new Promise((resolve, reject) => {
+            podcast.setCategories([])
+              .then(() => {
+                return Episode.destroy({
+                  where: { podcast_id: podcast.id }
+                })
+              })
+              .then(() => {
+                resolve(podcast)
+              })
+          })
+        })
+        .then(podcast => {
           return podcast.destroy()
         })
         .then(() => {

@@ -21,11 +21,40 @@ import Settings from '../settings'
 
 var path = require('path')
 var fs = require('fs')
+var { dialog, app } = require('electron')
 
-const libraryPath = Settings.get('libraryPath')
+var libraryPath = Settings.get('libraryPath')
 
 if (!fs.existsSync(libraryPath)) {
-  fs.mkdirSync(libraryPath)
+  if (libraryPath === Settings.defaults.libraryPath) {
+    // This is probably the first launch, create Doughnut folder automatically
+    fs.mkdirSync(libraryPath)
+  } else {
+    // The user's library might be on a disconnected network drive
+    var locateMsgIndex = dialog.showMessageBox({
+      type: 'question',
+      buttons: ['Locate Library', 'Quit'],
+      defaultId: 0,
+      message: 'Doughnut Library Not Found',
+      detail: 'Your Doughnut library could not be found. If this is your first time launching Doughnut, a folder to store your library could not be created automatically. Please choose one from the options below.'
+    })
+
+    if (locateMsgIndex === 0 /* Locate Library */) {
+      var newLibraryPath = dialog.showOpenDialog({
+        defaultPath: app.getPath('music'),
+        properties: ['openDirectory']
+      })
+
+      console.log(newLibraryPath)
+
+      if (newLibraryPath && newLibraryPath.length >= 1) {
+        libraryPath = newLibraryPath[0]
+        Settings.set('libraryPath', libraryPath)
+      }
+    } else {
+      app.quit()
+    }
+  }
 }
 
 var sequelize = new Sequelize('', '', '', {

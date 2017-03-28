@@ -21,6 +21,12 @@ type alias FloatAction =
   }
 port floatAction : FloatAction -> Cmd msg
 
+type alias StringAction =
+  { action : String
+  , arg : String
+  }
+port stringAction : StringAction -> Cmd msg
+
 -- Action -> Main
 
 
@@ -33,3 +39,4 @@ port playerState : (Json.Encode.Value -> msg) -> Sub msg
 port taskState : (Json.Encode.Value -> msg) -> Sub msg
 
 -- Preferences Window
+port saveSettings : Settings -> Cmd msg

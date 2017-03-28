@@ -53,7 +53,7 @@ libraryControlView model =
       ]
     else
       text ""
-  , button [class "library-subscribe"]
+  , button [class "library-subscribe", onClick PodcastSubscribe]
     [ Icons.plusIcon
     ]
   ]

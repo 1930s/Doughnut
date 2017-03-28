@@ -19,7 +19,7 @@
 import Electron from 'electron'
 import url from 'url'
 import path from 'path'
-const { ipcMain, dialog, shell } = require('electron')
+const { ipcMain, dialog, shell, clipboard, app } = require('electron')
 
 import MainWindow from './windows/main_window'
 import PreferencesWindow from './windows/preferences'
@@ -72,6 +72,10 @@ class WindowManager {
         .then(podcast => {
           return Library().reload(podcast)
         })
+    })
+
+    ipcMain.on('podcast:subscribe:new', (event, arg) => {
+      wm.subscribeWindow().show()
     })
 
     ipcMain.on('podcast:unsubscribe', (event, arg) => {
@@ -155,11 +159,40 @@ class WindowManager {
         })
     })
 
+    // Settings
+
+    ipcMain.on('settings:save', (event, arg) => {
+      console.log('settings:save', arg)
+
+      if (Settings.restartNeeded(arg)) {
+        dialog.showMessageBox({
+          type: 'question',
+          buttons: ['Ok', 'Cancel'],
+          defaultId: 0,
+          message: 'Restart Needed',
+          detail: 'You are about to change a setting that requires Doughnut to close and reopen in order to apply it. After clicking ok, Doughnut will quit. Please reopen it to proceed.'
+        }, response => {
+          if (response === 0 /* Ok */) {
+            Settings.update(arg)
+            wm.preferencesWindow().close()
+            app.quit()
+          }
+        })
+      } else {
+        Settings.update(arg)
+        wm.preferencesWindow().close()
+      }
+    })
+
     // Misc
 
     ipcMain.on('link', (event, arg) => {
       console.log('Opening link: ', arg)
       shell.openExternal(arg)
+    })
+
+    ipcMain.on('clipboard:set', (event, arg) => {
+      clipboard.writeText(arg)
     })
   }
 

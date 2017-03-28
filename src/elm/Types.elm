@@ -90,3 +90,7 @@ type alias LibraryTask =
   , progress : Int
   , description : String
   }
+
+type alias Settings =
+  { libraryPath : String
+  }

@@ -5,6 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Icons as Icons
 import Dialog
+import Types exposing (Settings)
+import Ipc
 
 type PreferenceView
   = Library
@@ -12,12 +14,9 @@ type PreferenceView
 
 type Msg
   = ChangeView PreferenceView
+  | Apply
   | BrowseLibraryPath
   | ChangeLibraryPath String
-
-type alias Settings =
-  { libraryPath : String
-  }
 
 type alias Model =
   { view : PreferenceView
@@ -57,6 +56,9 @@ update msg model =
     case msg of
       ChangeView newView ->
         { model | view = newView } ! []
+
+      Apply -> 
+        model ! [Ipc.settingsSave model.settings ]
       
       BrowseLibraryPath ->
         model ! [Dialog.chooseFolder ChangeLibraryPath model.settings.libraryPath]
@@ -69,24 +71,35 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div [class "preferences"]
-  [ div [class "preference-tabs"]
-    [ div [onClick (ChangeView Library)]
-      [ Icons.libraryIcon
-      , span [] [text "Library"]
+  let
+    applyAction = if model.restartNeeded then
+        "Restart & Apply"
+      else
+        "Apply"
+  in 
+    div [class "preferences"]
+    [ div [class "preference-tabs"]
+      [ div [onClick (ChangeView Library)]
+        [ Icons.libraryIcon
+        , span [] [text "Library"]
+        ]
+      , div [onClick (ChangeView Playback)] [text "Playback"]
       ]
-    , div [onClick (ChangeView Playback)] [text "Playback"]
+    , div [class "preference-view"]
+      [ case model.view of
+        Library ->
+          libraryView model
+        Playback ->
+          playbackView model
+      ]
+    , div [class "preference-gutter"]
+      [ if model.restartNeeded then
+          span [] [text "Doughnut must be restarted before your new settings can be applied"]
+        else
+          text ""
+      , button [onClick Apply] [text applyAction]
+      ]
     ]
-  , div [class "preference-view"]
-    [ case model.view of
-      Library ->
-        libraryView model
-      Playback ->
-        playbackView model
-    ]
-  , div [class "preference-gutter"]
-    []
-  ]
 
 libraryView : Model -> Html Msg
 libraryView model =

@@ -17,98 +17,26 @@
  */
 
 import Electron from 'electron'
-
 import Logger from './logger'
-import WindowManager from './window_manager'
-import Menu from './menu'
-import Settings from './settings'
-import Library from './library/manager'
-import AssetServer from './asset_server'
-import Player from './player'
 
-const {dialog, app, globalShortcut} = require('electron')
-
-export default class Main {
-  constructor () {
-    this.ipc = require('electron').ipcMain
-  }
-
-  onReady () {
-    const main = this
-
-    Logger.info(`Settings file: ${Settings.settingsFile()}`)
-
-    AssetServer.setup()
-      .then((server) => {
-        main.server = server
-
-        Library().load((err) => {
-          if (err) {
-            dialog.showMessageBox({
-              title: 'An error occured whilst loading your Doughnut library database'
-            })
-          }
-
-          WindowManager.setup()
-
-          Menu.init()
-
-          main.launchMainWindow()
-
-          this.registerGlobalShortcuts()
-        })
-      })
-      .catch((err) => {
-        console.log(err)
-        app.quit()
-      })
-  }
-
-  registerGlobalShortcuts () {
-    globalShortcut.register('MediaPlayPause', () => {
-      Player.toggle()
-    })
-
-    globalShortcut.register('MediaNextTrack', () => {
-      Player.skipForward()
-    })
-
-    globalShortcut.register('MediaPreviousTrack', () => {
-      Player.skipBack()
-    })
-  }
-
-  launchMainWindow () {
-    const mainWindow = WindowManager.mainWindow(this.server)
-    mainWindow.show()
-  }
-
-  launchWelcomeWindow () {
-    WindowManager.welcomeWindow()
-  }
-
-  onWindowAllClosed () {
-    Logger.debug('Quit')
-    Electron.app.quit()
-  }
-}
-
-const main = new Main()
+global.app = null
 
 Electron.app.on('ready', () => {
   Logger.debug('Application is ready')
-  main.onReady()
+
+  // Lazily load an instance of app after Electron has inited,
+  // then if the Doughnut library is not found we can display a
+  // dialog and sort the issue out
+  global.app = require('./app')
+  global.app.onReady()
 })
 
 Electron.app.on('will-quit', () => {
   Logger.debug('Application will quit')
-
-  globalShortcut.unregisterAll()
-  WindowManager.teardown()
-  Player.destroy()
+  global.app.shutdown()
 })
 
 Electron.app.on('window-all-closed', () => {
   Logger.debug('All windows closed')
-  main.onWindowAllClosed()
+  global.app.onWindowAllClosed()
 })

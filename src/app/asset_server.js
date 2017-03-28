@@ -19,6 +19,8 @@
 var express = require('express')
 var portfinder = require('portfinder')
 var Promise = require('bluebird')
+var fs = require('fs')
+var path = require('path')
 
 import { Podcast, Episode, Category } from './library/models'
 import Player from './player'
@@ -59,7 +61,18 @@ export default class AssetServer {
     return this.port
   }
 
+  servePodcastImage (res, podcast) {
+    const artworkFile = podcast.artworkFile()
+    if (fs.existsSync(artworkFile)) {
+      res.sendFile(artworkFile)
+    } else {
+      res.sendFile(path.join(__dirname, 'icon_subtle.png'))
+    }
+  }
+
   initRoutes () {
+    const server = this
+
     this.app.get('/podcasts', (req, res) => {
       Podcast.findAll({
         attributes: { exclude: ['imageBlob'] },
@@ -109,7 +122,7 @@ export default class AssetServer {
     this.app.get('/podcasts/image/:id', (req, res) => {
       Podcast.findById(req.params.id)
       .then(podcast => {
-        res.sendFile(podcast.artworkFile())
+        server.servePodcastImage(res, podcast)
       })
     })
 
@@ -117,7 +130,7 @@ export default class AssetServer {
       if (Player.episode) {
         Podcast.findById(Player.episode.podcast_id)
         .then(podcast => {
-          res.sendFile(podcast.artworkFile())
+          server.servePodcastImage(res, podcast)
         })
       }
     })

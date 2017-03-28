@@ -150,13 +150,18 @@ describe('Podcast', function() {
     it('should unsubscribe from podcast', function(done) {
       Library().on('podcast:unsubscribed', podcast => {
         expect(podcast.id).to.eql(subscribed.id)
-        done()
       })
 
       Library().unsubscribe(subscribed)
         .then(function() {
           Podcast.count().then(function(c) {
             expect(c).to.eql(0)
+
+            Episode.count().then(function(ce) {
+              expect(ce).to.eql(0)
+
+              done()
+            })
           })
         })
     })

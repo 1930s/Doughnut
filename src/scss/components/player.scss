@@ -89,11 +89,13 @@ button.player-control {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
 
   span:last-child {
     text-align: right;
     margin-left: auto;
+    min-width: 60px;
   }
 }
 

@@ -104,8 +104,17 @@ update msg model =
                 { pw | episodes = List.map updateEpisode pw.episodes }
               else
                 pw
+            
+            state = case model.selectedEpisode of
+              Just selected ->
+                if selected.id == episode.id then
+                  { model | selectedEpisode = Just episode }
+                else
+                  model
+              
+              Nothing -> model
           in
-            { model | podcasts = List.map updatePodcastEpisode model.podcasts } ! []
+            { state | podcasts = List.map updatePodcastEpisode model.podcasts } ! []
 
         Err err ->
           model ! [errorDialog (toString err)]
@@ -165,6 +174,9 @@ update msg model =
       else
         { model | showPodcastSettings = False } ! []
     
+    PodcastSubscribe ->
+      model ! [Ipc.podcastSubscribe]
+
     TaskState json ->
       case Json.Decode.decodeValue taskStateDecoder json of
         Ok state ->
@@ -200,6 +212,11 @@ podcastContextMenuUpdate menu r model =
     
     Just (M_Unsubscribe id) ->
       model ! [Ipc.unsubscribePodcast id]
+
+    Just (M_CopyPodcastFeed id) ->
+      case findPodcast id model of
+        Just podcast -> model ! [Ipc.clipboardSet podcast.feed]
+        Nothing -> model ! []
     
     _ ->
       model ! []

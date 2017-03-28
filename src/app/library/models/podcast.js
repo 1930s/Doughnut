@@ -119,6 +119,11 @@ const Podcast = Model.define('Podcast', {
         author = meta['itunes:author']['#']
       }
 
+      var imageUrl = meta.image.url
+      if (meta['itunes:image'] && meta['itunes:image']['@'] && meta['itunes:image']['@']['href']) {
+        imageUrl = meta['itunes:image']['@']['href']
+      }
+
       return {
         title: meta.title,
         feed: meta.feed,
@@ -128,7 +133,7 @@ const Podcast = Model.define('Podcast', {
         pubDate: meta.pubDate,
         language: meta.language,
         copyright: meta.copyright,
-        imageUrl: meta.image.url,
+        imageUrl: imageUrl,
         lastParsed: new Date()
       }
     },
@@ -224,17 +229,25 @@ const Podcast = Model.define('Podcast', {
       const podcast = this
 
       return new Promise(function (resolve, reject) {
-        var stream = request({
+        request({
           url: podcast.imageUrl,
           encoding: null
-        })
-        .on('error', err => {
-          reject(err)
-        })
-        .pipe(fs.createWriteStream(podcast.artworkFile()))
-
-        stream.on('finish', () => {
-          resolve(podcast)
+        }, (err, response, data) => {
+          if (err != null) {
+            reject(err)
+          } else {
+            if (response.statusCode === 200) {
+              fs.writeFile(podcast.artworkFile(), data, (err) => {
+                if (err != null) {
+                  reject(err)
+                } else {
+                  resolve(podcast)
+                }
+              })
+            } else {
+              resolve(podcast)
+            }
+          }
         })
       })
     },
@@ -289,10 +302,23 @@ const Podcast = Model.define('Podcast', {
   }
 })
 
-Podcast.hasMany(Episode, { foreignKey: 'podcast_id' })
-Episode.belongsTo(Podcast, { foreignKey: 'podcast_id' })
+Podcast.hasMany(Episode, {
+  foreignKey: 'podcast_id'
+})
+Episode.belongsTo(Podcast, {
+  foreignKey: 'podcast_id'
+})
 
-Category.belongsToMany(Podcast, { through: 'podcast_categories', foreignKey: 'category_id', timestamps: false })
-Podcast.belongsToMany(Category, { through: 'podcast_categories', foreignKey: 'podcast_id', timestamps: false })
+Category.belongsToMany(Podcast, {
+  through: 'podcast_categories',
+  foreignKey: 'category_id',
+  timestamps: false
+})
+
+Podcast.belongsToMany(Category, {
+  through: 'podcast_categories',
+  foreignKey: 'podcast_id',
+  timestamps: false
+})
 
 export { Podcast, Episode, Category }

@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import MainWindow.Model exposing (Model, Msg(..), selectedPodcast)
 import Types exposing (..)
 import Utils.Podcast exposing (imageUrl)
-import Utils.Date exposing (dateFormat, timeFormat)
+import Utils.Date exposing (dateFormat, timeFormat, friendlyDateFormat)
 import Markdown
 import MainWindow.TaskManager exposing (progressBar)
 import MainWindow.PodcastSettings as PodcastSettings
@@ -67,12 +67,15 @@ podcastDetail globalState pw =
       , table []
         [ tr []
           [ td [] [ text "Last Update" ]
-          , td [] [ text "27th February at 02:02"]
+          , td [] [ text (friendlyDateFormat podcast.lastParsed)]
           ]
-        , tr []
-          [ td [] [ text "Categories" ]
-          , td [] [ text (String.join ", " podcast.categories)]
-          ]
+        , if (List.length podcast.categories) > 0 then
+            tr []
+            [ td [] [ text "Categories" ]
+            , td [] [ text (String.join ", " podcast.categories)]
+            ]
+          else
+            text ""
         , tr []
           [ td [] [ text "Owner" ]
           , td [] [ text podcast.copyright]

@@ -86,6 +86,21 @@ class Settings {
     jsonfile.writeFile(this.settingsFile(), this.loaded)
   }
 
+  restartNeeded (updated) {
+    var restartNeeded = false
+
+    if (updated.libraryPath && updated.libraryPath !== this.get('libraryPath')) {
+      restartNeeded = true
+    }
+
+    return restartNeeded
+  }
+
+  update (updated) {
+    this.loaded = merge(this.loaded, updated)
+    this.save()
+  }
+
   load () {
     this.loaded = this.defaults
 
@@ -109,7 +124,12 @@ class Settings {
 
   set (key, val) {
     this.loadIfNeeded()
-    this.loaded[key] = merge(this.loaded[key], val)
+
+    if (val != null && typeof val === 'object') {
+      this.loaded[key] = merge(this.loaded[key], val)
+    } else {
+      this.loaded[key] = val
+    }
     this.store()
   }
 }

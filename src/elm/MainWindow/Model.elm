@@ -46,6 +46,7 @@ type Msg
   | HandlePodcastContextMenu MenuCallback
   | HandleEpisodeContextMenu MenuCallback
   | ToggleShowPodcastSettings
+  | PodcastSubscribe
   | PodcastLoading Json.Encode.Value
   | PodcastUpdated Json.Encode.Value
   | EpisodeUpdated Json.Encode.Value
@@ -59,3 +60,9 @@ selectedPodcast : Model -> Maybe PodcastWrapped
 selectedPodcast model =
   List.filter (\p -> p.selected == True) model.podcasts
     |> List.head
+
+findPodcast : PodcastId -> Model -> Maybe Podcast
+findPodcast id model =
+  case List.filter (\p -> p.podcast.id == id) model.podcasts |> List.head of
+    Just pw -> Just pw.podcast
+    Nothing -> Nothing

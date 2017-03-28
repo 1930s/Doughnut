@@ -42,6 +42,12 @@ export default class PreferencesWindow {
     })
   }
 
+  close () {
+    if (this.window) {
+      this.window.close()
+    }
+  }
+
   show () {
     const prefs = this
 
