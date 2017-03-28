@@ -27,7 +27,7 @@ export default class PreferencesWindow {
   }
 
   send (message, arg) {
-    if (this.window) {
+    if (this.window && !this.window.isDestroyed()) {
       this.window.webContents.send(message, arg)
     }
   }
@@ -43,8 +43,22 @@ export default class PreferencesWindow {
   }
 
   close () {
-    if (this.window) {
+    if (this.window && !this.window.isDestroyed()) {
       this.window.close()
+    }
+  }
+
+  focus () {
+    if (this.window && !this.window.isDestroyed()) {
+      this.window.focus()
+    }
+  }
+
+  isVisible () {
+    if (this.window && !this.window.isDestroyed()) {
+      return this.window.isVisible()
+    } else {
+      return false
     }
   }
 

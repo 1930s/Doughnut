@@ -239,7 +239,11 @@ function menuTemplate () {
         {
           label: 'Preferences...',
           click () {
-            WindowManager.preferencesWindow().show()
+            if (!WindowManager.preferencesWindow().isVisible()) {
+              WindowManager.preferencesWindow().show()
+            } else {
+              WindowManager.preferencesWindow().focus()
+            }
           }
         },
         {
