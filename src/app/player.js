@@ -145,7 +145,7 @@ class Player extends EventEmitter {
       this.mpv.loadStream(episode.enclosureUrl)
     }
 
-    if (this.episode.playPosition > 0) {
+    if (this.episode.playPosition && this.episode.playPosition > 0) {
       this.onStarted = () => {
         console.log('Resuming at: ', this.episode.playPosition)
         this.seekTo(this.episode.playPosition)

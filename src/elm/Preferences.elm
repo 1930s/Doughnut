@@ -97,7 +97,7 @@ view model =
           span [] [text "Doughnut must be restarted before your new settings can be applied"]
         else
           text ""
-      , button [onClick Apply] [text applyAction]
+      , button [class "btn", onClick Apply] [text applyAction]
       ]
     ]
 
@@ -112,7 +112,7 @@ libraryView model =
       , div [class "form-control-pair"]
         [ div [] [ span [] [text settings.libraryPath] ]
         , div [] [ button
-            [ class "small"
+            [ class "btn small"
             , onClick BrowseLibraryPath
             ] [text "Change Location"]
           ]

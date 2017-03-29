@@ -31,8 +31,8 @@ Electron.app.on('ready', () => {
   global.app.onReady()
 })
 
-Electron.app.on('will-quit', () => {
-  Logger.debug('Application will quit')
+Electron.app.on('quit', () => {
+  Logger.debug('Application quit')
   global.app.shutdown()
 })
 
