@@ -27,6 +27,10 @@ class Player extends EventEmitter {
   constructor () {
     super()
 
+    var audio = new Audio()
+    audio.src = 'http://feeds.soundcloud.com/stream/314355827-tesdpodcast-stevedave-330.mp3'
+    audio.play()
+
     this.mpv = mpv.mpv()
 
     const player = this
