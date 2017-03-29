@@ -16,8 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Electron, { ipcMain } from 'electron'
 const EventEmitter = require('events')
-const mpv = require('./mpv')
+const url = require('url')
+const path = require('path')
 
 import Library from './library/manager'
 import { Podcast } from './library/models'
@@ -27,13 +29,7 @@ class Player extends EventEmitter {
   constructor () {
     super()
 
-    var audio = new Audio()
-    audio.src = 'http://feeds.soundcloud.com/stream/314355827-tesdpodcast-stevedave-330.mp3'
-    audio.play()
-
-    this.mpv = mpv.mpv()
-
-    const player = this
+    this.startProcess()
 
     this.state = {
       pause: false,
@@ -46,8 +42,8 @@ class Player extends EventEmitter {
     }
     this.episode = null
 
-    this.mpv.volume(this.state.volume)
-
+    // TODO: Restore saved volume state
+/*
     this.onStarted = () => {}
     this.mpv.on('started', mpvStatus => {
       player.onStarted()
@@ -92,7 +88,49 @@ class Player extends EventEmitter {
         player.saveEpisodeState()
         saveNeeded = false
       }
+    }) */
+  }
+
+  startProcess () {
+    const player = this
+    const w = new Electron.BrowserWindow({
+      width: 50,
+      height: 50,
+      resizable: false,
+      show: false
     })
+
+    w.loadURL(url.format({
+      pathname: path.join(__dirname, 'player.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+
+    w.webContents.on('did-finish-load', () => {
+      player.setupIpc()
+    })
+
+    this.process = w
+    return w
+  }
+
+  setState (updated) {
+    this.state = Object.assign({}, this.state, updated)
+    this.emit('state', this.state)
+  }
+
+  setupIpc () {
+    const player = this
+
+    ipcMain.on('player:process:state', (event, arg) => {
+      player.setState(arg)
+    })
+  }
+
+  send (message, arg = '') {
+    if (this.process && !this.process.isDestroyed()) {
+      this.process.webContents.send(message, arg)
+    }
   }
 
   ready () {
@@ -161,20 +199,18 @@ class Player extends EventEmitter {
       episodeId: episode.id,
       ready: true
     })
-
-    this.mpv.play()
   }
 
   pause () {
-    this.mpv.pause()
+    this.send('pause')
   }
 
   toggle () {
-    this.mpv.togglePause()
+    this.send('toggle')
   }
 
   seekTo (position) {
-    this.mpv.goToPosition(position)
+    this.send('seek', position)
   }
 
   skipForward () {
@@ -190,8 +226,7 @@ class Player extends EventEmitter {
   setVolume (volume) {
     const clamped = Math.max(0, Math.min(100, volume))
 
-    this.mpv.volume(clamped)
-    Settings.set('player', { volume: clamped })
+    this.send('volume', clamped / 100)
   }
 
   volumeUp () {
