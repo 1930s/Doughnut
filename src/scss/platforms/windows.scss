@@ -1,0 +1,10 @@
+.os-win32 {
+  .main-window {
+    flex-direction: column-reverse;
+  }
+
+  .title-bar {
+    border-top: 1px solid #EEE;
+    border-bottom: none;
+  }
+}

@@ -27,6 +27,8 @@ function isRelease() {
 }
 
 window.onload = () => {
+  document.getElementById('app').className = `os-${remote.process.platform}`
+
   app = Elm.Main.embed(document.getElementById('app'), {
     serverPort: port(isRelease())
   })
