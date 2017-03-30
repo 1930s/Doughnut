@@ -125,7 +125,7 @@ class WindowManager {
 
       Library().loadEpisode(arg.id)
         .then(episode => {
-          Player.play(episode)
+          Player.load(episode)
         })
     })
 

@@ -12,8 +12,7 @@
     "postinstall": "cd node_modules/sqlite3 && npm run prepublish && node-gyp configure --module_name=node_sqlite3 --module_path=../lib/binding/electron-v1.6-darwin-x64 && node-gyp rebuild --target=1.6.3 --arch=x64 --target_platform=darwin --dist-url=https://atom.io/download/atom-shell --module_name=node_sqlite3 --module_path=../lib/binding/electron-v1.6-darwin-x64",
     "build:main": "browserify -t [ babelify --presets [ es2015 ] ] ./src/app/main.js --exclude electron --im --no-detect-globals --node -o ./build/main.js",
     "build:renderer": "webpack",
-    "build:mpv": "chmod +x build/mac/mpv",
-    "build": "npm-run-all -s build:renderer build:main build:mpv",
+    "build": "npm-run-all -s build:renderer build:main",
     "watch": "nodemon -V --exec \"npm run start\" --ext js,scss,elm --ignore build/ --ignore dist/",
     "prepackage": "npm run build"
   },
@@ -71,7 +70,6 @@
     "jsonfile": "^2.4.0",
     "moment": "^2.17.1",
     "nan": "^2.5.1",
-    "node-mpv": "^1.0.3",
     "portfinder": "^1.0.13",
     "request-progress": "^3.0.0",
     "request-promise": "^4.1.1",

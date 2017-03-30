@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Electron from 'electron'
+import Electron, { app } from 'electron'
 import url from 'url'
 import path from 'path'
 import Library from '../library/manager'
@@ -29,7 +29,7 @@ export default class MainWindow {
   }
 
   send (message, arg) {
-    if (this.window) {
+    if (this.window && !this.window.isDestroyed()) {
       this.window.webContents.send(message, arg)
     }
   }
@@ -96,6 +96,12 @@ export default class MainWindow {
       this.subscribe()
 
       mw.window.show()
+    })
+
+    this.window.webContents.on('close', () => {
+      if (Settings.isDevelopment()) {
+        app.quit()
+      }
     })
 
     // this.window.on('close', this.saveWindowState)

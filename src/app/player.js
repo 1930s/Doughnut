@@ -20,6 +20,7 @@ import Electron, { ipcMain } from 'electron'
 const EventEmitter = require('events')
 const url = require('url')
 const path = require('path')
+const fs = require('fs')
 
 import Library from './library/manager'
 import { Podcast } from './library/models'
@@ -33,13 +34,14 @@ class Player extends EventEmitter {
 
     this.state = {
       pause: false,
-      volume: Settings.get('player', { volume: 60 }).volume,
+      volume: 70,
       duration: 0,
       title: '',
       position: 0,
       ready: false,
       episodeId: 0
     }
+
     this.episode = null
 
     // TODO: Restore saved volume state
@@ -106,8 +108,16 @@ class Player extends EventEmitter {
       slashes: true
     }))
 
+    if (Settings.isDevelopment()) {
+      w.webContents.openDevTools({
+        mode: 'detach'
+      })
+    }
+
     w.webContents.on('did-finish-load', () => {
       player.setupIpc()
+
+      player.setVolume(Settings.get('player', { volume: 60 }).volume)
     })
 
     this.process = w
@@ -127,9 +137,9 @@ class Player extends EventEmitter {
     })
   }
 
-  send (message, arg = '') {
+  command (message, arg) {
     if (this.process && !this.process.isDestroyed()) {
-      this.process.webContents.send(message, arg)
+      this.process.webContents.send(message, arg || {})
     }
   }
 
@@ -170,47 +180,64 @@ class Player extends EventEmitter {
     }
   }
 
-  play (episode) {
+  load (episode) {
     if (!this.state.pause) {
-      this.mpv.stop()
+      this.pause()
     }
 
-    this.episode = episode
+    const player = this
+    player.episode = episode
+
+    var readyToPlay = () => {
+      if (episode.playPosition && episode.playPosition > 0) {
+        player.seekTo(episode.playPosition)
+      }
+
+      player.setState({
+        title: episode.title
+      })
+
+      player.play()
+    }
 
     if (episode.downloaded) {
       Podcast.findById(episode.podcast_id)
         .then(podcast => {
-          this.mpv.loadFile(podcast.fileName(episode))
+          const fileName = podcast.fileName(episode)
+          fs.exists(fileName, exists => {
+            if (exists) {
+              player.command('src', url.format({
+                pathname: fileName,
+                protocol: 'file:',
+                slashes: true
+              }))
+
+              readyToPlay()
+            }
+          })
         })
     } else {
-      console.log('Playing: ', episode.enclosureUrl)
-      this.mpv.loadStream(episode.enclosureUrl)
+      player.command('src', episode.enclosureUrl)
+      readyToPlay()
     }
+  }
 
-    if (this.episode.playPosition && this.episode.playPosition > 0) {
-      this.onStarted = () => {
-        console.log('Resuming at: ', this.episode.playPosition)
-        this.seekTo(this.episode.playPosition)
-      }
-    }
-
-    this.state = Object.assign(this.state, {
-      title: episode.title,
-      episodeId: episode.id,
-      ready: true
-    })
+  play () {
+    this.command('play')
   }
 
   pause () {
-    this.send('pause')
+    this.command('pause')
   }
 
   toggle () {
-    this.send('toggle')
+    this.command('toggle')
   }
 
   seekTo (position) {
-    this.send('seek', position)
+    if (!isNaN(parseFloat(position)) && isFinite(position)) {
+      this.command('seek', parseInt(position))
+    }
   }
 
   skipForward () {
@@ -226,7 +253,7 @@ class Player extends EventEmitter {
   setVolume (volume) {
     const clamped = Math.max(0, Math.min(100, volume))
 
-    this.send('volume', clamped / 100)
+    this.command('volume', clamped)
   }
 
   volumeUp () {

@@ -27,7 +27,6 @@ import AssetServer from './asset_server'
 import Player from './player'
 
 const {dialog, app, globalShortcut} = require('electron')
-const mpv = require('./mpv')
 
 class Main {
   constructor () {
@@ -68,7 +67,6 @@ class Main {
   shutdown () {
     globalShortcut.unregisterAll()
     WindowManager.teardown()
-    mpv.destroy()
   }
 
   registerGlobalShortcuts () {

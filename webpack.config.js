@@ -50,7 +50,7 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin('main.css'),
     new CopyWebpackPlugin([
-      { from: './src/assets' },
+      { from: './src/assets', ignore: '.DS_Store' },
     ])
   ],
   devServer: { inline: true },
