@@ -30,6 +30,7 @@ class Player extends EventEmitter {
   constructor () {
     super()
 
+    const player = this
     this.startProcess()
 
     this.state = {
@@ -44,53 +45,8 @@ class Player extends EventEmitter {
 
     this.episode = null
 
-    // TODO: Restore saved volume state
-/*
-    this.onStarted = () => {}
-    this.mpv.on('started', mpvStatus => {
-      player.onStarted()
-      player.onStarted = () => {}
-    })
-
-    this.mpv.on('paused', mpvStatus => {
-      player.saveEpisodeState()
-    })
-
-    this.mpv.on('stopped', mpvStatus => {
-      player.episode = null
-      player.state = Object.assign(player.state, {
-        ready: false,
-        episodeId: 0
-      })
-    })
-
-    this.mpv.on('statuschange', mpvStatus => {
-      player.state = Object.assign(player.state, {
-        pause: mpvStatus.pause,
-        volume: mpvStatus.volume,
-        duration: mpvStatus.duration
-      })
-
-      player.emit('state', player.state)
-      player.saveEpisodeState()
-    })
-
-    // Slightly crude rate limiting solution, so playPosition is only saved every 20 seconds when normally playing
-    var saveNeeded = false
-    setInterval(() => { saveNeeded = true }, 20000)
-
-    this.mpv.on('timeposition', seconds => {
-      player.state = Object.assign(player.state, {
-        position: seconds
-      })
-
-      player.emit('state', player.state)
-
-      if (saveNeeded) {
-        player.saveEpisodeState()
-        saveNeeded = false
-      }
-    }) */
+    var staleState = false
+    setInterval(() => { player.staleState = true }, 10000)
   }
 
   startProcess () {
@@ -99,7 +55,8 @@ class Player extends EventEmitter {
       width: 50,
       height: 50,
       resizable: false,
-      show: false
+      show: false,
+      skipTaskbar: true
     })
 
     w.loadURL(url.format({
@@ -107,12 +64,6 @@ class Player extends EventEmitter {
       protocol: 'file:',
       slashes: true
     }))
-
-    if (Settings.isDevelopment()) {
-      w.webContents.openDevTools({
-        mode: 'detach'
-      })
-    }
 
     w.webContents.on('did-finish-load', () => {
       player.setupIpc()
@@ -125,8 +76,19 @@ class Player extends EventEmitter {
   }
 
   setState (updated) {
+    const oldState = this.state
+
     this.state = Object.assign({}, this.state, updated)
     this.emit('state', this.state)
+
+    if (updated.pause !== oldState.pause || updated.duration !== oldState.duration) {
+      this.saveEpisodeState()
+    } else {
+      if (this.staleState) {
+        this.saveEpisodeState()
+        this.staleState = false
+      }
+    }
   }
 
   setupIpc () {
@@ -262,6 +224,13 @@ class Player extends EventEmitter {
 
   volumeDown () {
     this.setVolume(this.state.volume - 10)
+  }
+
+  notify (title, message) {
+    this.command('notify', {
+      title: title,
+      body: message
+    })
   }
 }
 

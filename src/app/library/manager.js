@@ -241,6 +241,12 @@ export class LibraryManager extends EventEmitter {
             const latest = result.found.sort((a, b) => { return new Date(b.pubDate) - new Date(a.pubDate) })[0]
             library.downloadEpisode(latest)
           }
+
+          // Notify new episodes
+          if (result.found.length > 0) {
+            library.emit('episodes:discovered', result.found)
+          }
+
           return result.podcast
         })
         .then(resolve)
@@ -268,6 +274,10 @@ export class LibraryManager extends EventEmitter {
     var task = new DownloadTask({ episode: episode })
     this.downloadQueue.push(task)
     this.downloadQueue.start()
+  }
+
+  unplayedCount () {
+    return Episode.count({ where: { played: false }})
   }
 }
 

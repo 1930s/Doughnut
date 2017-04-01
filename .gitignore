@@ -3,7 +3,5 @@ build
 !src/assets/build
 compiled
 elm-stuff
-test.mp3
 *.DS_Store
 dist
-src/assets/mac

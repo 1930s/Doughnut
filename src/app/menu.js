@@ -19,6 +19,7 @@ const electron = require('electron')
 
 import WindowManager from './window_manager'
 import Player from './player'
+import Library from './library/manager'
 
 var MENUS = {
   FILE: 0,
@@ -34,11 +35,10 @@ if (process.platform === 'darwin') {
   MENUS = {
     FILE: 1,
     EDIT: 2,
-    VIEW: 3,
-    ITEM: 4,
-    CONTROL: 5,
-    WINDOW: 6,
-    HELP: 7
+    ITEM: 3,
+    CONTROL: 4,
+    WINDOW: 5,
+    HELP: 6
   }
 }
 
@@ -88,76 +88,107 @@ function menuTemplate () {
       ]
     },
     {
-      label: 'View',
-      submenu: [
-        {
-          role: 'reload'
-        },
-        {
-          role: 'forcereload'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          role: 'toggledevtools'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          role: 'togglefullscreen'
-        }
-      ]
-    },
-    {
       label: 'Item',
       submenu: [
         {
           label: 'Reload',
-          accelerator: 'Alt+CmdOrCtrl+R'
+          accelerator: 'Alt+CmdOrCtrl+R',
+          click () {
+            WindowManager.selectedPodcast()
+              .then(podcast => {
+                Library().reload(podcast)
+              })
+          }
         },
         {
           type: 'separator'
         },
         {
           label: 'Play Now',
-          accelerator: 'CmdOrCtrl+P'
+          accelerator: 'CmdOrCtrl+P',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Player.load(episode)
+              })
+          }
         },
         {
           type: 'separator'
         },
         {
           label: 'Mark as Played',
-          accelerator: 'Ctrl+Cmd+M'
+          accelerator: 'Ctrl+Cmd+M',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Library().markEpisodePlayed(episode.id, true)
+              })
+          }
         },
         {
           label: 'Mark as Unplayed',
-          accelerator: 'Shift+Cmd+M'
+          accelerator: 'Shift+Cmd+M',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Library().markEpisodePlayed(episode.id, false)
+              })
+          }
         },
         {
           label: 'Mark as Favourite',
-          accelerator: 'CmdOrCtrl+B'
+          accelerator: 'CmdOrCtrl+B',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Library().markEpisodeFavourite(episode.id, true)
+              })
+          }
         },
         {
           label: 'Unmark Favourite',
-          accelerator: 'Shift+CmdOrCtrl+B'
+          accelerator: 'Shift+CmdOrCtrl+B',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Library().markEpisodeFavourite(episode.id, false)
+              })
+          }
         },
         {
           type: 'separator'
         },
         {
-          label: 'Mark all as Played'
+          label: 'Mark all as Played',
+          click () {
+            WindowManager.selectedPodcast()
+              .then(podcast => {
+                Library().markPodcastAllPlayed(podcast.id, true)
+              })
+          }
         },
         {
-          label: 'Mark all as Unplayed'
+          label: 'Mark all as Unplayed',
+          click () {
+            WindowManager.selectedPodcast()
+              .then(podcast => {
+                Library().markPodcastAllPlayed(podcast.id, false)
+              })
+          }
         },
         {
           type: 'separator'
         },
         {
           label: 'Download',
-          accelerator: 'CmdOrCtrl+L'
+          accelerator: 'CmdOrCtrl+L',
+          click () {
+            WindowManager.selectedEpisode()
+              .then(episode => {
+                Library().downloadEpisode(episode.id)
+              })
+          }
         }
       ]
     },
@@ -329,6 +360,24 @@ class Menu {
     Player.on('state', state => {
       menu.togglePlaybackControls(state)
     })
+
+    WindowManager.on('selection', selection => {
+      menu.toggleItemControls(selection)
+    })
+
+    Library().on('podcast:updated', podcast => {
+      if (WindowManager.selected.podcastId === podcast.id) {
+        menu.toggleItemControls(WindowManager.selected)
+      }
+    })
+
+    Library().on('episode:updated', episode => {
+      if (WindowManager.selected.episodeId === episode.id || WindowManager.selected.podcastId === episode.podcast_id) {
+        menu.toggleItemControls(WindowManager.selected)
+      }
+    })
+
+    menu.toggleItemControls(WindowManager.selected)
     menu.togglePlaybackControls(Player.state)
   }
 
@@ -339,6 +388,8 @@ class Menu {
       })
       if (menuItem) return menuItem
     }
+
+    return {}
   }
 
   togglePlaybackControls (playerState) {
@@ -347,6 +398,36 @@ class Menu {
     this.getMenuItem('Backward 30 seconds').enabled = playerReady
     this.getMenuItem('Play / Pause').enabled = playerReady
     this.getMenuItem('Forward 30 seconds').enabled = playerReady
+  }
+
+  toggleItemControls (selection) {
+    const podcastSelected = selection.podcastId !== false
+    const episodeSelected = selection.episodeId !== false
+
+    this.getMenuItem('Reload').enabled = podcastSelected
+    this.getMenuItem('Mark all as Played').enabled = podcastSelected
+    this.getMenuItem('Mark all as Unplayed').enabled = podcastSelected
+
+    this.getMenuItem('Play Now').enabled = episodeSelected
+
+    if (episodeSelected) {
+      WindowManager.selectedEpisode()
+        .then(episode => {
+          this.getMenuItem('Mark as Played').enabled = episode.played === false
+          this.getMenuItem('Mark as Unplayed').enabled = episode.played === true
+          this.getMenuItem('Mark as Favourite').enabled = episode.favourite === false
+          this.getMenuItem('Unmark Favourite').enabled = episode.favourite === true
+
+          this.getMenuItem('Download').enabled = episode.downloaded === false
+        })
+    } else {
+      this.getMenuItem('Mark as Played').enabled = false
+      this.getMenuItem('Mark as Unplayed').enabled = false
+      this.getMenuItem('Mark as Favourite').enabled = false
+      this.getMenuItem('Unmark Favourite').enabled = false
+
+      this.getMenuItem('Download').enabled = false
+    }
   }
 }
 

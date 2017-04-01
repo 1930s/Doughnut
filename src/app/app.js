@@ -52,10 +52,22 @@ class Main {
           WindowManager.setup()
 
           Menu.init()
+          this.registerGlobalShortcuts()
+
+          Library().on('episodes:discovered', (podcast, episodes) => {
+            if (episodes.length > 1) {
+              main.notify(podcast.title, `${episodes.length} new episodes discovered`)
+            } else if (episodes.length == 1) {
+              main.notify(podcast.title, `New episode discovered: ${episodes[0].title}`)
+            }
+          })
+
+          // If on Mac, add dock badge with unplayed episodes count
+          Library().on('podcast:updated', main.updateUnplayedBadge)
+          Library().on('episode:updated', main.updateUnplayedBadge)
+          main.updateUnplayedBadge()
 
           main.launchMainWindow()
-
-          this.registerGlobalShortcuts()
         })
       })
       .catch((err) => {
@@ -85,11 +97,31 @@ class Main {
 
   launchMainWindow () {
     const mainWindow = WindowManager.mainWindow(this.server)
-    mainWindow.show()
+
+    if (!mainWindow.visible()) {
+      mainWindow.show()
+    }
   }
 
   launchWelcomeWindow () {
     WindowManager.welcomeWindow()
+  }
+
+  notify (title, message) {
+    Player.notify(title, message)
+  }
+
+  updateUnplayedBadge () {
+    if (process.platform === 'darwin') {
+      Library().unplayedCount()
+        .then(count => {
+          if (count >= 1) {
+            app.dock.setBadge(`${count}`)
+          } else {
+            app.dock.setBadge('')
+          }
+        })
+    }
   }
 
   onWindowAllClosed () {

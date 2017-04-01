@@ -61,7 +61,6 @@ type alias PlayerModel =
   { state : PlayerState
   , seeking : Bool
   , seekingPosition : Float
-  , adjustingVolume : Int
   , showSeekDetail : Bool
   }
 

@@ -73,6 +73,7 @@ export default class PreferencesWindow {
       resizable: true,
       show: false
     })
+    this.window.setMenu(null)
 
     this.window.loadURL(url.format({
       pathname: path.join(__dirname, `preferences.html`),

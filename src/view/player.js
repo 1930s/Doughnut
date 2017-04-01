@@ -75,7 +75,6 @@ window.onload = () => {
     pause: false,
     volume: 70,
     duration: 0,
-    title: '',
     position: 0,
     ready: false,
     episodeId: 0
@@ -121,5 +120,11 @@ window.onload = () => {
   ipcRenderer.on('seek', (event, arg) => {
     console.log('seek', arg)
     audio.currentTime = arg
+  })
+
+  ipcRenderer.on('notify', (event, arg) => {
+    new Notification(arg.title, {
+       body: arg.body
+    })
   })
 }

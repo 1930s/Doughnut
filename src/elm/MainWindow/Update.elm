@@ -137,18 +137,18 @@ update msg model =
           else
             { pw | selected = False }
       in
-        { model | showPodcastSettings = False, podcasts = List.map selectPodcast model.podcasts } ! []
+        { model | showPodcastSettings = False, podcasts = List.map selectPodcast model.podcasts } ! [ Ipc.selectPodcast pod.podcast.id ]
     
     SelectEpisode ep ->
       case model.selectedEpisode of
         Just selected ->
           if (selected.id == ep.id) then
-            { model | selectedEpisode = Nothing } ! []
+            { model | selectedEpisode = Nothing } ! [ Ipc.selectEpisode 0 ]
           else
-            { model | selectedEpisode = Just ep } ! []
+            { model | selectedEpisode = Just ep } ! [ Ipc.selectEpisode ep.id ]
 
         Nothing ->
-          { model | selectedEpisode = Just ep } ! []
+          { model | selectedEpisode = Just ep } ! [ Ipc.selectEpisode ep.id ]
     
     PlayEpisode ep ->
       { model | selectedEpisode = Just ep } ! [ Ipc.playEpisode ep.id ]

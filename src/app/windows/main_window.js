@@ -38,6 +38,14 @@ export default class MainWindow {
     return this.window
   }
 
+  visible () {
+    if (this.window && !this.window.isDestroyed()) {
+      return this.window.isVisible()
+    } else {
+      return false
+    }
+  }
+
   subscribe () {
     const mw = this
     const library = Library()
@@ -98,8 +106,8 @@ export default class MainWindow {
       mw.window.show()
     })
 
-    this.window.webContents.on('close', () => {
-      if (Settings.isDevelopment()) {
+    this.window.on('close', () => {
+      if (process.platform !== 'darwin') {
         app.quit()
       }
     })

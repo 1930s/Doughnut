@@ -20,6 +20,7 @@ import Electron from 'electron'
 import url from 'url'
 import path from 'path'
 const { ipcMain, dialog, shell, clipboard, app } = require('electron')
+const EventEmitter = require('events')
 
 import MainWindow from './windows/main_window'
 import PreferencesWindow from './windows/preferences'
@@ -27,21 +28,35 @@ import Library from './library/manager'
 import Player from './player'
 import Settings from './settings'
 
-class WindowManager {
+class WindowManager extends EventEmitter {
   constructor () {
+    super()
     const wm = this
 
-    this._windows = {
+    this.selected = {
+      podcastId: false,
+      episodeId: false
+    }
+
+    this.windows = {
       MainWindow: false,
       WelcomeWindow: false,
       PreferencesWindow: false
     }
 
     Player.on('state', state => {
-      if (wm._windows.MainWindow) {
-        wm._windows.MainWindow.send('player:state', state)
+      if (wm.windows.MainWindow) {
+        wm.windows.MainWindow.send('player:state', state)
       }
     })
+  }
+
+  selectedPodcast () {
+    return Library().loadPodcast(this.selected.podcastId)
+  }
+
+  selectedEpisode () {
+    return Library().loadEpisode(this.selected.episodeId)
   }
 
   main () {
@@ -105,6 +120,15 @@ class WindowManager {
       Library().markPodcastAllPlayed(arg.id, false)
     })
 
+    ipcMain.on('podcast:select', (event, arg) => {
+      if (arg.id > 0) {
+        wm.selected.podcastId = arg.id
+        wm.emit('selection', wm.selected)
+      } else {
+        wm.selected.podcastId = false
+      }
+    })
+
     // Player Action
     ipcMain.on('player:toggle', (event, arg) => {
       Player.toggle()
@@ -119,6 +143,15 @@ class WindowManager {
     })
 
     // Episode Action
+
+    ipcMain.on('episode:select', (event, arg) => {
+      if (arg.id > 0) {
+        wm.selected.episodeId = arg.id
+        wm.emit('selection', wm.selected)
+      } else {
+        wm.selected.episodeId = false
+      }
+    })
 
     ipcMain.on('episode:play', (event, arg) => {
       console.log('episode:play', arg)
@@ -197,17 +230,17 @@ class WindowManager {
   }
 
   mainWindow (server) {
-    if (this._windows.MainWindow) { return this._windows.MainWindow }
+    if (this.windows.MainWindow) { return this.windows.MainWindow }
 
-    this._windows.MainWindow = new MainWindow(server)
-    return this._windows.MainWindow
+    this.windows.MainWindow = new MainWindow(server)
+    return this.windows.MainWindow
   }
 
   preferencesWindow () {
-    if (this._windows.PreferencesWindow) { return this._windows.PreferencesWindow }
+    if (this.windows.PreferencesWindow) { return this.windows.PreferencesWindow }
 
-    this._windows.PreferencesWindow = new PreferencesWindow()
-    return this._windows.PreferencesWindow
+    this.windows.PreferencesWindow = new PreferencesWindow()
+    return this.windows.PreferencesWindow
   }
 
   subscribeWindow () {
@@ -216,6 +249,7 @@ class WindowManager {
       height: 170,
       resizable: false
     })
+    w.setMenu(null)
 
     w.loadURL(url.format({
       pathname: path.join(__dirname, 'subscribe.html'),
@@ -233,7 +267,7 @@ class WindowManager {
   }
 
   welcomeWindow () {
-    if (this._windows.WelcomeWindow) { return this._windows.WelcomeWindow }
+    if (this.windows.WelcomeWindow) { return this.windows.WelcomeWindow }
 
     const w = new Electron.BrowserWindow({
       width: 500,
@@ -248,7 +282,7 @@ class WindowManager {
       slashes: true
     }))
 
-    this._windows.WelcomeWindow = w
+    this.windows.WelcomeWindow = w
     return w
   }
 }

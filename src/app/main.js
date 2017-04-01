@@ -40,3 +40,9 @@ Electron.app.on('window-all-closed', () => {
   Logger.debug('All windows closed')
   global.app.onWindowAllClosed()
 })
+
+Electron.app.on('activate', () => {
+  if (global.app) {
+    global.app.launchMainWindow()
+  }
+})

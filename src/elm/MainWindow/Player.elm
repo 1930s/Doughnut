@@ -17,7 +17,6 @@ type Msg
   | StartSeeking
   | FinishSeeking
   | SlideVolume String
-  | AdjustVolume
   | ShowSeekDetail Bool
 
 init : PlayerModel
@@ -25,7 +24,7 @@ init =
   let
     state = PlayerState True 50 0.0 0.0 "" False 0
   in
-    PlayerModel state False 0.0 0 False
+    PlayerModel state False 0.0 False
 
 update : Msg -> PlayerModel -> (PlayerModel, Cmd Msg)
 update msg model =
@@ -34,7 +33,7 @@ update msg model =
   in
     case msg of
       State newState ->
-        { model | state = newState, adjustingVolume = newState.volume } ! []
+        { model | state = newState } ! []
       
       ShowSeekDetail toggle ->
         { model | showSeekDetail = toggle } ! []
@@ -76,13 +75,11 @@ update msg model =
           { model | state = updated, seekingPosition = position } ! []
       
       SlideVolume volStr ->
-        { model | adjustingVolume = (String.toInt volStr) |> Result.withDefault 0 } ! []
-      
-      AdjustVolume ->
         let
-          updated = { state | volume = model.adjustingVolume }
+          newVolume = (String.toInt volStr) |> Result.withDefault 0
+          updated = { state | volume = newVolume }
         in
-          { model | state = updated } ! [ Ipc.setVolume model.adjustingVolume ]
+          { model | state = updated } ! [ Ipc.setVolume newVolume ]
 
 
 timestamp : Int -> String
@@ -172,8 +169,7 @@ volumeControl model =
       [ type_ "range"
       , H.min "0"
       , H.max "100"
-      , value (toString model.adjustingVolume)
+      , value (toString model.state.volume)
       , onInput SlideVolume
-      , onMouseUp AdjustVolume
       ] []
     ]

@@ -141,9 +141,10 @@ button.player-control {
 .volume-slider {
   position: absolute;
   right: 10px;
-  top: 20px;
+  top: 18px;
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .volume-slider input[type=range] {
@@ -171,7 +172,6 @@ button.player-control {
   z-index: 100;
   background: #999;
   border-radius: 22px;
-  margin-top: -1px;
 }
 
 .player-minicover {

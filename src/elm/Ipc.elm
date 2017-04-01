@@ -35,6 +35,10 @@ podcastSubscribe : Cmd msg
 podcastSubscribe =
   globalAction "podcast:subscribe:new"
 
+selectPodcast : PodcastId -> Cmd msg
+selectPodcast id =
+  objectAction (ObjAction "podcast:select" id)
+
 unsubscribePodcast : PodcastId -> Cmd msg
 unsubscribePodcast id =
   objectAction (ObjAction "podcast:unsubscribe" id)
@@ -46,6 +50,10 @@ markAllPlayedPodcast id =
 markAllUnplayedPodcast : PodcastId -> Cmd msg
 markAllUnplayedPodcast id =
   objectAction (ObjAction "podcast:unplayed" id)
+
+selectEpisode : PodcastId -> Cmd msg
+selectEpisode id =
+  objectAction (ObjAction "episode:select" id)
 
 playEpisode : EpisodeId -> Cmd msg
 playEpisode id =
